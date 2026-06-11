@@ -51,7 +51,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<header className="w-full">
 					<Navbar />
 				</header>
-				<main>{children}
+				<main>
+					{children}
 					<Footer />
 				</main>
 				<TanStackDevtools

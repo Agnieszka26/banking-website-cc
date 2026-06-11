@@ -3,6 +3,7 @@ import Card from "#/components/Card";
 import { CarouselComponent } from "#/components/Carousel";
 import LoginForm from "#/components/LoginForm";
 import { getPokemon } from "#/server/pokemon";
+import NewsBanner from "#/components/NewsBanner";
 
 export const Route = createFileRoute("/")({
 	component: Home,
@@ -17,17 +18,16 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-	const data = Route.useLoaderData();
-	console.log("data COMPONENT", data);
 	return (
-		<>
-			<div className="p-8 flex flex-row gap-4">
+		<div id="home">
+			<section className="p-8 flex flex-row gap-4">
 				<LoginForm />
 				<Card />
-			</div>
-			<div>
+			</section>
+			<section>
 				<CarouselComponent />
-			</div>
-		</>
+			</section>
+				<NewsBanner />
+		</div>
 	);
 }
