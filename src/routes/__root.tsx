@@ -4,6 +4,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Navbar } from "#/components/Navbar";
 import appCss from "../styles.css?url";
 import Footer from "#/components/Footer";
+import { ClerkProvider } from '@clerk/tanstack-react-start'
 
 export const Route = createRootRoute({
 	head: () => ({
@@ -48,7 +49,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body>
-				<header className="w-full">
+			<ClerkProvider>
+				<header className="w-full shrink-0">
 					<Navbar />
 				</header>
 				<main>
@@ -67,6 +69,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					]}
 				/>
 				<Scripts />
+				</ClerkProvider>
 			</body>
 		</html>
 	);

@@ -14,6 +14,8 @@ import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NewsIndexRouteImport } from './routes/news/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as SignUpSplatRouteImport } from './routes/sign-up.$'
+import { Route as SignInSplatRouteImport } from './routes/sign-in.$'
 import { Route as NewsNewsIdRouteImport } from './routes/news/$newsId'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
 import { Route as DashboardPaymentsRouteImport } from './routes/dashboard/payments'
@@ -43,6 +45,16 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const SignUpSplatRoute = SignUpSplatRouteImport.update({
+  id: '/sign-up/$',
+  path: '/sign-up/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInSplatRoute = SignInSplatRouteImport.update({
+  id: '/sign-in/$',
+  path: '/sign-in/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NewsNewsIdRoute = NewsNewsIdRouteImport.update({
   id: '/news/$newsId',
   path: '/news/$newsId',
@@ -66,6 +78,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/news/$newsId': typeof NewsNewsIdRoute
+  '/sign-in/$': typeof SignInSplatRoute
+  '/sign-up/$': typeof SignUpSplatRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/news/': typeof NewsIndexRoute
 }
@@ -75,6 +89,8 @@ export interface FileRoutesByTo {
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/news/$newsId': typeof NewsNewsIdRoute
+  '/sign-in/$': typeof SignInSplatRoute
+  '/sign-up/$': typeof SignUpSplatRoute
   '/dashboard': typeof DashboardIndexRoute
   '/news': typeof NewsIndexRoute
 }
@@ -86,6 +102,8 @@ export interface FileRoutesById {
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/news/$newsId': typeof NewsNewsIdRoute
+  '/sign-in/$': typeof SignInSplatRoute
+  '/sign-up/$': typeof SignUpSplatRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/news/': typeof NewsIndexRoute
 }
@@ -98,6 +116,8 @@ export interface FileRouteTypes {
     | '/dashboard/payments'
     | '/dashboard/settings'
     | '/news/$newsId'
+    | '/sign-in/$'
+    | '/sign-up/$'
     | '/dashboard/'
     | '/news/'
   fileRoutesByTo: FileRoutesByTo
@@ -107,6 +127,8 @@ export interface FileRouteTypes {
     | '/dashboard/payments'
     | '/dashboard/settings'
     | '/news/$newsId'
+    | '/sign-in/$'
+    | '/sign-up/$'
     | '/dashboard'
     | '/news'
   id:
@@ -117,6 +139,8 @@ export interface FileRouteTypes {
     | '/dashboard/payments'
     | '/dashboard/settings'
     | '/news/$newsId'
+    | '/sign-in/$'
+    | '/sign-up/$'
     | '/dashboard/'
     | '/news/'
   fileRoutesById: FileRoutesById
@@ -126,6 +150,8 @@ export interface RootRouteChildren {
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   ContactRoute: typeof ContactRoute
   NewsNewsIdRoute: typeof NewsNewsIdRoute
+  SignInSplatRoute: typeof SignInSplatRoute
+  SignUpSplatRoute: typeof SignUpSplatRoute
   NewsIndexRoute: typeof NewsIndexRoute
 }
 
@@ -165,6 +191,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
+    }
+    '/sign-up/$': {
+      id: '/sign-up/$'
+      path: '/sign-up/$'
+      fullPath: '/sign-up/$'
+      preLoaderRoute: typeof SignUpSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in/$': {
+      id: '/sign-in/$'
+      path: '/sign-in/$'
+      fullPath: '/sign-in/$'
+      preLoaderRoute: typeof SignInSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/news/$newsId': {
       id: '/news/$newsId'
@@ -211,6 +251,8 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   ContactRoute: ContactRoute,
   NewsNewsIdRoute: NewsNewsIdRoute,
+  SignInSplatRoute: SignInSplatRoute,
+  SignUpSplatRoute: SignUpSplatRoute,
   NewsIndexRoute: NewsIndexRoute,
 }
 export const routeTree = rootRouteImport
@@ -218,10 +260,11 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { startInstance } from './start.ts'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }
