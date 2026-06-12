@@ -11,7 +11,7 @@ function RouteComponent() {
 			id="sign-up"
 			className="flex items-center justify-center py-8 sm:py-12 px-4"
 		>
-			<SignUp fallbackRedirectUrl="/" />
+			<SignUp fallbackRedirectUrl="/dashboard" />
 		</section>
 	);
 }

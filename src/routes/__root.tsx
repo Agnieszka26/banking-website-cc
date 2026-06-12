@@ -1,5 +1,10 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+	createRootRoute,
+	HeadContent,
+	Scripts,
+	useRouterState,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Navbar } from "#/components/Navbar";
 import appCss from "../styles.css?url";
@@ -43,6 +48,10 @@ export const Route = createRootRoute({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+	const isDashboard = useRouterState({
+		select: (state) => state.location.pathname.startsWith("/dashboard"),
+	});
+
 	return (
 		<html lang="en">
 			<head>
@@ -50,12 +59,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 			<ClerkProvider>
-				<header className="w-full shrink-0">
-					<Navbar />
-				</header>
-				<main>
+				{!isDashboard && (
+					<header className="w-full shrink-0">
+						<Navbar />
+					</header>
+				)}
+				<main className={isDashboard ? "min-h-screen" : undefined}>
 					{children}
-					<Footer />
+					{!isDashboard && <Footer />}
 				</main>
 				<TanStackDevtools
 					config={{

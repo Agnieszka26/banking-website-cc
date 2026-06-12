@@ -19,6 +19,11 @@ import { Route as SignInSplatRouteImport } from './routes/sign-in.$'
 import { Route as NewsNewsIdRouteImport } from './routes/news/$newsId'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
 import { Route as DashboardPaymentsRouteImport } from './routes/dashboard/payments'
+import { Route as DashboardLoansRouteImport } from './routes/dashboard/loans'
+import { Route as DashboardDepositsRouteImport } from './routes/dashboard/deposits'
+import { Route as DashboardCardsRouteImport } from './routes/dashboard/cards'
+import { Route as DashboardApplicationsRouteImport } from './routes/dashboard/applications'
+import { Route as DashboardAccountsRouteImport } from './routes/dashboard/accounts'
 
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
@@ -70,11 +75,41 @@ const DashboardPaymentsRoute = DashboardPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardLoansRoute = DashboardLoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardDepositsRoute = DashboardDepositsRouteImport.update({
+  id: '/deposits',
+  path: '/deposits',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardCardsRoute = DashboardCardsRouteImport.update({
+  id: '/cards',
+  path: '/cards',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardApplicationsRoute = DashboardApplicationsRouteImport.update({
+  id: '/applications',
+  path: '/applications',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardAccountsRoute = DashboardAccountsRouteImport.update({
+  id: '/accounts',
+  path: '/accounts',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/contact': typeof ContactRoute
+  '/dashboard/accounts': typeof DashboardAccountsRoute
+  '/dashboard/applications': typeof DashboardApplicationsRoute
+  '/dashboard/cards': typeof DashboardCardsRoute
+  '/dashboard/deposits': typeof DashboardDepositsRoute
+  '/dashboard/loans': typeof DashboardLoansRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/news/$newsId': typeof NewsNewsIdRoute
@@ -86,6 +121,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
+  '/dashboard/accounts': typeof DashboardAccountsRoute
+  '/dashboard/applications': typeof DashboardApplicationsRoute
+  '/dashboard/cards': typeof DashboardCardsRoute
+  '/dashboard/deposits': typeof DashboardDepositsRoute
+  '/dashboard/loans': typeof DashboardLoansRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/news/$newsId': typeof NewsNewsIdRoute
@@ -99,6 +139,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/contact': typeof ContactRoute
+  '/dashboard/accounts': typeof DashboardAccountsRoute
+  '/dashboard/applications': typeof DashboardApplicationsRoute
+  '/dashboard/cards': typeof DashboardCardsRoute
+  '/dashboard/deposits': typeof DashboardDepositsRoute
+  '/dashboard/loans': typeof DashboardLoansRoute
   '/dashboard/payments': typeof DashboardPaymentsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/news/$newsId': typeof NewsNewsIdRoute
@@ -113,6 +158,11 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/contact'
+    | '/dashboard/accounts'
+    | '/dashboard/applications'
+    | '/dashboard/cards'
+    | '/dashboard/deposits'
+    | '/dashboard/loans'
     | '/dashboard/payments'
     | '/dashboard/settings'
     | '/news/$newsId'
@@ -124,6 +174,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/contact'
+    | '/dashboard/accounts'
+    | '/dashboard/applications'
+    | '/dashboard/cards'
+    | '/dashboard/deposits'
+    | '/dashboard/loans'
     | '/dashboard/payments'
     | '/dashboard/settings'
     | '/news/$newsId'
@@ -136,6 +191,11 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/contact'
+    | '/dashboard/accounts'
+    | '/dashboard/applications'
+    | '/dashboard/cards'
+    | '/dashboard/deposits'
+    | '/dashboard/loans'
     | '/dashboard/payments'
     | '/dashboard/settings'
     | '/news/$newsId'
@@ -227,16 +287,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardPaymentsRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/loans': {
+      id: '/dashboard/loans'
+      path: '/loans'
+      fullPath: '/dashboard/loans'
+      preLoaderRoute: typeof DashboardLoansRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/deposits': {
+      id: '/dashboard/deposits'
+      path: '/deposits'
+      fullPath: '/dashboard/deposits'
+      preLoaderRoute: typeof DashboardDepositsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/cards': {
+      id: '/dashboard/cards'
+      path: '/cards'
+      fullPath: '/dashboard/cards'
+      preLoaderRoute: typeof DashboardCardsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/applications': {
+      id: '/dashboard/applications'
+      path: '/applications'
+      fullPath: '/dashboard/applications'
+      preLoaderRoute: typeof DashboardApplicationsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/accounts': {
+      id: '/dashboard/accounts'
+      path: '/accounts'
+      fullPath: '/dashboard/accounts'
+      preLoaderRoute: typeof DashboardAccountsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
   }
 }
 
 interface DashboardRouteRouteChildren {
+  DashboardAccountsRoute: typeof DashboardAccountsRoute
+  DashboardApplicationsRoute: typeof DashboardApplicationsRoute
+  DashboardCardsRoute: typeof DashboardCardsRoute
+  DashboardDepositsRoute: typeof DashboardDepositsRoute
+  DashboardLoansRoute: typeof DashboardLoansRoute
   DashboardPaymentsRoute: typeof DashboardPaymentsRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardAccountsRoute: DashboardAccountsRoute,
+  DashboardApplicationsRoute: DashboardApplicationsRoute,
+  DashboardCardsRoute: DashboardCardsRoute,
+  DashboardDepositsRoute: DashboardDepositsRoute,
+  DashboardLoansRoute: DashboardLoansRoute,
   DashboardPaymentsRoute: DashboardPaymentsRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
