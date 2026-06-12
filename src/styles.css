@@ -67,6 +67,7 @@ body {
 }
 
 :root {
+  --font-scale: 1;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -150,5 +151,6 @@ body {
   }
   html {
     @apply font-sans;
+    font-size: calc(16px * var(--font-scale, 1));
   }
 }

@@ -12,7 +12,7 @@ function Home() {
 	return (
 		<div
 			id="home"
-			className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 pb-24 space-y-8 sm:space-y-10 lg:space-y-12"
+			className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 space-y-8 sm:space-y-10 lg:space-y-12"
 		>
 			<section className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch">
 				<LoginForm />
