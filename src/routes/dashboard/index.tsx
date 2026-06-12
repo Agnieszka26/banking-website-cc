@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	ArrowLeftRight,
 	Building2,
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/dashboard/")({
 	loader: () => getDashboardData(),
 	component: DashboardHome,
 });
-
+//TODO: Replace hardcoded dates with dynamic data.
 const messages = [
 	{ title: "Komunikat bezpieczeństwa", date: "24.04.2025" },
 	{ title: "Potwierdzenie przelewu", date: "23.04.2025" },
@@ -52,6 +52,7 @@ function getTransactionIcon(amount: number): LucideIcon {
 }
 
 function DashboardHome() {
+	//TODO: Add navigation or onClick handlers to interactive buttons.
 	const data = Route.useLoaderData();
 
 	return (
@@ -82,8 +83,9 @@ function DashboardHome() {
 
 								return (
 									<li key={account.id}>
-										<button
-											type="button"
+										<Link
+											to="/dashboard/accounts/$accountId"
+											params={{ accountId: account.id }}
 											className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-muted/60"
 										>
 											<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-bank-green-light">
@@ -103,8 +105,9 @@ function DashboardHome() {
 												</span>
 												<ChevronRight className="size-4 text-muted-foreground" />
 											</div>
-										</button>
+										</Link>
 									</li>
+									
 								);
 							})}
 						</ul>

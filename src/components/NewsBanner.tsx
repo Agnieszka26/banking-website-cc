@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Megaphone,
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 export default function NewsBanner() {
   return (
@@ -31,14 +32,14 @@ export default function NewsBanner() {
             </div>
 
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Informujemy o planowanych pracach serwisowych w dniach
-              30.04.2025 - 02.05.2025. W tym czasie dostęp do systemu może być
-              ograniczony.
-            </p>
+              {/* TODO: Connect to CMS or news API for dynamic maintenance notices */}
+              Brak aktualnych komunikatów serwisowych.            </p>
 
-            <Button variant="link" className="px-0 h-auto">
-              Czytaj więcej <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
+            <Link to="/news">
+              <Button variant="link" className="px-0 h-auto">
+                Czytaj więcej <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>

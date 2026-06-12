@@ -24,6 +24,7 @@ import { Route as DashboardDepositsRouteImport } from './routes/dashboard/deposi
 import { Route as DashboardCardsRouteImport } from './routes/dashboard/cards'
 import { Route as DashboardApplicationsRouteImport } from './routes/dashboard/applications'
 import { Route as DashboardAccountsRouteImport } from './routes/dashboard/accounts'
+import { Route as DashboardAccountsAccountIdRouteImport } from './routes/dashboard/accounts/$accountId'
 
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
@@ -100,12 +101,18 @@ const DashboardAccountsRoute = DashboardAccountsRouteImport.update({
   path: '/accounts',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardAccountsAccountIdRoute =
+  DashboardAccountsAccountIdRouteImport.update({
+    id: '/$accountId',
+    path: '/$accountId',
+    getParentRoute: () => DashboardAccountsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/contact': typeof ContactRoute
-  '/dashboard/accounts': typeof DashboardAccountsRoute
+  '/dashboard/accounts': typeof DashboardAccountsRouteWithChildren
   '/dashboard/applications': typeof DashboardApplicationsRoute
   '/dashboard/cards': typeof DashboardCardsRoute
   '/dashboard/deposits': typeof DashboardDepositsRoute
@@ -117,11 +124,12 @@ export interface FileRoutesByFullPath {
   '/sign-up/$': typeof SignUpSplatRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/dashboard/accounts/$accountId': typeof DashboardAccountsAccountIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
-  '/dashboard/accounts': typeof DashboardAccountsRoute
+  '/dashboard/accounts': typeof DashboardAccountsRouteWithChildren
   '/dashboard/applications': typeof DashboardApplicationsRoute
   '/dashboard/cards': typeof DashboardCardsRoute
   '/dashboard/deposits': typeof DashboardDepositsRoute
@@ -133,13 +141,14 @@ export interface FileRoutesByTo {
   '/sign-up/$': typeof SignUpSplatRoute
   '/dashboard': typeof DashboardIndexRoute
   '/news': typeof NewsIndexRoute
+  '/dashboard/accounts/$accountId': typeof DashboardAccountsAccountIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/contact': typeof ContactRoute
-  '/dashboard/accounts': typeof DashboardAccountsRoute
+  '/dashboard/accounts': typeof DashboardAccountsRouteWithChildren
   '/dashboard/applications': typeof DashboardApplicationsRoute
   '/dashboard/cards': typeof DashboardCardsRoute
   '/dashboard/deposits': typeof DashboardDepositsRoute
@@ -151,6 +160,7 @@ export interface FileRoutesById {
   '/sign-up/$': typeof SignUpSplatRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/dashboard/accounts/$accountId': typeof DashboardAccountsAccountIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/sign-up/$'
     | '/dashboard/'
     | '/news/'
+    | '/dashboard/accounts/$accountId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/sign-up/$'
     | '/dashboard'
     | '/news'
+    | '/dashboard/accounts/$accountId'
   id:
     | '__root__'
     | '/'
@@ -203,6 +215,7 @@ export interface FileRouteTypes {
     | '/sign-up/$'
     | '/dashboard/'
     | '/news/'
+    | '/dashboard/accounts/$accountId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -322,11 +335,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAccountsRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/accounts/$accountId': {
+      id: '/dashboard/accounts/$accountId'
+      path: '/$accountId'
+      fullPath: '/dashboard/accounts/$accountId'
+      preLoaderRoute: typeof DashboardAccountsAccountIdRouteImport
+      parentRoute: typeof DashboardAccountsRoute
+    }
   }
 }
 
+interface DashboardAccountsRouteChildren {
+  DashboardAccountsAccountIdRoute: typeof DashboardAccountsAccountIdRoute
+}
+
+const DashboardAccountsRouteChildren: DashboardAccountsRouteChildren = {
+  DashboardAccountsAccountIdRoute: DashboardAccountsAccountIdRoute,
+}
+
+const DashboardAccountsRouteWithChildren =
+  DashboardAccountsRoute._addFileChildren(DashboardAccountsRouteChildren)
+
 interface DashboardRouteRouteChildren {
-  DashboardAccountsRoute: typeof DashboardAccountsRoute
+  DashboardAccountsRoute: typeof DashboardAccountsRouteWithChildren
   DashboardApplicationsRoute: typeof DashboardApplicationsRoute
   DashboardCardsRoute: typeof DashboardCardsRoute
   DashboardDepositsRoute: typeof DashboardDepositsRoute
@@ -337,7 +368,7 @@ interface DashboardRouteRouteChildren {
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
-  DashboardAccountsRoute: DashboardAccountsRoute,
+  DashboardAccountsRoute: DashboardAccountsRouteWithChildren,
   DashboardApplicationsRoute: DashboardApplicationsRoute,
   DashboardCardsRoute: DashboardCardsRoute,
   DashboardDepositsRoute: DashboardDepositsRoute,

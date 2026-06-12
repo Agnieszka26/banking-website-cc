@@ -15,6 +15,7 @@ export function DashboardPanel({
 	className,
 	showAllLink = false,
 }: DashboardPanelProps) {
+	// TODO: Add navigation or onClick handlers to interactive buttons. Add functionality to the "Zobacz wszystkie" link button.
 	return (
 		<section
 			className={cn(

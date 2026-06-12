@@ -1,5 +1,7 @@
+import { Link } from "@tanstack/react-router";
 import { Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function DashboardSecurityBanner() {
 	return (
@@ -17,12 +19,15 @@ export function DashboardSecurityBanner() {
 						Zawsze sprawdzaj adres strony banku.
 					</p>
 				</div>
-				<Button
-					variant="outline"
-					className="shrink-0 border-bank-green text-bank-green hover:bg-bank-green hover:text-white"
+				<Link
+					to="/"
+					className={cn(
+						buttonVariants({ variant: "outline" }),
+						"shrink-0 border-bank-green text-bank-green hover:bg-bank-green hover:text-white",
+					)}
 				>
 					Dowiedz się więcej
-				</Button>
+				</Link>
 			</div>
 		</div>
 	);

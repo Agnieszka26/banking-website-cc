@@ -19,7 +19,9 @@ export function ConnectBankAccount() {
 	useEffect(() => {
 		createLinkTokenFn()
 			.then((data) => setLinkToken(data.linkToken))
-			.catch(() => setError("Nie udało się przygotować połączenia z bankiem."));
+			.catch(() => {
+				setError("Nie udało się przygotować połączenia z bankiem.");
+			});
 	}, [createLinkTokenFn]);
 
 	const onSuccess = useCallback<PlaidLinkOnSuccess>(

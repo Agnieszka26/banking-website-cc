@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { Globe, Menu, Phone, X } from "lucide-react";
 import { Label } from "@/components/ui/label";
@@ -38,6 +36,7 @@ const NavbarLogo = () => {
 };
 
 const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
+	//TODO: apply font size to the whole app
 	return (
 		<div className={cn("flex items-center gap-2", compact && "w-full justify-between")}>
 			{compact && (
@@ -56,7 +55,7 @@ const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 		</div>
 	);
 };
-
+//TODO: apply high contrast to the whole app
 const HighContrastToggle = ({ compact = false }: { compact?: boolean }) => {
 	return (
 		<div
@@ -77,7 +76,7 @@ const HighContrastToggle = ({ compact = false }: { compact?: boolean }) => {
 		</div>
 	);
 };
-
+//TODO: apply language to the whole app
 const LanguageSelect = ({ compact = false }: { compact?: boolean }) => {
 	return (
 		<Select>

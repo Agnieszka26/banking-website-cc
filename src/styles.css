@@ -136,6 +136,9 @@ body {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --bank-green: oklch(0.68 0.14 155);
+  --bank-green-light: oklch(0.28 0.04 155);
+  --bank-bg: oklch(0.17 0.015 155);
 }
 
 @layer base {

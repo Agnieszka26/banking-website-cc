@@ -12,6 +12,11 @@ import {
 	Settings,
 	Wallet,
 } from "lucide-react";
+import {
+	contactEmail,
+	contactPhone,
+	contactPhoneHref,
+} from "#/config/contact";
 import { cn } from "@/lib/utils";
 
 const navItems: Array<{
@@ -76,14 +81,14 @@ export function DashboardSidebar() {
 					Potrzebujesz pomocy?
 				</p>
 				<a
-					href="tel:801000000"
+					href={contactPhoneHref()}
 					className="mt-3 flex items-center gap-2 text-sm font-medium text-bank-green hover:underline"
 				>
 					<Phone className="size-4 shrink-0" />
-					801 000 000
+					{contactPhone}
 				</a>
 				<a
-					href="mailto:kontakt@bank.pl"
+					href={`mailto:${contactEmail}`}
 					className="mt-2 flex items-center gap-2 text-sm text-muted-foreground hover:text-bank-green hover:underline"
 				>
 					<Mail className="size-4 shrink-0" />

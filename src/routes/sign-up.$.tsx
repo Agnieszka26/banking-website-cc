@@ -1,5 +1,6 @@
 import { SignUp } from "@clerk/tanstack-react-start";
 import { createFileRoute } from "@tanstack/react-router";
+import { AuthLayout } from "#/components/AuthLayout";
 
 export const Route = createFileRoute("/sign-up/$")({
 	component: RouteComponent,
@@ -7,11 +8,8 @@ export const Route = createFileRoute("/sign-up/$")({
 
 function RouteComponent() {
 	return (
-		<section
-			id="sign-up"
-			className="flex items-center justify-center py-8 sm:py-12 px-4"
-		>
+		<AuthLayout id="sign-up">
 			<SignUp fallbackRedirectUrl="/dashboard" />
-		</section>
+		</AuthLayout>
 	);
 }

@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/carousel";
 
 export function CarouselComponent() {
+	// TODO: Replace with real carousel content (e.g., promotional banners, announcements)
 	const slides = ["Slide 1", "Slide 2", "Slide 3"];
 
 	return (
