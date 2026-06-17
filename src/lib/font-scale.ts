@@ -37,12 +37,12 @@ export function applyFontScale(level: number): void {
 	}
 
 	const clamped = clampFontScale(level);
+	const rootPx = FONT_SCALE_ROOT_PX[clamped];
+	const multiplier = getFontScaleMultiplier(clamped);
 	const root = document.documentElement;
 
-	root.style.setProperty(
-		"--font-scale",
-		String(getFontScaleMultiplier(clamped)),
-	);
+	root.style.setProperty("--font-scale", String(multiplier));
+	root.style.fontSize = `${rootPx}px`;
 	root.dataset.fontScale = String(clamped);
 }
 

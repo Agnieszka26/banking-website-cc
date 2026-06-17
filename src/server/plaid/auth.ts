@@ -1,3 +1,4 @@
+import "@tanstack/react-start/server-only";
 import { auth } from "@clerk/tanstack-react-start/server";
 import { setResponseStatus } from "@tanstack/react-start/server";
 
