@@ -1,4 +1,6 @@
+import { usePostHog } from "@posthog/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type { LucideIcon } from "lucide-react";
 import {
 	ArrowLeftRight,
 	Building2,
@@ -11,15 +13,10 @@ import {
 	User,
 	Wallet,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { ConnectBankAccount } from "#/components/dashboard/ConnectBankAccount";
 import { DashboardPanel } from "#/components/dashboard/DashboardPanel";
-import {
-	formatMoney,
-	formatPlDate,
-	getDashboardData,
-} from "#/server/plaid";
 import type { DashboardAccount } from "#/server/plaid";
+import { formatMoney, formatPlDate, getDashboardData } from "#/server/plaid";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +51,7 @@ function getTransactionIcon(amount: number): LucideIcon {
 function DashboardHome() {
 	//TODO: Add navigation or onClick handlers to interactive buttons.
 	const data = Route.useLoaderData();
+	const posthog = usePostHog();
 
 	return (
 		<div className="mx-auto max-w-7xl space-y-6">
@@ -107,7 +105,6 @@ function DashboardHome() {
 											</div>
 										</Link>
 									</li>
-									
 								);
 							})}
 						</ul>
@@ -125,6 +122,11 @@ function DashboardHome() {
 								key={action.label}
 								type="button"
 								className="flex flex-col items-center gap-2 rounded-lg border border-border bg-muted/30 px-2 py-4 text-center transition-colors hover:border-bank-green/30 hover:bg-bank-green-light"
+								onClick={() =>
+									posthog.capture("transfer_type_selected", {
+										transfer_type: action.label,
+									})
+								}
 							>
 								<div className="flex size-10 items-center justify-center rounded-lg bg-card">
 									<action.icon className="size-5 text-bank-green" />
@@ -138,12 +140,14 @@ function DashboardHome() {
 					<Button
 						className="mt-5 h-11 w-full bg-bank-green text-base font-semibold hover:bg-bank-green/90"
 						disabled={!data.linked}
+						onClick={() => posthog.capture("transfer_initiated")}
 					>
 						Wykonaj przelew
 					</Button>
 					<button
 						type="button"
 						className="mt-3 w-full text-center text-sm font-medium text-bank-green hover:underline"
+						onClick={() => posthog.capture("transfer_history_viewed")}
 					>
 						Historia przelewów
 					</button>
@@ -156,6 +160,11 @@ function DashboardHome() {
 								<button
 									type="button"
 									className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-muted/60"
+									onClick={() =>
+										posthog.capture("dashboard_message_opened", {
+											message_title: message.title,
+										})
+									}
 								>
 									<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-bank-green-light">
 										<Mail className="size-4 text-bank-green" />
@@ -235,10 +244,7 @@ function DashboardHome() {
 										Oszczędności
 									</dt>
 									<dd className="text-sm font-semibold">
-										{formatMoney(
-											data.summary.savings,
-											data.summary.currency,
-										)}
+										{formatMoney(data.summary.savings, data.summary.currency)}
 									</dd>
 								</div>
 								<div className="flex items-center justify-between gap-4">
@@ -271,6 +277,11 @@ function DashboardHome() {
 								<button
 									type="button"
 									className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-muted/60"
+									onClick={() =>
+										posthog.capture("dashboard_shortcut_clicked", {
+											shortcut_label: shortcut.label,
+										})
+									}
 								>
 									<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-bank-green-light">
 										<shortcut.icon className="size-4 text-bank-green" />

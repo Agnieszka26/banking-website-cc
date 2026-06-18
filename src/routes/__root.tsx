@@ -1,11 +1,17 @@
-﻿import { TanStackDevtools } from "@tanstack/react-devtools";
-import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
+﻿import { ClerkProvider } from "@clerk/tanstack-react-start";
+import { PostHogProvider } from "@posthog/react";
+import { TanStackDevtools } from "@tanstack/react-devtools";
+import {
+	createRootRoute,
+	HeadContent,
+	Outlet,
+	Scripts,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { FontScaleProvider } from "#/components/FontScaleProvider";
+import Footer from "#/components/Footer";
 import { Navbar } from "#/components/Navbar";
 import appCss from "../styles.css?url";
-import Footer from "#/components/Footer";
-import { ClerkProvider } from "@clerk/tanstack-react-start";
 
 const fontScaleInitScript = `(function(){try{var k=${JSON.stringify("banking-app-font-scale")};var px=[14,15,16,18,20];var v=localStorage.getItem(k);var n=v===null?2:parseInt(v,10);n=Number.isNaN(n)?2:Math.min(4,Math.max(0,n));var r=document.documentElement;r.style.setProperty("--font-scale",String(px[n]/16));r.style.fontSize=px[n]+"px";r.dataset.fontScale=String(n);}catch(e){}})();`;
 
@@ -54,11 +60,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body className="flex min-h-screen flex-col">
-				<ClerkProvider>
-					<FontScaleProvider>
-						{children}
-					</FontScaleProvider>
-				</ClerkProvider>
+				<PostHogProvider
+					apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN ?? ""}
+					options={{
+						api_host: "/ingest",
+						ui_host:
+							import.meta.env.VITE_PUBLIC_POSTHOG_HOST ||
+							"https://eu.posthog.com",
+						defaults: "2025-05-24",
+						capture_exceptions: true,
+						debug: import.meta.env.DEV,
+					}}
+				>
+					<ClerkProvider>
+						<FontScaleProvider>{children}</FontScaleProvider>
+					</ClerkProvider>
+				</PostHogProvider>
 				<Scripts />
 			</body>
 		</html>

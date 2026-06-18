@@ -1,6 +1,7 @@
 import { auth, clerkClient } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 import { CountryCode, Products } from "plaid";
+import { getPostHogClient } from "#/utils/posthog-server";
 import { requireUserId } from "./auth";
 import { plaidClient } from "./client";
 import { getDateRange } from "./format";
@@ -15,8 +16,7 @@ async function getDashboardUser(userId: string) {
 	return {
 		firstName,
 		lastName,
-		fullName:
-			[firstName, lastName].filter(Boolean).join(" ") || "Użytkowniku",
+		fullName: [firstName, lastName].filter(Boolean).join(" ") || "Użytkowniku",
 		lastSignIn: user.lastSignInAt
 			? new Date(user.lastSignInAt).toLocaleString("pl-PL", {
 					day: "2-digit",
@@ -50,7 +50,9 @@ export const createLinkToken = createServerFn({ method: "GET" }).handler(
 				language: "pl",
 			});
 		} catch (error) {
-			throw new Error(`Failed to create link token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			throw new Error(
+				`Failed to create link token: ${error instanceof Error ? error.message : "Unknown error"}`,
+			);
 		}
 
 		return { linkToken: response.data.link_token };
@@ -59,8 +61,12 @@ export const createLinkToken = createServerFn({ method: "GET" }).handler(
 
 export const exchangePublicToken = createServerFn({ method: "POST" })
 	.validator((data: { publicToken: string }) => {
-		if (!data.publicToken || typeof data.publicToken !== 'string' || data.publicToken.trim().length === 0) {
-			throw new Error('Invalid public token');
+		if (
+			!data.publicToken ||
+			typeof data.publicToken !== "string" ||
+			data.publicToken.trim().length === 0
+		) {
+			throw new Error("Invalid public token");
 		}
 		return data;
 	})
@@ -73,14 +79,27 @@ export const exchangePublicToken = createServerFn({ method: "POST" })
 				public_token: data.publicToken,
 			});
 		} catch (error) {
-			throw new Error(`Failed to exchange public token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			throw new Error(
+				`Failed to exchange public token: ${error instanceof Error ? error.message : "Unknown error"}`,
+			);
 		}
 
 		try {
 			await setPlaidAccessToken(userId, response.data.access_token);
 		} catch (error) {
-			throw new Error(`Failed to store access token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			throw new Error(
+				`Failed to store access token: ${error instanceof Error ? error.message : "Unknown error"}`,
+			);
 		}
+
+		const posthog = getPostHogClient();
+		posthog.capture({
+			distinctId: userId,
+			event: "bank_account_token_exchanged",
+			properties: {
+				source: "server",
+			},
+		});
 
 		return { linked: true };
 	});
@@ -103,7 +122,6 @@ export const getDashboardData = createServerFn({ method: "GET" }).handler(
 
 		const { startDate, endDate } = getDateRange(30);
 
-
 		let accountsResponse, transactionsResponse;
 		try {
 			[accountsResponse, transactionsResponse] = await Promise.all([
@@ -115,7 +133,9 @@ export const getDashboardData = createServerFn({ method: "GET" }).handler(
 				}),
 			]);
 		} catch (error) {
-			throw new Error(`Failed to fetch dashboard data from Plaid: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			throw new Error(
+				`Failed to fetch dashboard data from Plaid: ${error instanceof Error ? error.message : "Unknown error"}`,
+			);
 		}
 
 		const accounts = accountsResponse.data.accounts.map((account) => ({
