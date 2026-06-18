@@ -54,6 +54,9 @@ body {
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+  --color-bank-green: var(--bank-green);
+  --color-bank-green-light: var(--bank-green-light);
+  --color-bank-bg: var(--bank-bg);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -64,6 +67,7 @@ body {
 }
 
 :root {
+  --font-scale: 1;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -96,6 +100,9 @@ body {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --bank-green: oklch(0.42 0.12 155);
+  --bank-green-light: oklch(0.96 0.02 155);
+  --bank-bg: oklch(0.98 0.005 155);
 }
 
 .dark {
@@ -130,6 +137,9 @@ body {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --bank-green: oklch(0.68 0.14 155);
+  --bank-green-light: oklch(0.28 0.04 155);
+  --bank-bg: oklch(0.17 0.015 155);
 }
 
 @layer base {
@@ -141,5 +151,6 @@ body {
   }
   html {
     @apply font-sans;
+    font-size: calc(16px * var(--font-scale, 1));
   }
 }
