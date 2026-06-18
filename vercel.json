@@ -1,5 +1,13 @@
 {
-    "buildCommand": "npm run build",
-    "framework": null,
-    "rewrites": [{ "source": "/(.*)", "destination": "/" }]
-  }
+  "framework": "tanstack-start",
+  "rewrites": [
+    {
+      "source": "/ingest/static/:path*",
+      "destination": "https://eu-assets.i.posthog.com/static/:path*"
+    },
+    {
+      "source": "/ingest/:path*",
+      "destination": "https://eu.i.posthog.com/:path*"
+    }
+  ]
+}
