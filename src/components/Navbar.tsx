@@ -1,4 +1,4 @@
-﻿import { Link } from "@tanstack/react-router";
+﻿﻿import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Globe, Menu, Phone, X } from "lucide-react";
 import { Label } from "@/components/ui/label";
@@ -44,7 +44,7 @@ const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 					type="button"
 					variant="outline"
 					size={compact ? "sm" : "default"}
-					aria-label="Zmniejsz czcionk─Ö"
+					aria-label="Zmniejsz czcionke"
 					disabled={!canDecrease}
 					onClick={() => {
 						console.log("Font scale: decrease clicked");
@@ -57,7 +57,7 @@ const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 					type="button"
 					variant="outline"
 					size={compact ? "sm" : "default"}
-					aria-label="Powi─Öksz czcionk─Ö"
+					aria-label="Poweksz czcionke"
 					disabled={!canIncrease}
 					onClick={() => {
 						console.log("Font scale: increase clicked");
@@ -201,8 +201,7 @@ export const Navbar = () => {
 								variant="outline"
 								size="icon"
 								className="shrink-0"
-								aria-label={mobileOpen ? "Zamknij menu" : "Otw├│rz menu"}
-								aria-expanded={mobileOpen}
+								aria-label={mobileOpen ? "Zamknij menu" : "Otwórz menu"}								aria-expanded={mobileOpen}
 								onClick={() => setMobileOpen((open) => !open)}
 							>
 								{mobileOpen ? (

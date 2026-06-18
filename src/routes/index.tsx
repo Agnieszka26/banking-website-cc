@@ -9,7 +9,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-	console.log("Home rendered");
+
 	return (
 		<div
 			id="home"
