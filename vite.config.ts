@@ -36,6 +36,7 @@ const config = defineConfig({
 			},
 		},
 	},
+	base: "/",
 	build: {
 		ssr: true
 	  }
