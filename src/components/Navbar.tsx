@@ -46,10 +46,7 @@ const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 					size={compact ? "sm" : "default"}
 					aria-label="Zmniejsz czcionke"
 					disabled={!canDecrease}
-					onClick={() => {
-						console.log("Font scale: decrease clicked");
-						decrease();
-					}}
+					onClick={() => {decrease()}}
 				>
 					A-
 				</Button>
@@ -59,10 +56,7 @@ const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 					size={compact ? "sm" : "default"}
 					aria-label="Poweksz czcionke"
 					disabled={!canIncrease}
-					onClick={() => {
-						console.log("Font scale: increase clicked");
-						increase();
-					}}
+					onClick={() => {increase()}}
 				>
 					A+
 				</Button>

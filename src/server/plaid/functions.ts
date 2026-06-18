@@ -1,4 +1,3 @@
-import "@tanstack/react-start/server-only";
 import { auth, clerkClient } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 import { CountryCode, Products } from "plaid";
