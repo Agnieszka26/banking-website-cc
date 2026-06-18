@@ -36,6 +36,9 @@ const config = defineConfig({
 			},
 		},
 	},
+	build: {
+		ssr: true
+	  }
 });
 
 export default config;
