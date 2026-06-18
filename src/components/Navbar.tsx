@@ -1,12 +1,7 @@
+﻿﻿import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Globe, Menu, Phone, X } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import {
-	NavigationMenu,
-	NavigationMenuItem,
-	NavigationMenuLink,
-	NavigationMenuList,
-} from "@/components/ui/navigation-menu";
 import logo from "../../public/assets/logo.png";
 import { Button } from "./ui/button";
 import { ButtonGroup } from "./ui/button-group";
@@ -19,24 +14,24 @@ import {
 } from "./ui/select";
 import { Switch } from "./ui/switch";
 import { Separator } from "./ui/separator";
+import { useFontScale } from "#/components/FontScaleProvider";
 import { cn } from "@/lib/utils";
 
 const NavbarLogo = () => {
 	return (
-		<NavigationMenuItem className="list-none">
-			<NavigationMenuLink href="/" className="p-0 hover:bg-transparent">
-				<img
-					src={logo}
-					alt="Logo"
-					className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 object-contain"
-				/>
-			</NavigationMenuLink>
-		</NavigationMenuItem>
+		<Link to="/" className="shrink-0 p-0">
+			<img
+				src={logo}
+				alt="Logo"
+				className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 object-contain"
+			/>
+		</Link>
 	);
 };
 
 const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
-	//TODO: apply font size to the whole app
+	const { decrease, increase, canDecrease, canIncrease } = useFontScale();
+
 	return (
 		<div className={cn("flex items-center gap-2", compact && "w-full justify-between")}>
 			{compact && (
@@ -45,17 +40,31 @@ const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 				</span>
 			)}
 			<ButtonGroup>
-				<Button variant="outline" size={compact ? "sm" : "default"} aria-label="Zmniejsz czcionkę">
-					<span className="text-sm">A-</span>
+				<Button
+					type="button"
+					variant="outline"
+					size={compact ? "sm" : "default"}
+					aria-label="Zmniejsz czcionke"
+					disabled={!canDecrease}
+					onClick={() => {decrease()}}
+				>
+					A-
 				</Button>
-				<Button variant="outline" size={compact ? "sm" : "default"} aria-label="Powiększ czcionkę">
-					<span className="text-lg">A+</span>
+				<Button
+					type="button"
+					variant="outline"
+					size={compact ? "sm" : "default"}
+					aria-label="Poweksz czcionke"
+					disabled={!canIncrease}
+					onClick={() => {increase()}}
+				>
+					A+
 				</Button>
 			</ButtonGroup>
 		</div>
 	);
 };
-//TODO: apply high contrast to the whole app
+
 const HighContrastToggle = ({ compact = false }: { compact?: boolean }) => {
 	return (
 		<div
@@ -76,7 +85,7 @@ const HighContrastToggle = ({ compact = false }: { compact?: boolean }) => {
 		</div>
 	);
 };
-//TODO: apply language to the whole app
+
 const LanguageSelect = ({ compact = false }: { compact?: boolean }) => {
 	return (
 		<Select>
@@ -138,11 +147,7 @@ const InfoLine = ({
 	);
 };
 
-function NavbarControls({
-	layout,
-}: {
-	layout: "desktop" | "mobile";
-}) {
+function NavbarControls({ layout }: { layout: "desktop" | "mobile" }) {
 	const compact = layout === "mobile";
 
 	if (compact) {
@@ -158,20 +163,14 @@ function NavbarControls({
 	}
 
 	return (
-		<>
-			<NavigationMenuItem className="list-none">
-				<BiggerSmallerFont />
-			</NavigationMenuItem>
-			<NavigationMenuItem className="list-none hidden md:block">
+		<div className="flex items-center gap-3 xl:gap-4 flex-wrap justify-end">
+			<BiggerSmallerFont />
+			<div className="hidden md:block">
 				<HighContrastToggle />
-			</NavigationMenuItem>
-			<NavigationMenuItem className="list-none">
-				<InfoLine />
-			</NavigationMenuItem>
-			<NavigationMenuItem className="list-none">
-				<LanguageSelect />
-			</NavigationMenuItem>
-		</>
+			</div>
+			<InfoLine />
+			<LanguageSelect />
+		</div>
 	);
 }
 
@@ -179,43 +178,41 @@ export const Navbar = () => {
 	const [mobileOpen, setMobileOpen] = useState(false);
 
 	return (
-		<nav className="w-full border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-40 shadow-sm">
+		<nav className="sticky top-0 z-50 w-full border-b border-border bg-card/80 backdrop-blur-sm shadow-sm">
 			<div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<NavigationMenu className="w-full max-w-none">
-					<NavigationMenuList className="w-full flex-col items-stretch gap-0">
-						<div className="flex items-center justify-between gap-3 sm:gap-4 min-h-16 sm:min-h-18 lg:min-h-24 py-2 sm:py-3">
-							<NavbarLogo />
+				<div className="flex flex-col gap-0">
+					<div className="flex items-center justify-between gap-3 sm:gap-4 min-h-16 sm:min-h-18 lg:min-h-24 py-2 sm:py-3">
+						<NavbarLogo />
 
-							<div className="hidden lg:flex items-center gap-3 xl:gap-4 flex-wrap justify-end">
-								<NavbarControls layout="desktop" />
-							</div>
-
-							<div className="flex lg:hidden items-center gap-1 sm:gap-2 shrink-0">
-								<InfoLine iconOnly />
-								<Button
-									variant="outline"
-									size="icon"
-									className="shrink-0"
-									aria-label={mobileOpen ? "Zamknij menu" : "Otwórz menu"}
-									aria-expanded={mobileOpen}
-									onClick={() => setMobileOpen((open) => !open)}
-								>
-									{mobileOpen ? (
-										<X className="w-5 h-5" />
-									) : (
-										<Menu className="w-5 h-5" />
-									)}
-								</Button>
-							</div>
+						<div className="hidden lg:flex items-center gap-3 xl:gap-4 flex-wrap justify-end">
+							<NavbarControls layout="desktop" />
 						</div>
 
-						{mobileOpen && (
-							<div className="lg:hidden border-t border-border py-4 sm:py-5 pb-5 sm:pb-6">
-								<NavbarControls layout="mobile" />
-							</div>
-						)}
-					</NavigationMenuList>
-				</NavigationMenu>
+						<div className="flex lg:hidden items-center gap-1 sm:gap-2 shrink-0">
+							<InfoLine iconOnly />
+							<Button
+								type="button"
+								variant="outline"
+								size="icon"
+								className="shrink-0"
+								aria-label={mobileOpen ? "Zamknij menu" : "Otwórz menu"}								aria-expanded={mobileOpen}
+								onClick={() => setMobileOpen((open) => !open)}
+							>
+								{mobileOpen ? (
+									<X className="w-5 h-5" />
+								) : (
+									<Menu className="w-5 h-5" />
+								)}
+							</Button>
+						</div>
+					</div>
+
+					{mobileOpen && (
+						<div className="lg:hidden border-t border-border py-4 sm:py-5 pb-5 sm:pb-6">
+							<NavbarControls layout="mobile" />
+						</div>
+					)}
+				</div>
 			</div>
 		</nav>
 	);

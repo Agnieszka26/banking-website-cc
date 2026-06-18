@@ -1,4 +1,3 @@
-export { plaidClient } from "./plaid/client";
 export {
 	createLinkToken,
 	exchangePublicToken,

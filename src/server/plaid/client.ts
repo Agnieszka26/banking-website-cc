@@ -1,3 +1,4 @@
+import "@tanstack/react-start/server-only";
 import { Configuration, PlaidApi, PlaidEnvironments } from "plaid";
 
 const plaidEnv = process.env.PLAID_ENV ?? "sandbox";

@@ -1,3 +1,4 @@
+import "@tanstack/react-start/server-only";
 import { clerkClient } from "@clerk/tanstack-react-start/server";
 
 const PLAID_ACCESS_TOKEN_KEY = "plaidAccessToken";

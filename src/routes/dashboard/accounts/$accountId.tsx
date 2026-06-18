@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { usePostHog } from "@posthog/react";
+import { useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import { formatMoney, getDashboardData } from "#/server/plaid";
 
@@ -20,6 +22,14 @@ export const Route = createFileRoute("/dashboard/accounts/$accountId")({
 
 function AccountDetailsPage() {
 	const { account, transactions } = Route.useLoaderData();
+	const posthog = usePostHog();
+
+	useEffect(() => {
+		posthog.capture("account_details_viewed", {
+			account_type: account.type,
+			account_mask: account.mask,
+		});
+	}, [posthog, account.type, account.mask]);
 
 	return (
 		<div className="mx-auto max-w-3xl space-y-6">

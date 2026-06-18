@@ -1,204 +1,204 @@
-Welcome to your new TanStack Start app! 
+# Banking App (`banking-cc`)
 
-# Getting Started
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
+![TanStack Start](https://img.shields.io/badge/TanStack_Start-full--stack-EF4444)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?logo=tailwindcss&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-not_configured-lightgrey)
 
-To run this application:
+A Polish-language banking web application built with **TanStack Start**. It combines a public marketing site, Clerk authentication, and a protected customer dashboard. Bank accounts and transactions are loaded through the **Plaid** sandbox API after a user links an account.
+
+---
+
+## Project purpose
+
+This project demonstrates:
+
+- Full-stack React with file-based routing and server functions
+- Authentication and session handling with Clerk
+- Third-party fintech integration via Plaid Link
+- A component-driven UI with Tailwind CSS and shadcn-style primitives
+- Separation of public pages, auth flows, and protected dashboard areas
+
+---
+
+## Key features
+
+### Public site
+
+- Home page with login prompt, product cards, carousel, and news banner
+- News listing and article pages (`/news`, `/news/$newsId`)
+- Contact page (`/contact`)
+- Responsive navbar with accessibility controls (font size, high contrast, language selector UI)
+
+### Authentication
+
+- Sign in and sign up via Clerk (`/sign-in`, `/sign-up`)
+- Protected `/dashboard` routes with automatic redirect for unauthenticated users
+
+### Dashboard
+
+- Overview with greeting, linked accounts, recent transactions, and balance summary
+- Plaid Link flow to connect a bank account in sandbox mode
+- Sidebar navigation for accounts, payments, cards, deposits, loans, applications, and settings
+- Clerk `UserButton` for account management
+
+Several dashboard sub-pages are still placeholders and show stub content until implemented.
+
+---
+
+## Tech stack
+
+| Layer | Technology |
+| --- | --- |
+| Framework | [TanStack Start](https://tanstack.com/start) + [TanStack Router](https://tanstack.com/router) |
+| UI | React 19, Tailwind CSS 4, shadcn/ui (Base UI) |
+| Language | TypeScript |
+| Auth | [Clerk](https://clerk.com/) (`@clerk/tanstack-react-start`) |
+| Banking data | [Plaid](https://plaid.com/) (`plaid`, `react-plaid-link`) |
+| Build tool | Vite 8 |
+| Lint / format | Biome |
+| Tests | Vitest (configured, no test files yet) |
+
+---
+
+## Requirements
+
+- **Node.js** `>= 22.12.0`
+- Clerk application (publishable + secret keys)
+- Plaid sandbox credentials (`client_id` + `secret`)
+
+---
+
+## Getting started
+
+### 1. Install dependencies
 
 ```bash
 npm install
+```
+
+### 2. Configure environment variables
+
+Create a `.env` file in the project root:
+
+```env
+# Clerk
+CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+CLERK_SIGN_IN_URL=/sign-in
+CLERK_SIGN_UP_URL=/sign-up
+
+# Plaid (sandbox)
+PLAID_CLIENT_ID=your_plaid_client_id
+PLAID_SECRET=your_plaid_secret
+PLAID_ENV=sandbox
+
+# Optional public contact overrides
+VITE_CONTACT_PHONE=801 000 000
+VITE_CONTACT_EMAIL=kontakt@bank.pl
+```
+
+Never commit real credentials to version control.
+
+### 3. Run the dev server
+
+```bash
 npm run dev
 ```
 
-# Building For Production
+The app runs at [http://localhost:3000](http://localhost:3000).
 
-To build this application for production:
+### 4. Build for production
 
 ```bash
 npm run build
+npm run preview
 ```
 
-## Testing
+---
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+## Available scripts
 
-```bash
-npm run test
+| Script | Description |
+| --- | --- |
+| `npm run dev` | Start Vite dev server on port 3000 |
+| `npm run build` | Production build |
+| `npm run preview` | Preview production build |
+| `npm run generate-routes` | Regenerate TanStack Router route tree |
+| `npm run test` | Run Vitest |
+| `npm run lint` | Lint with Biome |
+| `npm run format` | Format with Biome |
+| `npm run check` | Run Biome lint + format checks |
+
+---
+
+## Project structure
+
+```text
+banking-cc/
+├── public/                 # Static assets (logo, manifest)
+├── src/
+│   ├── components/         # Shared UI (Navbar, Footer, dashboard widgets, shadcn/ui)
+│   ├── config/             # App configuration (contact details)
+│   ├── lib/                # Utilities (e.g. cn())
+│   ├── routes/             # File-based routes (pages + layouts)
+│   │   ├── dashboard/      # Protected dashboard routes
+│   │   ├── news/           # News pages
+│   │   ├── sign-in.$.tsx   # Clerk sign-in
+│   │   └── sign-up.$.tsx   # Clerk sign-up
+│   ├── server/
+│   │   └── plaid/          # Plaid client, server functions, auth helpers, storage
+│   ├── router.tsx          # Router setup
+│   ├── routeTree.gen.ts    # Generated route tree (do not edit manually)
+│   ├── start.ts            # TanStack Start middleware (Clerk, CSRF)
+│   └── styles.css          # Global styles + Tailwind theme
+├── vite.config.ts
+├── tsr.config.json         # TanStack Router CLI config
+└── biome.json
 ```
 
-## Styling
+### Routing overview
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+| Path | Description |
+| --- | --- |
+| `/` | Public home page |
+| `/news`, `/news/$newsId` | News section |
+| `/contact` | Contact page |
+| `/sign-in`, `/sign-up` | Clerk authentication |
+| `/dashboard` | Dashboard home (Plaid data, accounts, transactions) |
+| `/dashboard/accounts` | Accounts list (placeholder) |
+| `/dashboard/accounts/$accountId` | Single account detail (live when Plaid is linked) |
+| `/dashboard/payments` | Payments (stub) |
+| `/dashboard/cards` | Cards (placeholder) |
+| `/dashboard/deposits` | Deposits (placeholder) |
+| `/dashboard/loans` | Loans (placeholder) |
+| `/dashboard/applications` | Applications (placeholder) |
+| `/dashboard/settings` | Settings (stub) |
 
-### Removing Tailwind CSS
+---
 
-If you prefer not to use Tailwind CSS:
+## Server architecture
 
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `npm install @tailwindcss/vite tailwindcss -D`
+Server logic lives in TanStack Start **server functions** under `src/server/plaid/`:
 
-## Linting & Formatting
+- `getAuthUserId` — returns the current Clerk user ID
+- `createLinkToken` / `exchangePublicToken` — Plaid Link onboarding
+- `getDashboardData` — accounts, transactions, and summary for the dashboard
 
-This project uses [Biome](https://biomejs.dev/) for linting and formatting. The following scripts are available:
+Plaid access tokens are stored in Clerk user `privateMetadata` per user. Dashboard routes call `getAuthUserId` in `beforeLoad` and redirect to sign-in when no session exists.
 
+---
 
-```bash
-npm run lint
-npm run format
-npm run check
-```
+## Development notes
 
+- Regenerate routes after adding or renaming route files: `npm run generate-routes`
+- Plaid runs in **sandbox** by default (`PLAID_ENV=sandbox`). Use Plaid's test credentials in the Link modal.
+- TanStack Devtools are enabled in development via `@tanstack/devtools-vite`.
+- Avoid wrapping TanStack Router `redirect()` in broad `try/catch` blocks with `console.error` — redirects are thrown and enhanced devtools logging can create noisy server/client console loops.
 
+---
 
-## Routing
+## License
 
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+Private project. No license file is included in this repository.

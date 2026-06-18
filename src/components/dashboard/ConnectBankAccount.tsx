@@ -1,15 +1,14 @@
+import { usePostHog } from "@posthog/react";
 import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
-import {
-	type PlaidLinkOnSuccess,
-	usePlaidLink,
-} from "react-plaid-link";
+import { type PlaidLinkOnSuccess, usePlaidLink } from "react-plaid-link";
 import { createLinkToken, exchangePublicToken } from "#/server/plaid";
 import { Button } from "@/components/ui/button";
 
 export function ConnectBankAccount() {
 	const router = useRouter();
+	const posthog = usePostHog();
 	const createLinkTokenFn = useServerFn(createLinkToken);
 	const exchangePublicTokenFn = useServerFn(exchangePublicToken);
 	const [linkToken, setLinkToken] = useState<string | null>(null);
@@ -31,14 +30,16 @@ export function ConnectBankAccount() {
 
 			try {
 				await exchangePublicTokenFn({ data: { publicToken } });
+				posthog.capture("bank_account_connected");
 				await router.invalidate();
 			} catch {
 				setError("Nie udało się połączyć konta bankowego.");
+				posthog.capture("bank_account_connect_failed");
 			} finally {
 				setIsLinking(false);
 			}
 		},
-		[exchangePublicTokenFn, router],
+		[exchangePublicTokenFn, router, posthog],
 	);
 
 	const { open, ready } = usePlaidLink({
@@ -59,7 +60,10 @@ export function ConnectBankAccount() {
 			<Button
 				className="mt-4 bg-bank-green hover:bg-bank-green/90"
 				disabled={!ready || !linkToken || isLinking}
-				onClick={() => open()}
+				onClick={() => {
+					posthog.capture("bank_account_connect_opened");
+					open();
+				}}
 			>
 				{isLinking ? "Łączenie..." : "Połącz konto przez Plaid"}
 			</Button>
