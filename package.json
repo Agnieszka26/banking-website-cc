@@ -20,7 +20,6 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
-    "@clerk/tanstack-react-start": "^1.4.2",
     "@fontsource-variable/geist": "^5.2.9",
     "@posthog/react": "^1.10.2",
     "@tailwindcss/vite": "^4.1.18",

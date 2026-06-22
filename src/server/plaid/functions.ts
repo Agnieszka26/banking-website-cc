@@ -1,40 +1,12 @@
-import { auth, clerkClient } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 import { CountryCode, Products } from "plaid";
+import { getDashboardUser } from "#/server/auth/users";
 import { getPostHogClient } from "#/utils/posthog-server";
 import { requireUserId } from "./auth";
 import { plaidClient } from "./client";
 import { getDateRange } from "./format";
 import { getPlaidAccessToken, setPlaidAccessToken } from "./storage";
 import type { DashboardData } from "./types";
-
-async function getDashboardUser(userId: string) {
-	const user = await clerkClient().users.getUser(userId);
-	const firstName = user.firstName ?? "";
-	const lastName = user.lastName ?? "";
-
-	return {
-		firstName,
-		lastName,
-		fullName: [firstName, lastName].filter(Boolean).join(" ") || "Użytkowniku",
-		lastSignIn: user.lastSignInAt
-			? new Date(user.lastSignInAt).toLocaleString("pl-PL", {
-					day: "2-digit",
-					month: "2-digit",
-					year: "numeric",
-					hour: "2-digit",
-					minute: "2-digit",
-				})
-			: null,
-	};
-}
-
-export const getAuthUserId = createServerFn({ method: "GET" }).handler(
-	async () => {
-		const { userId } = await auth();
-		return userId;
-	},
-);
 
 export const createLinkToken = createServerFn({ method: "GET" }).handler(
 	async () => {
