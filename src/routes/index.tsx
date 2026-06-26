@@ -3,12 +3,16 @@ import Card from "#/components/Card";
 import { CarouselComponent } from "#/components/Carousel";
 import LoginForm from "#/components/LoginForm";
 import NewsBanner from "#/components/NewsBanner";
+import { getNews } from "#/server/news/functions";
 
 export const Route = createFileRoute("/")({
+	loader: () => getNews(),
 	component: Home,
 });
 
 function Home() {
+	const news = Route.useLoaderData();
+	const latest = news[0] ?? null;
 
 	return (
 		<div
@@ -22,7 +26,7 @@ function Home() {
 			<section className="w-full">
 				<CarouselComponent />
 			</section>
-			<NewsBanner />
+			<NewsBanner latest={latest} />
 		</div>
 	);
 }

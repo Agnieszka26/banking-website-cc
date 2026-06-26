@@ -68,9 +68,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 							"https://eu.posthog.com",
 						defaults: "2025-05-24",
 						capture_exceptions: true,
-						debug: import.meta.env.DEV,
-						before_send: (event) =>
-							import.meta.env.DEV ? null : event,
+						debug: import.meta.env.VITE_POSTHOG_DEBUG === "true",
+						opt_out_capturing_by_default: import.meta.env.DEV,
 					}}
 				>
 					<FontScaleProvider>{children}</FontScaleProvider>
