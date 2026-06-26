@@ -69,6 +69,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						defaults: "2025-05-24",
 						capture_exceptions: true,
 						debug: import.meta.env.DEV,
+						before_send: (event) =>
+							import.meta.env.DEV ? null : event,
 					}}
 				>
 					<FontScaleProvider>{children}</FontScaleProvider>
