@@ -1,7 +1,7 @@
+export { getAuthUserId } from "./auth/functions";
 export {
 	createLinkToken,
 	exchangePublicToken,
-	getAuthUserId,
 	getDashboardData,
 } from "./plaid/functions";
 export type {

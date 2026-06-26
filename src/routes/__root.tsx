@@ -1,5 +1,4 @@
-﻿import { ClerkProvider } from "@clerk/tanstack-react-start";
-import { PostHogProvider } from "@posthog/react";
+﻿import { PostHogProvider } from "@posthog/react";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import {
 	createRootRoute,
@@ -72,9 +71,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						debug: import.meta.env.DEV,
 					}}
 				>
-					<ClerkProvider>
-						<FontScaleProvider>{children}</FontScaleProvider>
-					</ClerkProvider>
+					<FontScaleProvider>{children}</FontScaleProvider>
 				</PostHogProvider>
 				<Scripts />
 			</body>
