@@ -25,6 +25,7 @@ import { Route as DashboardCardsRouteImport } from './routes/dashboard/cards'
 import { Route as DashboardApplicationsRouteImport } from './routes/dashboard/applications'
 import { Route as DashboardAccountsRouteImport } from './routes/dashboard/accounts'
 import { Route as DashboardAccountsAccountIdRouteImport } from './routes/dashboard/accounts/$accountId'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
@@ -107,6 +108,11 @@ const DashboardAccountsAccountIdRoute =
     path: '/$accountId',
     getParentRoute: () => DashboardAccountsRoute,
   } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/sign-up/$': typeof SignUpSplatRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard/accounts/$accountId': typeof DashboardAccountsAccountIdRoute
 }
 export interface FileRoutesByTo {
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/sign-up/$': typeof SignUpSplatRoute
   '/dashboard': typeof DashboardIndexRoute
   '/news': typeof NewsIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard/accounts/$accountId': typeof DashboardAccountsAccountIdRoute
 }
 export interface FileRoutesById {
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/sign-up/$': typeof SignUpSplatRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard/accounts/$accountId': typeof DashboardAccountsAccountIdRoute
 }
 export interface FileRouteTypes {
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/sign-up/$'
     | '/dashboard/'
     | '/news/'
+    | '/api/auth/$'
     | '/dashboard/accounts/$accountId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/sign-up/$'
     | '/dashboard'
     | '/news'
+    | '/api/auth/$'
     | '/dashboard/accounts/$accountId'
   id:
     | '__root__'
@@ -215,6 +226,7 @@ export interface FileRouteTypes {
     | '/sign-up/$'
     | '/dashboard/'
     | '/news/'
+    | '/api/auth/$'
     | '/dashboard/accounts/$accountId'
   fileRoutesById: FileRoutesById
 }
@@ -226,6 +238,7 @@ export interface RootRouteChildren {
   SignInSplatRoute: typeof SignInSplatRoute
   SignUpSplatRoute: typeof SignUpSplatRoute
   NewsIndexRoute: typeof NewsIndexRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -342,6 +355,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAccountsAccountIdRouteImport
       parentRoute: typeof DashboardAccountsRoute
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -390,6 +410,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignInSplatRoute: SignInSplatRoute,
   SignUpSplatRoute: SignUpSplatRoute,
   NewsIndexRoute: NewsIndexRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
