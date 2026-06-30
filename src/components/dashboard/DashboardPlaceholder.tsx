@@ -1,3 +1,4 @@
+/** Placeholder page for dashboard sections not yet implemented. */
 export function DashboardPlaceholder({ title }: { title: string }) {
 	return (
 		<div className="mx-auto max-w-7xl">

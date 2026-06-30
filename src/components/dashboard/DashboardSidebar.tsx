@@ -42,6 +42,7 @@ type DashboardSidebarProps = {
 	userName: string;
 };
 
+/** Dashboard navigation sidebar with user info and sign-out. */
 export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const navigate = useNavigate();

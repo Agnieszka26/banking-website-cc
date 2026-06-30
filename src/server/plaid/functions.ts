@@ -7,6 +7,7 @@ import { getDateRange } from "./format";
 import { getPlaidAccessToken, setPlaidAccessToken } from "./storage";
 import type { DashboardData, DashboardUser } from "./types";
 
+/** Maps a Better Auth session to dashboard user display fields. */
 function toDashboardUser(
 	session: Awaited<ReturnType<typeof requireSession>>,
 ): DashboardUser {
@@ -31,6 +32,7 @@ function toDashboardUser(
 	};
 }
 
+/** Creates a Plaid Link token for the authenticated user. */
 export const createLinkToken = createServerFn({ method: "GET" }).handler(
 	async () => {
 		const userId = await requireUserId();
@@ -53,6 +55,7 @@ export const createLinkToken = createServerFn({ method: "GET" }).handler(
 	},
 );
 
+/** Exchanges a Plaid public token and stores the access token for the user. */
 export const exchangePublicToken = createServerFn({ method: "POST" })
 	.validator((data: { publicToken: string }) => {
 		if (
@@ -97,6 +100,7 @@ export const exchangePublicToken = createServerFn({ method: "POST" })
 		return { linked: true };
 	});
 
+/** Loads linked accounts, recent transactions, and summary for the dashboard. */
 export const getDashboardData = createServerFn({ method: "GET" }).handler(
 	async (): Promise<DashboardData> => {
 		const session = await requireSession();

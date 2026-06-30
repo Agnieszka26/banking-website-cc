@@ -9,7 +9,7 @@ import slide1 from "./../../public/assets/slide1.png";
 import slide2 from "./../../public/assets/slide2.png";
 import slide3 from "./../../public/assets/slide3.png";
 
-
+/** Homepage image carousel with promotional slides. */
 export function CarouselComponent() {
 	const slides = [{
 		image: slide1,

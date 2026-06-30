@@ -7,6 +7,7 @@ export const contactPhone =
 export const contactEmail =
 	import.meta.env.VITE_CONTACT_EMAIL ?? DEFAULT_CONTACT_EMAIL;
 
+/** Builds a `tel:` href from a phone number, stripping whitespace. */
 export function contactPhoneHref(phone = contactPhone): string {
 	return `tel:${phone.replace(/\s/g, "")}`;
 }

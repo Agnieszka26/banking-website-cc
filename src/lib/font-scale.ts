@@ -9,14 +9,17 @@ export const FONT_SCALE_ROOT_PX = [14, 15, 16, 18, 20] as const;
 
 const DEFAULT_ROOT_PX = FONT_SCALE_ROOT_PX[FONT_SCALE_DEFAULT];
 
+/** Clamps a font scale level to the supported min/max range. */
 export function clampFontScale(level: number): number {
 	return Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, level));
 }
 
+/** Returns the CSS multiplier for a font scale level relative to the default size. */
 export function getFontScaleMultiplier(level: number): number {
 	return FONT_SCALE_ROOT_PX[clampFontScale(level)] / DEFAULT_ROOT_PX;
 }
 
+/** Reads the persisted font scale level from localStorage, or the default. */
 export function readFontScale(): number {
 	if (typeof window === "undefined") {
 		return FONT_SCALE_DEFAULT;
@@ -31,6 +34,7 @@ export function readFontScale(): number {
 	return Number.isNaN(parsed) ? FONT_SCALE_DEFAULT : clampFontScale(parsed);
 }
 
+/** Applies the font scale level to the document root element. */
 export function applyFontScale(level: number): void {
 	if (typeof document === "undefined") {
 		return;
@@ -46,6 +50,7 @@ export function applyFontScale(level: number): void {
 	root.dataset.fontScale = String(clamped);
 }
 
+/** Persists, applies, and returns the clamped font scale level. */
 export function persistFontScale(level: number): number {
 	const clamped = clampFontScale(level);
 

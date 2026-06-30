@@ -5,6 +5,7 @@ type AuthLayoutProps = {
 	id: string;
 };
 
+/** Centered layout wrapper for sign-in and sign-up pages. */
 export function AuthLayout({ children, id }: AuthLayoutProps) {
 	return (
 		<section

@@ -19,6 +19,7 @@ if (!plaidClientId || !plaidSecret) {
 	);
 }
 
+/** Configured Plaid API client for the current environment. */
 export const plaidClient = new PlaidApi(
 	new Configuration({
 		basePath,

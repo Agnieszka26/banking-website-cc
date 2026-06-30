@@ -3,6 +3,7 @@ import { Shield } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+/** Footer banner prompting users to review security settings. */
 export function DashboardSecurityBanner() {
 	return (
 		<div className="border-t border-bank-green/15 bg-bank-green-light px-6 py-4 lg:px-8">

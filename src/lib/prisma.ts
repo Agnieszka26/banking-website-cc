@@ -16,6 +16,7 @@ const globalForPrisma = globalThis as unknown as {
 
 const adapter = new PrismaPg({ connectionString });
 
+/** Shared Prisma client for Supabase PostgreSQL (runtime transaction pooler). */
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== "production") {

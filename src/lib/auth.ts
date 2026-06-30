@@ -5,6 +5,7 @@ import { username } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { prisma } from "#/lib/prisma";
 
+/** Better Auth server instance (sessions, identifier login, Prisma adapter). */
 export const auth = betterAuth({
 	secret: process.env.BETTER_AUTH_SECRET,
 	baseURL: process.env.BETTER_AUTH_URL,

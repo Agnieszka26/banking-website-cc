@@ -6,6 +6,7 @@ import { type PlaidLinkOnSuccess, usePlaidLink } from "react-plaid-link";
 import { createLinkToken, exchangePublicToken } from "#/server/plaid";
 import { Button } from "@/components/ui/button";
 
+/** Plaid Link flow for connecting a bank account to the dashboard. */
 export function ConnectBankAccount() {
 	const router = useRouter();
 	const posthog = usePostHog();
