@@ -2,7 +2,7 @@ import { usePostHog } from "@posthog/react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { LockKeyholeOpen } from "lucide-react";
 import { useState } from "react";
-import { signIn } from "#/lib/auth-client";
+import { loginWithIdentifier } from "#/lib/auth-client";
 
 const LoginForm = () => {
 	const posthog = usePostHog();
@@ -18,8 +18,8 @@ const LoginForm = () => {
 		setIsSubmitting(true);
 
 		try {
-			const { error: signInError } = await signIn.username({
-				username,
+			const { error: signInError } = await loginWithIdentifier({
+				identifier: username,
 				password,
 			});
 

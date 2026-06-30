@@ -2,7 +2,7 @@ import { usePostHog } from "@posthog/react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthLayout } from "#/components/AuthLayout";
-import { signIn } from "#/lib/auth-client";
+import { loginWithIdentifier } from "#/lib/auth-client";
 
 export const Route = createFileRoute("/sign-in/$")({
 	component: RouteComponent,
@@ -22,8 +22,8 @@ function RouteComponent() {
 		setIsSubmitting(true);
 
 		try {
-			const { error: signInError } = await signIn.username({
-				username,
+			const { error: signInError } = await loginWithIdentifier({
+				identifier: username,
 				password,
 			});
 

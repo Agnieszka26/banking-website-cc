@@ -7,3 +7,19 @@ export const authClient = createAuthClient({
 });
 
 export const { signIn, signUp, signOut, useSession } = authClient;
+
+/**
+ * Identifier-based login: authenticates by username/identifier + password.
+ * Returns Better Auth's `{ data, error }` result (does not throw on auth failure).
+ */
+export function loginWithIdentifier(input: {
+	identifier: string;
+	password: string;
+	rememberMe?: boolean;
+}) {
+	return authClient.signIn.username({
+		username: input.identifier.trim().toLowerCase(),
+		password: input.password,
+		rememberMe: input.rememberMe,
+	});
+}
