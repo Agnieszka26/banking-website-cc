@@ -2,7 +2,7 @@ import { usePostHog } from "@posthog/react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthLayout } from "#/components/AuthLayout";
-import { signUp } from "#/server/auth/functions";
+import { signUp } from "#/lib/auth-client";
 
 export const Route = createFileRoute("/sign-up/$")({
 	component: RouteComponent,
@@ -24,9 +24,23 @@ function RouteComponent() {
 		setIsSubmitting(true);
 
 		try {
-			await signUp({
-				data: { username, password, firstName, lastName },
+			const normalizedUsername = username.trim().toLowerCase();
+			const fullName =
+				[firstName, lastName].map((part) => part.trim()).filter(Boolean).join(" ") ||
+				normalizedUsername;
+
+			const { error: signUpError } = await signUp.email({
+				email: `${normalizedUsername}@example.com`,
+				password,
+				name: fullName,
+				username: normalizedUsername,
 			});
+
+			if (signUpError) {
+				setError(signUpError.message ?? "Rejestracja nie powiodła się");
+				return;
+			}
+
 			posthog.capture("user_signed_up");
 			posthog.identify(username, { username, firstName, lastName });
 			await navigate({ to: "/dashboard" });
@@ -69,8 +83,12 @@ function RouteComponent() {
 							onChange={(event) => setPassword(event.target.value)}
 							className="w-full rounded-md border border-gray-300 p-2"
 							autoComplete="new-password"
+							minLength={8}
 							required
 						/>
+						<p className="mt-1 text-xs text-muted-foreground">
+							Minimum 8 znaków
+						</p>
 					</div>
 					<div className="grid grid-cols-2 gap-3">
 						<div>

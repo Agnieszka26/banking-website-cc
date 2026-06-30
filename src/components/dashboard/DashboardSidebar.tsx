@@ -19,7 +19,7 @@ import {
 	contactPhone,
 	contactPhoneHref,
 } from "#/config/contact";
-import { signOut } from "#/server/auth/functions";
+import { signOut } from "#/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 const navItems: Array<{

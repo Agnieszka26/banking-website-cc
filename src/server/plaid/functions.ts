@@ -1,31 +1,53 @@
 import { createServerFn } from "@tanstack/react-start";
 import { CountryCode, Products } from "plaid";
-import { getDashboardUser } from "#/server/auth/users";
 import { getPostHogClient } from "#/utils/posthog-server";
-import { requireUserId } from "./auth";
+import { requireSession, requireUserId } from "./auth";
 import { plaidClient } from "./client";
 import { getDateRange } from "./format";
 import { getPlaidAccessToken, setPlaidAccessToken } from "./storage";
-import type { DashboardData } from "./types";
+import type { DashboardData, DashboardUser } from "./types";
+
+function toDashboardUser(
+	session: Awaited<ReturnType<typeof requireSession>>,
+): DashboardUser {
+	const fullName =
+		session.user.name || session.user.username || "Użytkowniku";
+	const [firstName, ...rest] = fullName.split(" ");
+	const signedInAt = session.session.createdAt;
+
+	return {
+		firstName: firstName ?? "",
+		lastName: rest.join(" "),
+		fullName,
+		lastSignIn: signedInAt
+			? new Date(signedInAt).toLocaleString("pl-PL", {
+					day: "2-digit",
+					month: "2-digit",
+					year: "numeric",
+					hour: "2-digit",
+					minute: "2-digit",
+				})
+			: null,
+	};
+}
 
 export const createLinkToken = createServerFn({ method: "GET" }).handler(
 	async () => {
 		const userId = await requireUserId();
 
-		let response;
-		try {
-			response = await plaidClient.linkTokenCreate({
+		const response = await plaidClient
+			.linkTokenCreate({
 				user: { client_user_id: userId },
 				client_name: "TanStack Bank App",
 				products: [Products.Transactions],
 				country_codes: [CountryCode.Pl, CountryCode.Us],
 				language: "pl",
+			})
+			.catch((error) => {
+				throw new Error(
+					`Failed to create link token: ${error instanceof Error ? error.message : "Unknown error"}`,
+				);
 			});
-		} catch (error) {
-			throw new Error(
-				`Failed to create link token: ${error instanceof Error ? error.message : "Unknown error"}`,
-			);
-		}
 
 		return { linkToken: response.data.link_token };
 	},
@@ -45,24 +67,23 @@ export const exchangePublicToken = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
 
-		let response;
-		try {
-			response = await plaidClient.itemPublicTokenExchange({
+		const response = await plaidClient
+			.itemPublicTokenExchange({
 				public_token: data.publicToken,
+			})
+			.catch((error) => {
+				throw new Error(
+					`Failed to exchange public token: ${error instanceof Error ? error.message : "Unknown error"}`,
+				);
 			});
-		} catch (error) {
-			throw new Error(
-				`Failed to exchange public token: ${error instanceof Error ? error.message : "Unknown error"}`,
-			);
-		}
 
-		try {
-			await setPlaidAccessToken(userId, response.data.access_token);
-		} catch (error) {
-			throw new Error(
-				`Failed to store access token: ${error instanceof Error ? error.message : "Unknown error"}`,
-			);
-		}
+		await setPlaidAccessToken(userId, response.data.access_token).catch(
+			(error) => {
+				throw new Error(
+					`Failed to store access token: ${error instanceof Error ? error.message : "Unknown error"}`,
+				);
+			},
+		);
 
 		const posthog = getPostHogClient();
 		posthog.capture({
@@ -78,8 +99,9 @@ export const exchangePublicToken = createServerFn({ method: "POST" })
 
 export const getDashboardData = createServerFn({ method: "GET" }).handler(
 	async (): Promise<DashboardData> => {
-		const userId = await requireUserId();
-		const user = await getDashboardUser(userId);
+		const session = await requireSession();
+		const userId = session.user.id;
+		const user = toDashboardUser(session);
 		const accessToken = await getPlaidAccessToken(userId);
 
 		if (!accessToken) {
@@ -94,21 +116,18 @@ export const getDashboardData = createServerFn({ method: "GET" }).handler(
 
 		const { startDate, endDate } = getDateRange(30);
 
-		let accountsResponse, transactionsResponse;
-		try {
-			[accountsResponse, transactionsResponse] = await Promise.all([
-				plaidClient.accountsBalanceGet({ access_token: accessToken }),
-				plaidClient.transactionsGet({
-					access_token: accessToken,
-					start_date: startDate,
-					end_date: endDate,
-				}),
-			]);
-		} catch (error) {
+		const [accountsResponse, transactionsResponse] = await Promise.all([
+			plaidClient.accountsBalanceGet({ access_token: accessToken }),
+			plaidClient.transactionsGet({
+				access_token: accessToken,
+				start_date: startDate,
+				end_date: endDate,
+			}),
+		]).catch((error) => {
 			throw new Error(
 				`Failed to fetch dashboard data from Plaid: ${error instanceof Error ? error.message : "Unknown error"}`,
 			);
-		}
+		});
 
 		const accounts = accountsResponse.data.accounts.map((account) => ({
 			id: account.account_id,
