@@ -24,6 +24,7 @@ export const plaidClient = new PlaidApi(
 	new Configuration({
 		basePath,
 		baseOptions: {
+			timeout: 10_000,
 			headers: {
 				"PLAID-CLIENT-ID": plaidClientId,
 				"PLAID-SECRET": plaidSecret,

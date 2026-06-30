@@ -14,6 +14,7 @@ import {
 	User,
 	Wallet,
 } from "lucide-react";
+import { useState } from "react";
 import {
 	contactEmail,
 	contactPhone,
@@ -47,11 +48,30 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const navigate = useNavigate();
 	const posthog = usePostHog();
+	const [error, setError] = useState<string | null>(null);
+	const [isSigningOut, setIsSigningOut] = useState(false);
 
 	const handleSignOut = async () => {
-		await signOut();
-		posthog.reset();
-		await navigate({ to: "/" });
+		setError(null);
+		setIsSigningOut(true);
+
+		try {
+			const { error: signOutError } = await signOut();
+
+			if (signOutError) {
+				setError(signOutError.message ?? "Wylogowanie nie powiodło się");
+				return;
+			}
+
+			posthog.reset();
+			await navigate({ to: "/" });
+		} catch (err) {
+			setError(
+				err instanceof Error ? err.message : "Wylogowanie nie powiodło się",
+			);
+		} finally {
+			setIsSigningOut(false);
+		}
 	};
 
 	const initials = userName
@@ -104,11 +124,17 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 						<button
 							type="button"
 							onClick={handleSignOut}
-							className="flex items-center gap-1 text-xs text-muted-foreground hover:text-bank-green"
+							disabled={isSigningOut}
+							className="flex items-center gap-1 text-xs text-muted-foreground hover:text-bank-green disabled:opacity-60"
 						>
 							<LogOut className="size-3" />
-							Wyloguj
+							{isSigningOut ? "Wylogowywanie..." : "Wyloguj"}
 						</button>
+						{error && (
+							<p className="mt-1 text-xs text-red-600" role="alert">
+								{error}
+							</p>
+						)}
 					</div>
 				</div>
 			</div>

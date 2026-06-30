@@ -103,11 +103,19 @@ model Transaction {
   id        BigInt       @id @default(autoincrement())
   createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
   accountId String?      @unique @map("account_id")
-  amount    Float?
+  amount    Decimal?     @db.Decimal(14, 2)
   type      String?
   accounts  BankAccount?
 
   @@map("transactions")
+}
+
+model PlaidLink {
+  userId      String   @id @map("user_id")
+  accessToken String   @map("access_token")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("plaid_link")
 }
 
 model news {
