@@ -2,6 +2,7 @@ import { PostHog } from "posthog-node";
 
 let posthogClient: PostHog | null = null;
 
+/** Returns a singleton PostHog server client for server-side event capture. */
 export function getPostHogClient() {
 	if (!posthogClient) {
 		posthogClient = new PostHog(

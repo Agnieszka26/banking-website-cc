@@ -1,8 +1,8 @@
 import { usePostHog } from "@posthog/react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { LockKeyholeOpen } from "lucide-react";
 import { useState } from "react";
-import { signIn } from "#/server/auth/functions";
+import { loginWithIdentifier } from "#/lib/auth-client";
 
 const LoginForm = () => {
 	const posthog = usePostHog();
@@ -18,7 +18,16 @@ const LoginForm = () => {
 		setIsSubmitting(true);
 
 		try {
-			await signIn({ data: { username, password } });
+			const { error: signInError } = await loginWithIdentifier({
+				identifier: username,
+				password,
+			});
+
+			if (signInError) {
+				setError(signInError.message ?? "Logowanie nie powiodło się");
+				return;
+			}
+
 			posthog.capture("login_started");
 			posthog.identify(username, { username });
 			await navigate({ to: "/dashboard" });

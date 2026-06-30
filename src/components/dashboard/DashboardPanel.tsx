@@ -9,6 +9,7 @@ type DashboardPanelProps = {
 	showAllLink?: boolean;
 };
 
+/** Card-style panel used on dashboard home sections. */
 export function DashboardPanel({
 	title,
 	children,

@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Better Auth (core + `username` plugin). These tables are created by Prisma.
+// ---------------------------------------------------------------------------
+
+model User {
+  id              String    @id
+  name            String
+  email           String    @unique
+  emailVerified   Boolean   @default(false)
+  image           String?
+  username        String?   @unique
+  displayUsername String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  sessions        Session[]
+  accounts        Account[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("session")
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+  @@index([userId])
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@map("verification")
+  @@index([identifier])
+}
+
+model Profile {
+  id        BigInt       @id @default(autoincrement())
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  firstName String?      @map("first_name")
+  lastName  String?      @map("last_name")
+  phone     String?
+  userUid   String?      @unique @map("user_UID")
+  email     String?
+  accounts  BankAccount? @relation(fields: [userUid], references: [userUid], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("profiles")
+}
+
+model BankAccount {
+  id            BigInt       @id @default(autoincrement())
+  userUid       String?      @unique @map("user_UID")
+  accountNumber Decimal?     @map("account_number") @db.Decimal
+  balance       Decimal?     @db.Decimal
+  accountId     String?      @unique @map("account_id")
+  transactions  Transaction? @relation(fields: [accountId], references: [accountId], onDelete: NoAction, onUpdate: NoAction)
+  profiles      Profile?
+
+  @@map("accounts")
+}
+
+model Transaction {
+  id        BigInt       @id @default(autoincrement())
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  accountId String?      @unique @map("account_id")
+  amount    Decimal?     @db.Decimal(14, 2)
+  type      String?
+  accounts  BankAccount?
+
+  @@map("transactions")
+}
+
+model PlaidLink {
+  userId      String   @id @map("user_id")
+  accessToken String   @map("access_token")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("plaid_link")
+}
+
+model news {
+  id           BigInt    @id @default(autoincrement())
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  title        String?
+  subtitle     String?
+  published_at DateTime? @default(now()) @db.Timestamp(6)
+  category     String?
+  body         String?
+  slug         String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+}

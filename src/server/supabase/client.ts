@@ -10,6 +10,7 @@ if (!supabaseUrl || !supabaseSecretKey) {
 	);
 }
 
+/** Supabase admin client for server-side data access (no session persistence). */
 export const supabase = createClient(supabaseUrl, supabaseSecretKey, {
 	auth: {
 		persistSession: false,

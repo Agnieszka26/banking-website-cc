@@ -24,5 +24,3 @@ export type Accounts = {
     account_id: string;
 };
 
-import type { User } from '@supabase/supabase-js'
-export type UserSupabase = User;

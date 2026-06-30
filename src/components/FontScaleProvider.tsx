@@ -27,6 +27,7 @@ type FontScaleContextValue = {
 
 const FontScaleContext = createContext<FontScaleContextValue | null>(null);
 
+/** Provides font scale state and persistence to the component tree. */
 export function FontScaleProvider({ children }: { children: ReactNode }) {
 	const [level, setLevel] = useState(FONT_SCALE_DEFAULT);
 
@@ -81,6 +82,7 @@ export function FontScaleProvider({ children }: { children: ReactNode }) {
 	);
 }
 
+/** Returns the current font scale context from `FontScaleProvider`. */
 export function useFontScale(): FontScaleContextValue {
 	const context = useContext(FontScaleContext);
 

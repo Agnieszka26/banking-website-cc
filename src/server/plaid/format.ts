@@ -1,3 +1,4 @@
+/** Formats a numeric amount as a localized currency string. */
 export function formatMoney(amount: number, currency = "PLN"): string {
 	return new Intl.NumberFormat("pl-PL", {
 		style: "currency",
@@ -5,6 +6,7 @@ export function formatMoney(amount: number, currency = "PLN"): string {
 	}).format(amount);
 }
 
+/** Converts an ISO date (`YYYY-MM-DD`) to Polish display format (`DD.MM.YYYY`). */
 export function formatPlDate(date: string): string {
 	if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
 		throw new Error(`Invalid date format: expected YYYY-MM-DD, got ${date}`);
@@ -13,6 +15,7 @@ export function formatPlDate(date: string): string {
 	return `${day}.${month}.${year}`;
 }
 
+/** Returns ISO start/end dates covering the last `days` days (inclusive of today). */
 export function getDateRange(days = 30): { startDate: string; endDate: string } {
 	const end = new Date();
 	const start = new Date();

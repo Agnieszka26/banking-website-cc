@@ -3,22 +3,29 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { DashboardSecurityBanner } from "#/components/dashboard/DashboardSecurityBanner";
 import { DashboardSidebar } from "#/components/dashboard/DashboardSidebar";
-import { getAuthUserId, getCurrentUser } from "#/server/auth/functions";
+import { getSession } from "#/lib/auth.functions";
 
 export const Route = createFileRoute("/dashboard")({
 	beforeLoad: async () => {
-		const userId = await getAuthUserId();
+		const session = await getSession();
 
-		if (!userId) {
+		if (!session) {
 			throw redirect({ to: "/sign-in/$" });
 		}
+
+		return {
+			user: {
+				id: session.user.id,
+				name: session.user.name || session.user.username || "Użytkownik",
+				email: session.user.email,
+			},
+		};
 	},
-	loader: () => getCurrentUser(),
 	component: RouteComponent,
 });
 
 function RouteComponent() {
-	const user = Route.useLoaderData();
+	const { user } = Route.useRouteContext();
 	const posthog = usePostHog();
 
 	useEffect(() => {

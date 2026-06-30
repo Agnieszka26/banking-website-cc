@@ -1,4 +1,3 @@
-export { getAuthUserId } from "./auth/functions";
 export {
 	createLinkToken,
 	exchangePublicToken,
