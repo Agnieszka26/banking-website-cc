@@ -1,26 +1,18 @@
 import { usePostHog } from "@posthog/react";
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { AuthCheckPending } from "#/components/AuthCheckPending";
 import { DashboardSecurityBanner } from "#/components/dashboard/DashboardSecurityBanner";
 import { DashboardSidebar } from "#/components/dashboard/DashboardSidebar";
-import { getSession } from "#/lib/auth.functions";
+import { requireAuthenticatedUser } from "#/lib/auth-guard";
 
 export const Route = createFileRoute("/dashboard")({
-	beforeLoad: async () => {
-		const session = await getSession();
-
-		if (!session) {
-			throw redirect({ to: "/sign-in/$" });
-		}
-
-		return {
-			user: {
-				id: session.user.id,
-				name: session.user.name || session.user.username || "Użytkownik",
-				email: session.user.email,
-			},
-		};
+	beforeLoad: async ({ location }) => {
+		const user = await requireAuthenticatedUser(location);
+		return { user };
 	},
+	pendingComponent: AuthCheckPending,
+	pendingMs: 0,
 	component: RouteComponent,
 });
 

@@ -1,7 +1,8 @@
 import { usePostHog } from "@posthog/react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthLayout } from "#/components/AuthLayout";
+import { getSafeRedirectTarget } from "#/lib/auth-guard";
 import { loginWithIdentifier } from "#/lib/auth-client";
 
 export const Route = createFileRoute("/sign-in/$")({
@@ -10,6 +11,11 @@ export const Route = createFileRoute("/sign-in/$")({
 
 function RouteComponent() {
 	const navigate = useNavigate();
+	const location = useLocation();
+	const redirectTo =
+		typeof (location.search as Record<string, unknown>).redirect === "string"
+			? ((location.search as Record<string, unknown>).redirect as string)
+			: undefined;
 	const posthog = usePostHog();
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -34,7 +40,12 @@ function RouteComponent() {
 
 			posthog.capture("user_logged_in");
 			posthog.identify(username, { username });
-			await navigate({ to: "/dashboard" });
+			const { pathname, search, hash } = getSafeRedirectTarget(redirectTo);
+			await navigate({
+				to: pathname,
+				search,
+				...(hash ? { hash } : {}),
+			});
 		} catch (err) {
 			setError(
 				err instanceof Error ? err.message : "Logowanie nie powiodło się",
