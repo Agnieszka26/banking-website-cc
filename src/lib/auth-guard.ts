@@ -28,31 +28,94 @@ export async function requireAuthenticatedUser(location: {
 }
 
 /** Restricts post-login navigation to same-origin app paths. */
-export function getSafeRedirectPath(
+export type SafeRedirectTarget = {
+	pathname: string;
+	search: Record<string, string>;
+	hash?: string;
+};
+
+function parseSearchParams(searchParams: URLSearchParams): Record<string, string> {
+	const search: Record<string, string> = {};
+	for (const [key, value] of searchParams) {
+		search[key] = value;
+	}
+	return search;
+}
+
+function toRedirectTarget(url: URL): SafeRedirectTarget | null {
+	const { pathname } = url;
+	if (!pathname.startsWith("/") || pathname.startsWith("//")) {
+		return null;
+	}
+
+	return {
+		pathname,
+		search: parseSearchParams(url.searchParams),
+		...(url.hash ? { hash: url.hash.slice(1) } : {}),
+	};
+}
+
+function getFallbackRedirectTarget(fallback: string): SafeRedirectTarget {
+	try {
+		const base =
+			typeof window !== "undefined"
+				? window.location.origin
+				: "http://localhost";
+		return toRedirectTarget(new URL(fallback, base)) ?? {
+			pathname: "/dashboard",
+			search: {},
+		};
+	} catch {
+		return { pathname: "/dashboard", search: {} };
+	}
+}
+
+/** Validates redirect input and returns path, query, and hash separately. */
+export function getSafeRedirectTarget(
 	redirect: string | undefined,
 	fallback = "/dashboard",
-): string {
+): SafeRedirectTarget {
+	const fallbackTarget = getFallbackRedirectTarget(fallback);
+
 	if (!redirect) {
-		return fallback;
+		return fallbackTarget;
 	}
 
 	if (typeof window === "undefined") {
-		return redirect.startsWith("/") &&
-			!redirect.startsWith("//") &&
-			!redirect.includes("\\")
-			? redirect
-			: fallback;
+		if (
+			!redirect.startsWith("/") ||
+			redirect.startsWith("//") ||
+			redirect.includes("\\")
+		) {
+			return fallbackTarget;
+		}
+
+		try {
+			return toRedirectTarget(new URL(redirect, "http://localhost")) ?? fallbackTarget;
+		} catch {
+			return fallbackTarget;
+		}
 	}
 
 	try {
 		const url = new URL(redirect, window.location.origin);
 		if (url.origin !== window.location.origin) {
-			return fallback;
+			return fallbackTarget;
 		}
 
-		const path = `${url.pathname}${url.search}${url.hash}`;
-		return path.startsWith("/") && !path.startsWith("//") ? path : fallback;
+		return toRedirectTarget(url) ?? fallbackTarget;
 	} catch {
-		return fallback;
+		return fallbackTarget;
 	}
+}
+
+/** Restricts post-login navigation to same-origin app paths. */
+export function getSafeRedirectPath(
+	redirect: string | undefined,
+	fallback = "/dashboard",
+): string {
+	const target = getSafeRedirectTarget(redirect, fallback);
+	const query = new URLSearchParams(target.search).toString();
+
+	return `${target.pathname}${query ? `?${query}` : ""}${target.hash ? `#${target.hash}` : ""}`;
 }
