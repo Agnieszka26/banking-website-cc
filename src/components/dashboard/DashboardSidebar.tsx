@@ -65,8 +65,8 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 			}
 
 			posthog.reset();
-			await router.invalidate();
 			await navigate({ to: "/" });
+			await router.invalidate();
 		} catch (err) {
 			setError(
 				err instanceof Error ? err.message : "Wylogowanie nie powiodło się",
