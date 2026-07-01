@@ -1,5 +1,5 @@
 import { usePostHog } from "@posthog/react";
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import {
 	CreditCard,
 	FileText,
@@ -20,7 +20,7 @@ import {
 	contactPhone,
 	contactPhoneHref,
 } from "#/config/contact";
-import { signOut } from "#/lib/auth-client";
+import { logout } from "#/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 const navItems: Array<{
@@ -47,6 +47,7 @@ type DashboardSidebarProps = {
 export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const navigate = useNavigate();
+	const router = useRouter();
 	const posthog = usePostHog();
 	const [error, setError] = useState<string | null>(null);
 	const [isSigningOut, setIsSigningOut] = useState(false);
@@ -56,14 +57,15 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 		setIsSigningOut(true);
 
 		try {
-			const { error: signOutError } = await signOut();
+			const result = await logout();
 
-			if (signOutError) {
-				setError(signOutError.message ?? "Wylogowanie nie powiodło się");
+			if (!result.ok) {
+				setError(result.error);
 				return;
 			}
 
 			posthog.reset();
+			await router.invalidate();
 			await navigate({ to: "/" });
 		} catch (err) {
 			setError(
