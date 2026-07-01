@@ -21,6 +21,8 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
+    "db:rls": "node scripts/apply-rls.mjs",
+    "db:rls-user": "node scripts/setup-rls-db-user.mjs",
     "postinstall": "prisma generate"
   },
   "dependencies": {

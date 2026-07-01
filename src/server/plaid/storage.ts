@@ -1,16 +1,18 @@
 import "@tanstack/react-start/server-only";
-import { prisma } from "#/lib/prisma";
+import { withUserRlsContext } from "#/lib/prisma-rls";
 
 /** Returns the stored Plaid access token for a user, if one exists. */
 export async function getPlaidAccessToken(
 	userId: string,
 ): Promise<string | null> {
-	const record = await prisma.plaidLink.findUnique({
-		where: { userId },
-		select: { accessToken: true },
-	});
+	return withUserRlsContext(userId, async (tx) => {
+		const record = await tx.plaidLink.findUnique({
+			where: { userId },
+			select: { accessToken: true },
+		});
 
-	return record?.accessToken ?? null;
+		return record?.accessToken ?? null;
+	});
 }
 
 /** Persists a Plaid access token for the given user. */
@@ -18,9 +20,11 @@ export async function setPlaidAccessToken(
 	userId: string,
 	accessToken: string,
 ): Promise<void> {
-	await prisma.plaidLink.upsert({
-		where: { userId },
-		create: { userId, accessToken },
-		update: { accessToken },
+	await withUserRlsContext(userId, async (tx) => {
+		await tx.plaidLink.upsert({
+			where: { userId },
+			create: { userId, accessToken },
+			update: { accessToken },
+		});
 	});
 }
