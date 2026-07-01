@@ -36,12 +36,12 @@ export function getSafeRedirectPath(
 		return fallback;
 	}
 
-	if (redirect.startsWith("/") && !redirect.startsWith("//")) {
-		return redirect;
-	}
-
 	if (typeof window === "undefined") {
-		return fallback;
+		return redirect.startsWith("/") &&
+			!redirect.startsWith("//") &&
+			!redirect.includes("\\")
+			? redirect
+			: fallback;
 	}
 
 	try {
@@ -50,7 +50,8 @@ export function getSafeRedirectPath(
 			return fallback;
 		}
 
-		return `${url.pathname}${url.search}${url.hash}`;
+		const path = `${url.pathname}${url.search}${url.hash}`;
+		return path.startsWith("/") && !path.startsWith("//") ? path : fallback;
 	} catch {
 		return fallback;
 	}
