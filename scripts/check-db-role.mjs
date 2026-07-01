@@ -1,7 +1,12 @@
 import pg from "pg";
 import "dotenv/config";
 
-const client = new pg.Client({ connectionString: process.env.DIRECT_URL });
+const connectionString = process.env.DIRECT_URL;
+if (!connectionString) {
+	throw new Error("Missing DIRECT_URL");
+}
+
+const client = new pg.Client({ connectionString });
 await client.connect();
 const whoami = await client.query(
 	"SELECT current_user, session_user, current_setting('role', true) AS role",

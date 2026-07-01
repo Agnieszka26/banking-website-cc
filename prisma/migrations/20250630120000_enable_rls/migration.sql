@@ -23,6 +23,19 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO banking_a
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO banking_app;
 GRANT banking_app TO authenticated;
 
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'banking_app_runtime') THEN
+    CREATE ROLE banking_app_runtime LOGIN INHERIT;
+  END IF;
+END
+$$;
+
+GRANT authenticated TO banking_app_runtime;
+GRANT USAGE ON SCHEMA public TO banking_app_runtime;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO banking_app_runtime;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO banking_app_runtime;
+
 -- ---------------------------------------------------------------------------
 -- Enable RLS on every public app table
 -- ---------------------------------------------------------------------------
