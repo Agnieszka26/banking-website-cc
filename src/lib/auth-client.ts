@@ -37,14 +37,22 @@ type LogoutResult =
  * callers can avoid clearing analytics or navigation state prematurely.
  */
 export async function logout(): Promise<LogoutResult> {
-	const { error } = await authClient.signOut();
+	try {
+		const { error } = await authClient.signOut();
 
-	if (error) {
+		if (error) {
+			return {
+				ok: false,
+				error: error.message ?? "Wylogowanie nie powiodło się",
+			};
+		}
+
+		return { ok: true };
+	} catch (err) {
 		return {
 			ok: false,
-			error: error.message ?? "Wylogowanie nie powiodło się",
+			error:
+				err instanceof Error ? err.message : "Wylogowanie nie powiodło się",
 		};
 	}
-
-	return { ok: true };
 }
