@@ -14,6 +14,10 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 	},
+	session: {
+		expiresIn: 60 * 60 * 24 * 7,
+		updateAge: 60 * 60 * 24,
+	},
 	// `username` plugin enables identifier-based login (sign in by username).
 	// `tanstackStartCookies` must remain the last plugin in the array.
 	plugins: [username(), tanstackStartCookies()],

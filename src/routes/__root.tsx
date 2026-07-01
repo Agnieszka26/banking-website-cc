@@ -10,6 +10,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { FontScaleProvider } from "#/components/FontScaleProvider";
 import Footer from "#/components/Footer";
 import { Navbar } from "#/components/Navbar";
+import { SessionSync } from "#/components/SessionSync";
 import appCss from "../styles.css?url";
 
 const fontScaleInitScript = `(function(){try{var k=${JSON.stringify("banking-app-font-scale")};var px=[14,15,16,18,20];var v=localStorage.getItem(k);var n=v===null?2:parseInt(v,10);n=Number.isNaN(n)?2:Math.min(4,Math.max(0,n));var r=document.documentElement;r.style.setProperty("--font-scale",String(px[n]/16));r.style.fontSize=px[n]+"px";r.dataset.fontScale=String(n);}catch(e){}})();`;
@@ -72,6 +73,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						opt_out_capturing_by_default: import.meta.env.DEV,
 					}}
 				>
+					<SessionSync />
 					<FontScaleProvider>{children}</FontScaleProvider>
 				</PostHogProvider>
 				<Scripts />

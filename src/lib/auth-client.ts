@@ -27,3 +27,32 @@ export function loginWithIdentifier(input: {
 		rememberMe: input.rememberMe,
 	});
 }
+
+type LogoutResult =
+	| { ok: true }
+	| { ok: false; error: string };
+
+/**
+ * Ends the Better Auth session. Returns `{ ok: false }` when sign-out fails so
+ * callers can avoid clearing analytics or navigation state prematurely.
+ */
+export async function logout(): Promise<LogoutResult> {
+	try {
+		const { error } = await authClient.signOut();
+
+		if (error) {
+			return {
+				ok: false,
+				error: error.message ?? "Wylogowanie nie powiodło się",
+			};
+		}
+
+		return { ok: true };
+	} catch (err) {
+		return {
+			ok: false,
+			error:
+				err instanceof Error ? err.message : "Wylogowanie nie powiodło się",
+		};
+	}
+}
