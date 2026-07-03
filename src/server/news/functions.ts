@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabase } from "#/server/supabase/client";
+import { parseNewsId } from "./schemas";
 import type { NewsItem } from "./types";
 
 /** Fetches all news items ordered by newest first. */
@@ -20,12 +21,7 @@ export const getNews = createServerFn({ method: "GET" }).handler(
 
 /** Fetches a single news item by id, or `null` when not found. */
 export const getNewsById = createServerFn({ method: "GET" })
-	.validator((newsId: string) => {
-		if (typeof newsId !== "string" || newsId.trim().length === 0) {
-			throw new Error("Invalid news id");
-		}
-		return newsId;
-	})
+	.validator(parseNewsId)
 	.handler(async ({ data: newsId }): Promise<NewsItem | null> => {
 		const { data, error } = await supabase
 			.from("news")

@@ -74,49 +74,104 @@ model Verification {
   @@index([identifier])
 }
 
-model Profile {
-  id        BigInt       @id @default(autoincrement())
-  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  firstName String?      @map("first_name")
-  lastName  String?      @map("last_name")
+// ---------------------------------------------------------------------------
+// Plaid integration (active). Tokens in `plaid_link`; accounts/transactions
+// synced to cache tables via `sync.service.ts` (sync-on-link + stale refresh).
+// Dashboard reads DB cache first; live Plaid API is fallback during sync.
+// ---------------------------------------------------------------------------
+
+model PlaidLink {
+  userId               String    @id @map("user_id")
+  accessToken          String    @map("access_token")
+  itemId               String?   @map("item_id")
+  accountsSyncedAt     DateTime? @map("accounts_synced_at") @db.Timestamptz(6)
+  transactionsSyncedAt DateTime? @map("transactions_synced_at") @db.Timestamptz(6)
+  syncError            String?   @map("sync_error")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+  cachedAccounts       PlaidCachedAccount[]
+  cachedTransactions   PlaidCachedTransaction[]
+
+  @@map("plaid_link")
+}
+
+model PlaidCachedAccount {
+  plaidAccountId String   @id @map("plaid_account_id")
+  userId         String   @map("user_id")
+  name           String
+  mask           String
+  balance        Decimal  @db.Decimal(14, 2)
+  currency       String   @default("PLN")
+  type           String
+  syncedAt       DateTime @default(now()) @map("synced_at") @db.Timestamptz(6)
+  link           PlaidLink @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("plaid_cached_accounts")
+}
+
+model PlaidCachedTransaction {
+  plaidTransactionId String   @id @map("plaid_transaction_id")
+  userId             String   @map("user_id")
+  plaidAccountId     String   @map("plaid_account_id")
+  date               String
+  name               String
+  amount             Decimal  @db.Decimal(14, 2)
+  currency           String   @default("PLN")
+  syncedAt           DateTime @default(now()) @map("synced_at") @db.Timestamptz(6)
+  link               PlaidLink @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, date(sort: Desc)])
+  @@map("plaid_cached_transactions")
+}
+
+// ---------------------------------------------------------------------------
+// Legacy Supabase tables (deprecated — not used by application code).
+// Introspected from an earlier schema. Kept in Prisma so `db push` does not
+// drop existing tables or RLS policies. Do not query from app code; use Plaid
+// types in `src/server/plaid/types.ts` and `plaidLinkRepository` instead.
+// Removal tracked when a Plaid sync/cache model replaces these tables.
+// ---------------------------------------------------------------------------
+
+model LegacyProfile {
+  id        BigInt            @id @default(autoincrement())
+  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  firstName String?           @map("first_name")
+  lastName  String?           @map("last_name")
   phone     String?
-  userUid   String?      @unique @map("user_UID")
+  userUid   String?           @unique @map("user_UID")
   email     String?
-  accounts  BankAccount? @relation(fields: [userUid], references: [userUid], onDelete: NoAction, onUpdate: NoAction)
+  accounts  LegacyBankAccount? @relation(fields: [userUid], references: [userUid], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("profiles")
 }
 
-model BankAccount {
-  id            BigInt       @id @default(autoincrement())
-  userUid       String?      @unique @map("user_UID")
-  accountNumber Decimal?     @map("account_number") @db.Decimal
-  balance       Decimal?     @db.Decimal
-  accountId     String?      @unique @map("account_id")
-  transactions  Transaction? @relation(fields: [accountId], references: [accountId], onDelete: NoAction, onUpdate: NoAction)
-  profiles      Profile?
+model LegacyBankAccount {
+  id            BigInt             @id @default(autoincrement())
+  userUid       String?            @unique @map("user_UID")
+  accountNumber Decimal?           @map("account_number") @db.Decimal
+  balance       Decimal?           @db.Decimal
+  accountId     String?            @unique @map("account_id")
+  transactions  LegacyTransaction? @relation(fields: [accountId], references: [accountId], onDelete: NoAction, onUpdate: NoAction)
+  profiles      LegacyProfile?
 
   @@map("accounts")
 }
 
-model Transaction {
-  id        BigInt       @id @default(autoincrement())
-  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  accountId String?      @unique @map("account_id")
-  amount    Decimal?     @db.Decimal(14, 2)
+model LegacyTransaction {
+  id        BigInt             @id @default(autoincrement())
+  createdAt DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  accountId String?            @unique @map("account_id")
+  amount    Decimal?           @db.Decimal(14, 2)
   type      String?
-  accounts  BankAccount?
+  accounts  LegacyBankAccount?
 
   @@map("transactions")
 }
 
-model PlaidLink {
-  userId      String   @id @map("user_id")
-  accessToken String   @map("access_token")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  @@map("plaid_link")
-}
+// ---------------------------------------------------------------------------
+// CMS content (active reads via Supabase client, not Prisma repositories).
+// ---------------------------------------------------------------------------
 
 model news {
   id           BigInt    @id @default(autoincrement())

@@ -1,12 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import "dotenv/config";
-import { withUserRlsContext } from "#/lib/prisma-rls";
+import { plaidLinkRepository } from "#/data/repositories";
 
 const connectionString = process.env.DATABASE_URL_RLS;
 const describeIfRlsDb = connectionString ? describe : describe.skip;
 
-describeIfRlsDb("withUserRlsContext", () => {
+describeIfRlsDb("plaidLinkRepository", () => {
 	const ownerUserId = `prisma-rls-owner-${randomUUID()}`;
 	const otherUserId = `prisma-rls-other-${randomUUID()}`;
 
@@ -28,23 +28,26 @@ describeIfRlsDb("withUserRlsContext", () => {
 		});
 	});
 
-	it("returns only the caller's plaid_link row", async () => {
-		const ownToken = await withUserRlsContext(ownerUserId, async (tx) => {
-			const record = await tx.plaidLink.findUnique({
-				where: { userId: ownerUserId },
-				select: { accessToken: true },
-			});
-			return record?.accessToken ?? null;
-		});
+	it("returns each user's own plaid_link row", async () => {
+		await expect(plaidLinkRepository.getAccessToken(ownerUserId)).resolves.toBe(
+			"owner-token",
+		);
+		await expect(plaidLinkRepository.getAccessToken(otherUserId)).resolves.toBe(
+			"other-token",
+		);
+	});
 
-		const foreignRows = await withUserRlsContext(ownerUserId, async (tx) => {
-			return tx.plaidLink.findMany({
-				where: { userId: otherUserId },
-				select: { userId: true },
-			});
-		});
+	it("persists tokens for the authenticated user", async () => {
+		const userId = `prisma-rls-save-${randomUUID()}`;
 
-		expect(ownToken).toBe("owner-token");
-		expect(foreignRows).toHaveLength(0);
+		try {
+			await plaidLinkRepository.saveAccessToken(userId, "saved-token");
+			await expect(plaidLinkRepository.getAccessToken(userId)).resolves.toBe(
+				"saved-token",
+			);
+		} finally {
+			const { prisma } = await import("#/lib/prisma");
+			await prisma.plaidLink.deleteMany({ where: { userId } });
+		}
 	});
 });

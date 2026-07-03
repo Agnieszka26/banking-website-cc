@@ -1,22 +1,31 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
 import { usePostHog } from "@posthog/react";
-import { useEffect } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
-import { formatMoney, getDashboardData } from "#/server/plaid";
+import { useEffect } from "react";
+import {
+	ACCOUNTS_CACHE_TTL_MS,
+	formatMoney,
+	getDashboardOverview,
+	getDashboardTransactions,
+	mergeDashboardData,
+} from "#/server/plaid";
 
 export const Route = createFileRoute("/dashboard/accounts/$accountId")({
-	loader: ({ params }) =>
-		getDashboardData().then((data) => {
-			const account = data.accounts.find(
-				(item) => item.id === params.accountId,
-			);
+	loader: async ({ params }) => {
+		const [overview, transactions] = await Promise.all([
+			getDashboardOverview(),
+			getDashboardTransactions(),
+		]);
+		const data = mergeDashboardData(overview, transactions);
+		const account = data.accounts.find((item) => item.id === params.accountId);
 
-			if (!account) {
-				throw new Error("Nie znaleziono rachunku.");
-			}
+		if (!account) {
+			throw new Error("Nie znaleziono rachunku.");
+		}
 
-			return { account, transactions: data.transactions };
-		}),
+		return { account, transactions: data.transactions };
+	},
+	staleTime: ACCOUNTS_CACHE_TTL_MS,
 	component: AccountDetailsPage,
 });
 

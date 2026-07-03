@@ -174,7 +174,9 @@ banking-cc/
 ├── src/
 │   ├── components/         # Shared UI (Navbar, Footer, dashboard widgets, shadcn/ui)
 │   ├── config/             # App configuration (contact details)
-│   ├── lib/                # Auth, Prisma, guards, RLS helpers
+│   ├── data/
+│   │   └── repositories/   # RLS-enforced data access (only layer using prisma-rls)
+│   ├── lib/                # Auth, Prisma, guards, RLS infrastructure
 │   ├── routes/             # File-based routes (pages + layouts)
 │   │   ├── api/auth/       # Better Auth HTTP handler
 │   │   ├── dashboard/      # Protected dashboard routes
@@ -221,19 +223,56 @@ Server logic uses TanStack Start **server functions** and one HTTP auth route:
 | Area | Location | Responsibility |
 | --- | --- | --- |
 | Auth API | `src/routes/api/auth/$.ts` | Better Auth handler (`/api/auth/*`) |
-| Session | `src/lib/auth.functions.ts` | `getSession`, `ensureSession` |
+| Session | `src/lib/session.ts` | `resolveSession`, `requireSession`, `requireUserId` |
+| Session (RPC) | `src/lib/auth.functions.ts` | `getSession`, `ensureSession` server functions |
 | Route guard | `src/lib/auth-guard.ts` | Dashboard `beforeLoad` protection + safe redirects |
-| Plaid | `src/server/plaid/functions.ts` | Link token, token exchange, dashboard data |
+| Plaid | `src/server/plaid/functions.ts` | Link token, token exchange, dashboard data, manual sync refresh |
+| Plaid sync | `src/server/plaid/sync.service.ts` | Plaid → Postgres cache pipeline (sync-on-link + stale refresh) |
+| Plaid tokens | `src/data/repositories/plaid-link.repository.ts` | RLS-enforced `plaid_link` access |
+| Plaid cache | `src/data/repositories/plaid-sync.repository.ts` | RLS-enforced `plaid_cached_*` reads/writes |
 | News | `src/server/news/functions.ts` | Public news reads via Supabase client |
-| Token storage | `src/server/plaid/storage.ts` | Plaid access tokens in `plaid_link` (RLS-enforced) |
 
 **Data access:**
 
 - `DATABASE_URL` — Prisma client for Better Auth and admin operations
-- `DATABASE_URL_RLS` — Prisma client under `banking_app_runtime` for user-scoped writes (see `src/lib/prisma-rls.ts`)
+- `DATABASE_URL_RLS` — RLS-enforced Prisma client; accessed only via `src/data/repositories/*`
 - Supabase publishable key — public news reads subject to RLS
 
-Dashboard accounts and transactions are fetched **live from Plaid**, not from legacy `accounts` / `transactions` tables in the schema.
+Dashboard accounts and transactions are served from a **Postgres sync cache** (`plaid_cached_accounts`, `plaid_cached_transactions`). Plaid API is called on link, when cache is stale, or as a fallback — not on every page load.
+
+### Plaid sync pipeline (scale path)
+
+```
+Link / stale refresh / refreshPlaidSync
+        ↓
+ sync.service.ts  →  Plaid API
+        ↓
+ plaid-sync.repository  →  plaid_cached_* (RLS)
+        ↓
+ service.ts loaders  →  dashboard UI
+```
+
+| Trigger | When |
+| --- | --- |
+| Sync-on-link | `exchangePublicToken` runs a full sync after storing the token |
+| Stale refresh | Dashboard read re-syncs accounts after 5 min / transactions after 10 min |
+| Manual refresh | `refreshPlaidSync` server fn (future: cron / webhooks call the same service) |
+
+In-memory TTL cache (`src/server/plaid/cache.ts`) remains as a hot L1 layer on top of the DB cache.
+
+---
+
+## Data model
+
+| Layer | Source | Used by app |
+| --- | --- | --- |
+| Auth | Better Auth tables (`user`, `session`, `account`, `verification`) | Yes |
+| Plaid link | `plaid_link` via `plaidLinkRepository` | Yes — access tokens + sync timestamps |
+| Banking UI | `plaid_cached_*` → `DashboardAccount` / `DashboardTransaction` DTOs | Yes — DB cache with Plaid fallback |
+| Legacy banking | `profiles`, `accounts`, `transactions` (`Legacy*` in Prisma schema) | **No** — introspected Supabase tables, kept so `db push` does not drop them |
+| News | `news` table via Supabase client | Yes — public reads |
+
+**Decision:** Plaid-first with DB sync cache. Legacy tables remain in Postgres with RLS until fully removed. Do not add app queries against `LegacyProfile`, `LegacyBankAccount`, or `LegacyTransaction`.
 
 ---
 
@@ -241,6 +280,7 @@ Dashboard accounts and transactions are fetched **live from Plaid**, not from le
 
 - Regenerate routes after adding or renaming route files: `npm run generate-routes`
 - Plaid runs in **sandbox** by default (`PLAID_ENV=sandbox`). Use Plaid's test credentials in the Link modal.
+- After pulling Plaid sync changes, run `npm run db:push` then `npm run db:rls` to create cache tables and policies.
 - Prisma CLI uses `DIRECT_URL` (session pooler, port 5432); app runtime uses `DATABASE_URL` (transaction pooler, port 6543).
 - TanStack Devtools are enabled in development via `@tanstack/devtools-vite`.
 - Avoid wrapping TanStack Router `redirect()` in broad `try/catch` blocks — redirects are thrown intentionally.

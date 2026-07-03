@@ -1,103 +1,110 @@
 import { usePostHog } from "@posthog/react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { LockKeyholeOpen } from "lucide-react";
-import { useState } from "react";
-import { loginWithIdentifier } from "#/lib/auth-client";
+import { type LoginSource, useLogin } from "#/lib/use-login";
 
-const LoginForm = () => {
+type LoginFormProps = {
+	redirectTo?: string;
+	source: LoginSource;
+	idPrefix?: string;
+	submitLabel?: string;
+	className?: string;
+	showHelpLink?: boolean;
+	showSignUpLink?: boolean;
+};
+
+const LoginForm = ({
+	redirectTo,
+	source,
+	idPrefix = "login",
+	submitLabel = "Zaloguj się",
+	className = "w-full lg:w-80 xl:w-96 shrink-0 p-5 sm:p-6 rounded-lg border border-gray-200 bg-card shadow-sm",
+	showHelpLink = false,
+	showSignUpLink = false,
+}: LoginFormProps) => {
 	const posthog = usePostHog();
-	const navigate = useNavigate();
-	const [username, setUsername] = useState("");
-	const [password, setPassword] = useState("");
-	const [error, setError] = useState<string | null>(null);
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const {
+		username,
+		setUsername,
+		password,
+		setPassword,
+		error,
+		isSubmitting,
+		handleSubmit,
+	} = useLogin({ redirectTo, source });
 
-	const handleSubmit = async (event: React.FormEvent) => {
-		event.preventDefault();
-		setError(null);
-		setIsSubmitting(true);
-
-		try {
-			const { error: signInError } = await loginWithIdentifier({
-				identifier: username,
-				password,
-			});
-
-			if (signInError) {
-				setError(signInError.message ?? "Logowanie nie powiodło się");
-				return;
-			}
-
-			posthog.capture("login_started");
-			posthog.identify(username, { username });
-			await navigate({ to: "/dashboard" });
-		} catch (err) {
-			setError(
-				err instanceof Error ? err.message : "Logowanie nie powiodło się",
-			);
-		} finally {
-			setIsSubmitting(false);
-		}
-	};
+	const usernameId = `${idPrefix}-username`;
+	const passwordId = `${idPrefix}-password`;
 
 	return (
-		<div className="w-full lg:w-80 xl:w-96 shrink-0 p-5 sm:p-6 rounded-lg border border-gray-200 bg-card shadow-sm">
-			<h1 className="font-bold text-lg sm:text-xl mb-4 sm:mb-5 text-green-800">
+		<div className={className}>
+			<h1 className="mb-4 text-lg font-bold text-green-800 sm:mb-5 sm:text-xl">
 				Logowanie
 			</h1>
-			<form onSubmit={handleSubmit}>
-				<div className="mb-4">
-					<label htmlFor="username" className="block mb-2">
+			<form onSubmit={handleSubmit} className="space-y-4">
+				<div>
+					<label htmlFor={usernameId} className="mb-2 block text-sm">
 						Identyfikator
 					</label>
 					<input
+						id={usernameId}
 						type="text"
-						id="username"
 						value={username}
 						onChange={(event) => setUsername(event.target.value)}
-						className="w-full p-2 rounded-md border border-gray-300"
-						placeholder="Podaj identyfikator"
+						className="w-full rounded-md border border-gray-300 p-2"
+						placeholder={source === "home" ? "Podaj identyfikator" : undefined}
 						autoComplete="username"
 						required
 					/>
 				</div>
-				<div className="mb-4">
-					<label htmlFor="password" className="block mb-2">
+				<div>
+					<label htmlFor={passwordId} className="mb-2 block text-sm">
 						Hasło
 					</label>
 					<input
+						id={passwordId}
 						type="password"
-						id="password"
 						value={password}
 						onChange={(event) => setPassword(event.target.value)}
-						className="w-full p-2 rounded-md border border-gray-300"
-						placeholder="Podaj hasło"
+						className="w-full rounded-md border border-gray-300 p-2"
+						placeholder={source === "home" ? "Podaj hasło" : undefined}
 						autoComplete="current-password"
 						required
 					/>
 				</div>
 				{error && (
-					<p className="mb-4 text-sm text-red-600" role="alert">
+					<p className="text-sm text-red-600" role="alert">
 						{error}
 					</p>
 				)}
 				<button
 					type="submit"
 					disabled={isSubmitting}
-					className="block w-full bg-green-800 text-white p-2.5 sm:p-3 rounded-md font-medium hover:bg-green-900 transition-colors text-center disabled:opacity-60"
+					className="block w-full rounded-md bg-green-800 p-2.5 text-center font-medium text-white transition-colors hover:bg-green-900 disabled:opacity-60 sm:p-3"
 				>
-					{isSubmitting ? "Logowanie..." : "Dalej"}
+					{isSubmitting ? "Logowanie..." : submitLabel}
 				</button>
 			</form>
 
-			<Link
-				to="/sign-in/$"
-				onClick={() => posthog.capture("login_help_clicked")}
-			>
-				<p className="flex items-center gap-2 text-sm text-gray-500 pt-4 sm:pt-5">
-					<LockKeyholeOpen className="text-green-800" /> pomoc w logowaniu
+			{showHelpLink && (
+				<Link
+					to="/sign-in/$"
+					onClick={() => posthog.capture("login_help_clicked")}
+				>
+					<p className="flex items-center gap-2 pt-4 text-sm text-gray-500 sm:pt-5">
+						<LockKeyholeOpen className="text-green-800" /> pomoc w logowaniu
+					</p>
+				</Link>
+			)}
+
+			{showSignUpLink && (
+				<p className="mt-4 text-center text-sm text-muted-foreground">
+					Nie masz konta?{" "}
+					<Link to="/sign-up/$" className="text-green-800 hover:underline">
+						Zarejestruj się
+					</Link>
 				</p>
-			</Link>
+			)}
 		</div>
 	);
 };

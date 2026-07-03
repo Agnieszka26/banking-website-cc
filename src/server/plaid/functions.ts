@@ -1,41 +1,23 @@
 import { createServerFn } from "@tanstack/react-start";
 import { CountryCode, Products } from "plaid";
+import { plaidLinkRepository } from "#/data/repositories";
+import { requireUserId } from "#/lib/session";
 import { getPostHogClient } from "#/utils/posthog-server";
-import { requireSession, requireUserId } from "./auth";
+import { invalidatePlaidCache } from "./cache";
 import { plaidClient } from "./client";
-import { getDateRange } from "./format";
-import { getPlaidAccessToken, setPlaidAccessToken } from "./storage";
-import type { DashboardData, DashboardUser } from "./types";
-
-/** Maps a Better Auth session to dashboard user display fields. */
-function toDashboardUser(
-	session: Awaited<ReturnType<typeof requireSession>>,
-): DashboardUser {
-	const fullName =
-		session.user.name || session.user.username || "Użytkowniku";
-	const [firstName, ...rest] = fullName.split(" ");
-	const signedInAt = session.session.createdAt;
-
-	return {
-		firstName: firstName ?? "",
-		lastName: rest.join(" "),
-		fullName,
-		lastSignIn: signedInAt
-			? new Date(signedInAt).toLocaleString("pl-PL", {
-					day: "2-digit",
-					month: "2-digit",
-					year: "numeric",
-					hour: "2-digit",
-					minute: "2-digit",
-				})
-			: null,
-	};
-}
+import { parsePublicTokenInput } from "./schemas";
+import {
+	loadDashboardOverview,
+	loadDashboardTransactions,
+	mergeDashboardData,
+} from "./service";
+import { syncUserPlaidData } from "./sync.service";
+import type { DashboardData } from "./types";
 
 /** Creates a Plaid Link token for the authenticated user. */
 export const createLinkToken = createServerFn({ method: "GET" }).handler(
 	async () => {
-		const userId = await requireUserId();
+		const userId = await requireUserId("unauthorized");
 
 		const response = await plaidClient
 			.linkTokenCreate({
@@ -57,18 +39,9 @@ export const createLinkToken = createServerFn({ method: "GET" }).handler(
 
 /** Exchanges a Plaid public token and stores the access token for the user. */
 export const exchangePublicToken = createServerFn({ method: "POST" })
-	.validator((data: { publicToken: string }) => {
-		if (
-			!data.publicToken ||
-			typeof data.publicToken !== "string" ||
-			data.publicToken.trim().length === 0
-		) {
-			throw new Error("Invalid public token");
-		}
-		return data;
-	})
+	.validator(parsePublicTokenInput)
 	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+		const userId = await requireUserId("unauthorized");
 
 		const response = await plaidClient
 			.itemPublicTokenExchange({
@@ -80,13 +53,28 @@ export const exchangePublicToken = createServerFn({ method: "POST" })
 				);
 			});
 
-		await setPlaidAccessToken(userId, response.data.access_token).catch(
-			(error) => {
+		await plaidLinkRepository
+			.saveAccessToken(
+				userId,
+				response.data.access_token,
+				response.data.item_id,
+			)
+			.catch((error) => {
 				throw new Error(
 					`Failed to store access token: ${error instanceof Error ? error.message : "Unknown error"}`,
 				);
-			},
-		);
+			});
+
+		invalidatePlaidCache(userId);
+
+		try {
+			await syncUserPlaidData(userId, "all");
+		} catch (error) {
+			console.error(
+				`Initial Plaid sync failed for user ${userId}:`,
+				error instanceof Error ? error.message : error,
+			);
+		}
 
 		const posthog = getPostHogClient();
 		posthog.capture({
@@ -100,80 +88,34 @@ export const exchangePublicToken = createServerFn({ method: "POST" })
 		return { linked: true };
 	});
 
+/** Loads account balances and summary without fetching transactions. */
+export const getDashboardOverview = createServerFn({ method: "GET" }).handler(
+	async () => loadDashboardOverview(),
+);
+
+/** Loads recent transactions without fetching account balances. */
+export const getDashboardTransactions = createServerFn({
+	method: "GET",
+}).handler(async () => loadDashboardTransactions());
+
 /** Loads linked accounts, recent transactions, and summary for the dashboard. */
 export const getDashboardData = createServerFn({ method: "GET" }).handler(
 	async (): Promise<DashboardData> => {
-		const session = await requireSession();
-		const userId = session.user.id;
-		const user = toDashboardUser(session);
-		const accessToken = await getPlaidAccessToken(userId);
+		const [overview, transactions] = await Promise.all([
+			loadDashboardOverview(),
+			loadDashboardTransactions(),
+		]);
 
-		if (!accessToken) {
-			return {
-				linked: false,
-				user,
-				accounts: [],
-				transactions: [],
-				summary: null,
-			};
-		}
+		return mergeDashboardData(overview, transactions);
+	},
+);
 
-		const { startDate, endDate } = getDateRange(30);
-
-		const [accountsResponse, transactionsResponse] = await Promise.all([
-			plaidClient.accountsBalanceGet({ access_token: accessToken }),
-			plaidClient.transactionsGet({
-				access_token: accessToken,
-				start_date: startDate,
-				end_date: endDate,
-			}),
-		]).catch((error) => {
-			throw new Error(
-				`Failed to fetch dashboard data from Plaid: ${error instanceof Error ? error.message : "Unknown error"}`,
-			);
-		});
-
-		const accounts = accountsResponse.data.accounts.map((account) => ({
-			id: account.account_id,
-			name: account.name,
-			mask: account.mask ?? "****",
-			balance: account.balances.current ?? account.balances.available ?? 0,
-			currency: account.balances.iso_currency_code ?? "PLN",
-			type: account.subtype ?? account.type,
-		}));
-		const MAX_RECENT_TRANSACTIONS = 8;
-		const transactions = transactionsResponse.data.transactions
-			.sort((a, b) => b.date.localeCompare(a.date))
-			.slice(0, MAX_RECENT_TRANSACTIONS)
-			.map((transaction) => ({
-				id: transaction.transaction_id,
-				date: transaction.date,
-				name: transaction.merchant_name ?? transaction.name,
-				amount: transaction.amount,
-				currency: transaction.iso_currency_code ?? "PLN",
-			}));
-
-		const primaryCurrency = accounts[0]?.currency ?? "PLN";
-		const totalAvailable = accounts.reduce(
-			(sum, account) => sum + account.balance,
-			0,
-		);
-		const savings = accounts
-			.filter((account) =>
-				["savings", "cd", "money market"].includes(account.type),
-			)
-			.reduce((sum, account) => sum + account.balance, 0);
-
-		return {
-			linked: true,
-			user,
-			accounts,
-			transactions,
-			summary: {
-				totalAvailable,
-				savings,
-				currency: primaryCurrency,
-			},
-		};
+/** Forces a Plaid → Postgres sync for the authenticated user (cron/webhook-ready entry point). */
+export const refreshPlaidSync = createServerFn({ method: "POST" }).handler(
+	async () => {
+		const userId = await requireUserId("unauthorized");
+		invalidatePlaidCache(userId);
+		await syncUserPlaidData(userId, "all");
+		return { synced: true };
 	},
 );

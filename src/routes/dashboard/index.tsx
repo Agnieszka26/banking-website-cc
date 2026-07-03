@@ -16,12 +16,27 @@ import {
 import { ConnectBankAccount } from "#/components/dashboard/ConnectBankAccount";
 import { DashboardPanel } from "#/components/dashboard/DashboardPanel";
 import type { DashboardAccount } from "#/server/plaid";
-import { formatMoney, formatPlDate, getDashboardData } from "#/server/plaid";
+import {
+	ACCOUNTS_CACHE_TTL_MS,
+	formatMoney,
+	formatPlDate,
+	getDashboardOverview,
+	getDashboardTransactions,
+	mergeDashboardData,
+} from "#/server/plaid";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard/")({
-	loader: () => getDashboardData(),
+	loader: async () => {
+		const [overview, transactions] = await Promise.all([
+			getDashboardOverview(),
+			getDashboardTransactions(),
+		]);
+
+		return mergeDashboardData(overview, transactions);
+	},
+	staleTime: ACCOUNTS_CACHE_TTL_MS,
 	component: DashboardHome,
 });
 //TODO: Replace hardcoded dates with dynamic data.
