@@ -11,6 +11,7 @@ import { FontScaleProvider } from "#/components/FontScaleProvider";
 import Footer from "#/components/Footer";
 import { Navbar } from "#/components/Navbar";
 import { RootError } from "#/components/RootError";
+import { RootNotFound } from "#/components/RootNotFound";
 import { SessionSync } from "#/components/SessionSync";
 import appCss from "../styles.css?url";
 
@@ -52,6 +53,7 @@ export const Route = createRootRoute({
 	shellComponent: RootDocument,
 	component: RootLayout,
 	errorComponent: RootError,
+	notFoundComponent: RootNotFound,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
