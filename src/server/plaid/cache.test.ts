@@ -34,8 +34,25 @@ describe("createTtlCache", () => {
 
 describe("invalidatePlaidCache", () => {
 	it("clears both plaid caches for a user", () => {
-		plaidAccountsCache.set("user-1", [{ id: "acc" }]);
-		plaidTransactionsCache.set("user-1", [{ id: "tx" }]);
+		plaidAccountsCache.set("user-1", [
+			{
+				id: "acc",
+				name: "Checking",
+				mask: "1234",
+				balance: 0,
+				currency: "PLN",
+				type: "checking",
+			},
+		]);
+		plaidTransactionsCache.set("user-1", [
+			{
+				id: "tx",
+				date: "2025-04-20",
+				name: "Test",
+				amount: 1,
+				currency: "PLN",
+			},
+		]);
 
 		invalidatePlaidCache("user-1");
 

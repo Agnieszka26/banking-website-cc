@@ -7,6 +7,7 @@ import { randomUUID } from "node:crypto";
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import "dotenv/config";
+import { queryAsAppUser } from "#/lib/test/rls-query";
 
 const connectionString = process.env.DIRECT_URL;
 const describeIfDb = connectionString ? describe : describe.skip;
@@ -41,37 +42,18 @@ describeIfDb("legacy table row level security", () => {
 			return;
 		}
 
-		await client.query("DELETE FROM accounts WHERE account_id = $1", [
+		await client.query("DELETE FROM transactions WHERE account_id = $1", [
 			ownerAccountId,
 		]);
-		await client.query("DELETE FROM transactions WHERE account_id = $1", [
+		await client.query("DELETE FROM accounts WHERE account_id = $1", [
 			ownerAccountId,
 		]);
 		await client.end();
 	});
 
-	async function queryAsAppUser<T extends pg.QueryResultRow>(
-		userId: string,
-		sql: string,
-		params: unknown[] = [],
-	): Promise<pg.QueryResult<T>> {
-		await client.query("BEGIN");
-		try {
-			await client.query("SET LOCAL ROLE authenticated");
-			await client.query("SELECT set_config('app.current_user_id', $1, true)", [
-				userId,
-			]);
-			const result = await client.query<T>(sql, params);
-			await client.query("COMMIT");
-			return result;
-		} catch (error) {
-			await client.query("ROLLBACK");
-			throw error;
-		}
-	}
-
 	it("blocks transactions for accounts owned by another user", async () => {
 		const result = await queryAsAppUser(
+			client,
 			otherUserId,
 			"SELECT account_id FROM transactions WHERE account_id = $1",
 			[ownerAccountId],
@@ -82,6 +64,7 @@ describeIfDb("legacy table row level security", () => {
 
 	it("allows owners to read their own transactions", async () => {
 		const result = await queryAsAppUser(
+			client,
 			ownerUserId,
 			"SELECT account_id, type FROM transactions WHERE account_id = $1",
 			[ownerAccountId],

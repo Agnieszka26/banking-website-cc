@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_USER_DISPLAY_NAME } from "#/config/i18n";
 import { toAuthenticatedUser } from "#/lib/session-user";
 
 describe("toAuthenticatedUser", () => {
@@ -42,6 +43,6 @@ describe("toAuthenticatedUser", () => {
 			},
 		} as Parameters<typeof toAuthenticatedUser>[0]);
 
-		expect(user.name).toBe("Użytkownik");
+		expect(user.name).toBe(DEFAULT_USER_DISPLAY_NAME);
 	});
 });

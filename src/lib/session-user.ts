@@ -1,3 +1,5 @@
+import { DEFAULT_USER_DISPLAY_NAME } from "#/config/i18n";
+
 export type AuthenticatedUser = {
 	id: string;
 	name: string;
@@ -17,7 +19,7 @@ export type SessionUserSource = {
 export function toAuthenticatedUser(session: SessionUserSource): AuthenticatedUser {
 	return {
 		id: session.user.id,
-		name: session.user.name || session.user.username || "Użytkownik",
+		name: session.user.name || session.user.username || DEFAULT_USER_DISPLAY_NAME,
 		email: session.user.email,
 	};
 }

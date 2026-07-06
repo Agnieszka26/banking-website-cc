@@ -48,7 +48,7 @@ describe("mapCachedTransaction", () => {
 });
 
 describe("buildAccountSummary", () => {
-	it("aggregates balances and savings account types", () => {
+	it("aggregates cash-like balances and savings account types", () => {
 		expect(
 			buildAccountSummary([
 				{
@@ -67,11 +67,32 @@ describe("buildAccountSummary", () => {
 					currency: "PLN",
 					type: "savings",
 				},
+				{
+					id: "3",
+					name: "Credit card",
+					mask: "3333",
+					balance: 500,
+					currency: "PLN",
+					type: "credit card",
+				},
 			]),
 		).toEqual({
 			totalAvailable: 150,
 			savings: 50,
 			currency: "PLN",
 		});
+	});
+
+	it("maps null cached masks to a display placeholder", () => {
+		expect(
+			mapCachedAccount({
+				plaidAccountId: "acc-2",
+				name: "Checking",
+				mask: null,
+				balance: 10,
+				currency: "PLN",
+				type: "checking",
+			}).mask,
+		).toBe("****");
 	});
 });

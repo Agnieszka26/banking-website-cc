@@ -2,14 +2,12 @@ import "@tanstack/react-start/server-only";
 import { plaidLinkRepository, plaidSyncRepository } from "#/data/repositories";
 import { requireSession } from "#/lib/session";
 import { plaidAccountsCache, plaidTransactionsCache } from "./cache";
-import { plaidClient } from "./client";
 import { toDashboardUser } from "./dashboard-mappers";
-import { getDateRange } from "./format";
+import { buildAccountSummary } from "./plaid-mappers";
 import {
-	buildAccountSummary,
-	mapPlaidAccount,
-	mapPlaidTransaction,
-} from "./plaid-mappers";
+	fetchPlaidAccounts,
+	fetchPlaidTransactions,
+} from "./plaid-api";
 import { needsPlaidSync } from "./sync-staleness";
 import { syncUserPlaidData } from "./sync.service";
 import type {
@@ -26,29 +24,6 @@ async function getAccessTokenForUser(userId: string): Promise<string | null> {
 	return plaidLinkRepository.getAccessToken(userId);
 }
 
-async function fetchAccountsLive(accessToken: string): Promise<DashboardAccount[]> {
-	const response = await plaidClient.accountsBalanceGet({
-		access_token: accessToken,
-	});
-	return response.data.accounts.map(mapPlaidAccount);
-}
-
-async function fetchTransactionsLive(
-	accessToken: string,
-): Promise<DashboardTransaction[]> {
-	const { startDate, endDate } = getDateRange(30);
-	const response = await plaidClient.transactionsGet({
-		access_token: accessToken,
-		start_date: startDate,
-		end_date: endDate,
-	});
-
-	return response.data.transactions
-		.sort((a, b) => b.date.localeCompare(a.date))
-		.slice(0, PLAID_DASHBOARD_TRANSACTION_LIMIT)
-		.map(mapPlaidTransaction);
-}
-
 async function ensureAccountsSynced(userId: string, accessToken: string): Promise<void> {
 	const timestamps = await plaidSyncRepository.getSyncTimestamps(userId);
 	if (!needsPlaidSync(timestamps, "accounts")) {
@@ -57,10 +32,21 @@ async function ensureAccountsSynced(userId: string, accessToken: string): Promis
 
 	try {
 		await syncUserPlaidData(userId, "accounts");
-	} catch {
-		// Fallback to live Plaid fetch below when sync fails.
-		const accounts = await fetchAccountsLive(accessToken);
-		plaidAccountsCache.set(userId, accounts);
+	} catch (syncError) {
+		console.error("Plaid account sync failed; trying live fallback", {
+			userId,
+			error: syncError instanceof Error ? syncError.message : syncError,
+		});
+
+		try {
+			const accounts = await fetchPlaidAccounts(accessToken);
+			plaidAccountsCache.set(userId, accounts);
+		} catch (liveError) {
+			console.error("Plaid live account fallback failed", {
+				userId,
+				error: liveError instanceof Error ? liveError.message : liveError,
+			});
+		}
 	}
 }
 
@@ -75,9 +61,24 @@ async function ensureTransactionsSynced(
 
 	try {
 		await syncUserPlaidData(userId, "transactions");
-	} catch {
-		const transactions = await fetchTransactionsLive(accessToken);
-		plaidTransactionsCache.set(userId, transactions);
+	} catch (syncError) {
+		console.error("Plaid transaction sync failed; trying live fallback", {
+			userId,
+			error: syncError instanceof Error ? syncError.message : syncError,
+		});
+
+		try {
+			const transactions = await fetchPlaidTransactions(
+				accessToken,
+				PLAID_DASHBOARD_TRANSACTION_LIMIT,
+			);
+			plaidTransactionsCache.set(userId, transactions);
+		} catch (liveError) {
+			console.error("Plaid live transaction fallback failed", {
+				userId,
+				error: liveError instanceof Error ? liveError.message : liveError,
+			});
+		}
 	}
 }
 
@@ -85,14 +86,17 @@ async function loadAccountsForUser(
 	userId: string,
 	accessToken: string,
 ): Promise<DashboardAccount[]> {
-	const memoryCached = plaidAccountsCache.get(userId) as
-		| DashboardAccount[]
-		| undefined;
+	const memoryCached = plaidAccountsCache.get(userId);
 	if (memoryCached) {
 		return memoryCached;
 	}
 
 	await ensureAccountsSynced(userId, accessToken);
+
+	const afterSyncMemory = plaidAccountsCache.get(userId);
+	if (afterSyncMemory) {
+		return afterSyncMemory;
+	}
 
 	const dbCached = await plaidSyncRepository.getCachedAccounts(userId);
 	if (dbCached.length > 0) {
@@ -100,7 +104,7 @@ async function loadAccountsForUser(
 		return dbCached;
 	}
 
-	const live = await fetchAccountsLive(accessToken);
+	const live = await fetchPlaidAccounts(accessToken);
 	plaidAccountsCache.set(userId, live);
 	return live;
 }
@@ -109,14 +113,17 @@ async function loadTransactionsForUser(
 	userId: string,
 	accessToken: string,
 ): Promise<DashboardTransaction[]> {
-	const memoryCached = plaidTransactionsCache.get(userId) as
-		| DashboardTransaction[]
-		| undefined;
+	const memoryCached = plaidTransactionsCache.get(userId);
 	if (memoryCached) {
 		return memoryCached;
 	}
 
 	await ensureTransactionsSynced(userId, accessToken);
+
+	const afterSyncMemory = plaidTransactionsCache.get(userId);
+	if (afterSyncMemory) {
+		return afterSyncMemory;
+	}
 
 	const dbCached = await plaidSyncRepository.getCachedTransactions(userId);
 	if (dbCached.length > 0) {
@@ -124,7 +131,10 @@ async function loadTransactionsForUser(
 		return dbCached;
 	}
 
-	const live = await fetchTransactionsLive(accessToken);
+	const live = await fetchPlaidTransactions(
+		accessToken,
+		PLAID_DASHBOARD_TRANSACTION_LIMIT,
+	);
 	plaidTransactionsCache.set(userId, live);
 	return live;
 }

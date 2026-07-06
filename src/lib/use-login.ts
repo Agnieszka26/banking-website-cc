@@ -1,7 +1,7 @@
 import { usePostHog } from "@posthog/react";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { loginWithIdentifier } from "#/lib/auth-client";
+import { authClient, loginWithIdentifier } from "#/lib/auth-client";
 import { getSafeRedirectTarget } from "#/lib/auth-guard";
 
 export type LoginSource = "home" | "sign-in";
@@ -26,7 +26,7 @@ export function useLogin({ redirectTo, source }: UseLoginOptions) {
 		setIsSubmitting(true);
 
 		try {
-			const { error: signInError } = await loginWithIdentifier({
+			const { data, error: signInError } = await loginWithIdentifier({
 				identifier: username,
 				password,
 			});
@@ -37,7 +37,12 @@ export function useLogin({ redirectTo, source }: UseLoginOptions) {
 			}
 
 			posthog.capture("user_logged_in", { source });
-			posthog.identify(username, { username });
+
+			const session = await authClient.getSession();
+			const userId = data?.user?.id ?? session.data?.user?.id;
+			if (userId) {
+				posthog.identify(userId, { source });
+			}
 
 			const { pathname, search, hash } = getSafeRedirectTarget(redirectTo);
 			await navigate({

@@ -98,7 +98,7 @@ model PlaidCachedAccount {
   plaidAccountId String   @id @map("plaid_account_id")
   userId         String   @map("user_id")
   name           String
-  mask           String
+  mask           String?
   balance        Decimal  @db.Decimal(14, 2)
   currency       String   @default("PLN")
   type           String

@@ -1,5 +1,5 @@
 import "@tanstack/react-start/server-only";
-import { getRequestHeaders, setResponseStatus } from "@tanstack/react-start/server";
+import { getRequestHeaders } from "@tanstack/react-start/server";
 import { auth } from "#/lib/auth";
 
 export type AuthSession = NonNullable<
@@ -28,7 +28,7 @@ export async function requireSession(
 
 	if (!session) {
 		if (mode === "unauthorized") {
-			setResponseStatus(401);
+			throw new Response("Unauthorized", { status: 401 });
 		}
 
 		throw new Error("Unauthorized");

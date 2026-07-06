@@ -33,6 +33,17 @@ describe("getSafeRedirectTarget (SSR)", () => {
 			search: {},
 		});
 	});
+
+	it("rejects javascript: and data: URI schemes", () => {
+		expect(getSafeRedirectTarget("javascript:alert(1)")).toEqual({
+			pathname: "/dashboard",
+			search: {},
+		});
+		expect(getSafeRedirectTarget("data:text/html,<script>alert(1)</script>")).toEqual({
+			pathname: "/dashboard",
+			search: {},
+		});
+	});
 });
 
 /**

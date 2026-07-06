@@ -10,7 +10,6 @@ import type {
 } from "#/server/plaid/types";
 import {
 	PLAID_DASHBOARD_TRANSACTION_LIMIT,
-	PLAID_SYNC_TRANSACTION_LIMIT,
 	type PlaidSyncTimestamps,
 } from "#/server/plaid/sync-config";
 import type { SyncableTransaction } from "#/server/plaid/sync-types";
@@ -69,6 +68,10 @@ export const plaidSyncRepository = {
 		});
 	},
 
+	/**
+	 * Replaces all cached accounts for a user with a full Plaid snapshot.
+	 * Caller must pass the complete account set (not incremental deltas).
+	 */
 	async replaceAccounts(
 		userId: string,
 		accounts: DashboardAccount[],
@@ -84,7 +87,7 @@ export const plaidSyncRepository = {
 						plaidAccountId: account.id,
 						userId,
 						name: account.name,
-						mask: account.mask,
+						mask: account.mask === "****" ? null : account.mask,
 						balance: account.balance,
 						currency: account.currency,
 						type: account.type,
@@ -103,19 +106,24 @@ export const plaidSyncRepository = {
 		});
 	},
 
+	/**
+	 * Replaces all cached transactions for a user with a full snapshot.
+	 * Caller must pass the complete intended cache contents (not incremental
+	 * deltas from a Plaid cursor). Uses delete-then-insert; do not call with
+	 * partial updates — use upsert/merge only when cursor sync is implemented.
+	 */
 	async replaceTransactions(
 		userId: string,
-		transactions: SyncableTransaction[],
+		snapshot: SyncableTransaction[],
 	): Promise<void> {
 		await withUserRlsContext(userId, async (tx) => {
 			const syncedAt = new Date();
-			const limited = transactions.slice(0, PLAID_SYNC_TRANSACTION_LIMIT);
 
 			await tx.plaidCachedTransaction.deleteMany({ where: { userId } });
 
-			if (limited.length > 0) {
+			if (snapshot.length > 0) {
 				await tx.plaidCachedTransaction.createMany({
-					data: limited.map((transaction) => ({
+					data: snapshot.map((transaction) => ({
 						plaidTransactionId: transaction.id,
 						userId,
 						plaidAccountId: transaction.plaidAccountId,

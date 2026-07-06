@@ -20,22 +20,13 @@ import {
 	ACCOUNTS_CACHE_TTL_MS,
 	formatMoney,
 	formatPlDate,
-	getDashboardOverview,
-	getDashboardTransactions,
-	mergeDashboardData,
 } from "#/server/plaid";
+import { loadDashboardDataResilient } from "#/server/plaid/dashboard-loader";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard/")({
-	loader: async () => {
-		const [overview, transactions] = await Promise.all([
-			getDashboardOverview(),
-			getDashboardTransactions(),
-		]);
-
-		return mergeDashboardData(overview, transactions);
-	},
+	loader: () => loadDashboardDataResilient(),
 	staleTime: ACCOUNTS_CACHE_TTL_MS,
 	component: DashboardHome,
 });

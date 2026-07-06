@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import "dotenv/config";
+import { queryAsAppUser } from "#/lib/test/rls-query";
 
 const connectionString = process.env.DIRECT_URL;
 const describeIfDb = connectionString ? describe : describe.skip;
@@ -36,31 +37,9 @@ describeIfDb("plaid_link row level security", () => {
 		await client.end();
 	});
 
-	async function queryAsAppUser<T extends pg.QueryResultRow>(
-		userId: string | null,
-		sql: string,
-		params: unknown[] = [],
-	): Promise<pg.QueryResult<T>> {
-		await client.query("BEGIN");
-		try {
-			await client.query("SET LOCAL ROLE authenticated");
-			if (userId) {
-				await client.query(
-					"SELECT set_config('app.current_user_id', $1, true)",
-					[userId],
-				);
-			}
-			const result = await client.query<T>(sql, params);
-			await client.query("COMMIT");
-			return result;
-		} catch (error) {
-			await client.query("ROLLBACK");
-			throw error;
-		}
-	}
-
 	it("blocks plaid_link reads without a user context", async () => {
 		const result = await queryAsAppUser(
+			client,
 			null,
 			"SELECT user_id FROM plaid_link WHERE user_id = ANY($1::text[])",
 			[[ownerUserId, otherUserId]],
@@ -71,11 +50,13 @@ describeIfDb("plaid_link row level security", () => {
 
 	it("allows users to read only their own plaid_link row", async () => {
 		const ownRows = await queryAsAppUser(
+			client,
 			ownerUserId,
 			"SELECT user_id, access_token FROM plaid_link WHERE user_id = $1",
 			[ownerUserId],
 		);
 		const foreignRows = await queryAsAppUser(
+			client,
 			ownerUserId,
 			"SELECT user_id FROM plaid_link WHERE user_id = $1",
 			[otherUserId],
@@ -89,6 +70,7 @@ describeIfDb("plaid_link row level security", () => {
 
 	it("blocks cross-user updates to plaid_link", async () => {
 		const result = await queryAsAppUser(
+			client,
 			ownerUserId,
 			`UPDATE plaid_link
        SET access_token = 'hijacked'

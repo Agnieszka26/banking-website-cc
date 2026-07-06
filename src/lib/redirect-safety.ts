@@ -41,6 +41,52 @@ function getFallbackRedirectTarget(fallback: string): SafeRedirectTarget {
 	}
 }
 
+/** Rejects non-path inputs and dangerous URI schemes such as javascript: or data:. */
+function isUnsafeRedirectInput(redirect: string): boolean {
+	if (redirect.startsWith("//") || redirect.includes("\\")) {
+		return true;
+	}
+
+	if (redirect.startsWith("/")) {
+		return false;
+	}
+
+	if (/^(javascript|data|vbscript|file):/i.test(redirect)) {
+		return true;
+	}
+
+	if (/^https?:\/\//i.test(redirect)) {
+		return false;
+	}
+
+	return /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(redirect) || !redirect.startsWith("/");
+}
+
+/** Parses a redirect against a trusted origin; rejects cross-origin and non-http(s) URLs. */
+function parseSameOriginRedirectUrl(
+	redirect: string,
+	origin: string,
+): URL | null {
+	if (isUnsafeRedirectInput(redirect)) {
+		return null;
+	}
+
+	try {
+		const url = new URL(redirect, origin);
+		if (url.origin !== origin) {
+			return null;
+		}
+
+		if (url.protocol !== "http:" && url.protocol !== "https:") {
+			return null;
+		}
+
+		return url;
+	} catch {
+		return null;
+	}
+}
+
 /** Validates redirect input and returns path, query, and hash separately. */
 export function getSafeRedirectTarget(
 	redirect: string | undefined,
@@ -52,32 +98,17 @@ export function getSafeRedirectTarget(
 		return fallbackTarget;
 	}
 
-	if (typeof window === "undefined") {
-		if (
-			!redirect.startsWith("/") ||
-			redirect.startsWith("//") ||
-			redirect.includes("\\")
-		) {
-			return fallbackTarget;
-		}
+	const origin =
+		typeof window === "undefined"
+			? "http://localhost"
+			: window.location.origin;
 
-		try {
-			return toRedirectTarget(new URL(redirect, "http://localhost")) ?? fallbackTarget;
-		} catch {
-			return fallbackTarget;
-		}
-	}
-
-	try {
-		const url = new URL(redirect, window.location.origin);
-		if (url.origin !== window.location.origin) {
-			return fallbackTarget;
-		}
-
-		return toRedirectTarget(url) ?? fallbackTarget;
-	} catch {
+	const url = parseSameOriginRedirectUrl(redirect, origin);
+	if (!url) {
 		return fallbackTarget;
 	}
+
+	return toRedirectTarget(url) ?? fallbackTarget;
 }
 
 /** Serializes a safe redirect target back to a path string. */

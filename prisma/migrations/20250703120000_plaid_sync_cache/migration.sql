@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS public.plaid_cached_accounts (
   plaid_account_id text PRIMARY KEY,
   user_id text NOT NULL REFERENCES public.plaid_link(user_id) ON DELETE CASCADE,
   name text NOT NULL,
-  mask text NOT NULL,
+  mask text,
   balance numeric(14, 2) NOT NULL,
   currency text NOT NULL DEFAULT 'PLN',
   type text NOT NULL,
@@ -72,3 +72,6 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.plaid_cached_accounts TO banking_
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.plaid_cached_transactions TO banking_app;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.plaid_cached_accounts TO banking_app_runtime;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.plaid_cached_transactions TO banking_app_runtime;
+
+ALTER TABLE public.plaid_cached_accounts
+  ALTER COLUMN mask DROP NOT NULL;
