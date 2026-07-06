@@ -42,10 +42,10 @@ describeIfDb("legacy table row level security", () => {
 			return;
 		}
 
-		await client.query("DELETE FROM transactions WHERE account_id = $1", [
+		await client.query("DELETE FROM accounts WHERE account_id = $1", [
 			ownerAccountId,
 		]);
-		await client.query("DELETE FROM accounts WHERE account_id = $1", [
+		await client.query("DELETE FROM transactions WHERE account_id = $1", [
 			ownerAccountId,
 		]);
 		await client.end();
