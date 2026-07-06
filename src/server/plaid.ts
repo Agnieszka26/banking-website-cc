@@ -16,5 +16,5 @@ export type {
 	DashboardUser,
 } from "./plaid/types";
 export { ACCOUNTS_CACHE_TTL_MS } from "./plaid/cache";
-export { mergeDashboardData } from "./plaid/service";
+export { mergeDashboardData } from "./plaid/dashboard-mappers";
 export { formatMoney, formatPlDate } from "./plaid/format";

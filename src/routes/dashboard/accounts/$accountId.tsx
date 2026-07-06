@@ -2,12 +2,11 @@ import { usePostHog } from "@posthog/react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { useEffect } from "react";
-import { loadDashboardDataResilient } from "#/server/plaid/dashboard-loader";
-import { ACCOUNTS_CACHE_TTL_MS, formatMoney } from "#/server/plaid";
+import { ACCOUNTS_CACHE_TTL_MS, formatMoney, getDashboardData } from "#/server/plaid";
 
 export const Route = createFileRoute("/dashboard/accounts/$accountId")({
 	loader: async ({ params }) => {
-		const data = await loadDashboardDataResilient();
+		const data = await getDashboardData();
 		const account = data.accounts.find((item) => item.id === params.accountId);
 
 		if (!account) {

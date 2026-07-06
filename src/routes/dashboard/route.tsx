@@ -4,11 +4,13 @@ import { useEffect } from "react";
 import { AuthCheckPending } from "#/components/AuthCheckPending";
 import { DashboardSecurityBanner } from "#/components/dashboard/DashboardSecurityBanner";
 import { DashboardSidebar } from "#/components/dashboard/DashboardSidebar";
-import { requireAuthenticatedUser } from "#/lib/auth-guard";
+import { getSession } from "#/lib/auth.functions";
+import { authenticateRouteUser } from "#/lib/auth-guard";
 
 export const Route = createFileRoute("/dashboard")({
 	beforeLoad: async ({ location }) => {
-		const user = await requireAuthenticatedUser(location);
+		const session = await getSession();
+		const user = authenticateRouteUser(session, location);
 		return { user };
 	},
 	pendingComponent: AuthCheckPending,

@@ -1,6 +1,9 @@
 import { redirect } from "@tanstack/react-router";
-import { resolveSession, toAuthenticatedUser } from "#/lib/session";
-import type { AuthenticatedUser } from "#/lib/session-user";
+import {
+	toAuthenticatedUser,
+	type AuthenticatedUser,
+	type SessionUserSource,
+} from "#/lib/session-user";
 
 export type { AuthenticatedUser } from "#/lib/session-user";
 export {
@@ -9,12 +12,16 @@ export {
 	type SafeRedirectTarget,
 } from "#/lib/redirect-safety";
 
-/** Resolves the session or redirects unauthenticated users to sign-in. */
-export async function requireAuthenticatedUser(location: {
-	href: string;
-}): Promise<AuthenticatedUser> {
-	const session = await resolveSession();
+type RouteSession = SessionUserSource | null;
 
+/**
+ * Maps a session from `getSession()` to route context, or redirects to sign-in.
+ * Safe for route modules — does not import server-only APIs.
+ */
+export function authenticateRouteUser(
+	session: RouteSession,
+	location: { href: string },
+): AuthenticatedUser {
 	if (!session) {
 		throw redirect({
 			to: "/sign-in/$",

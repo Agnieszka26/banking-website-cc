@@ -1,6 +1,6 @@
 import "@tanstack/react-start/server-only";
 import { plaidLinkRepository, plaidSyncRepository } from "#/data/repositories";
-import { requireSession } from "#/lib/session";
+import { requireSession } from "#/lib/session.server";
 import { plaidAccountsCache, plaidTransactionsCache } from "./cache";
 import { toDashboardUser } from "./dashboard-mappers";
 import { buildAccountSummary } from "./plaid-mappers";
