@@ -1,3 +1,4 @@
+/** Canonical banking DTOs mapped from live Plaid API responses (not legacy DB tables). */
 export type DashboardAccount = {
 	id: string;
 	name: string;
@@ -34,4 +35,18 @@ export type DashboardData = {
 	accounts: DashboardAccount[];
 	transactions: DashboardTransaction[];
 	summary: DashboardSummary | null;
+};
+
+/** Account balances and summary (no transaction fetch). */
+export type DashboardOverview = {
+	linked: boolean;
+	user: DashboardUser;
+	accounts: DashboardAccount[];
+	summary: DashboardSummary | null;
+};
+
+/** Recent transactions payload from a dedicated Plaid query. */
+export type DashboardTransactionsPayload = {
+	linked: boolean;
+	transactions: DashboardTransaction[];
 };

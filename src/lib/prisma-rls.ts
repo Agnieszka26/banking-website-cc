@@ -75,7 +75,10 @@ async function activateRlsSession(
 	await tx.$executeRaw`SELECT set_config('app.current_user_id', ${userId}, true)`;
 }
 
-/** Runs Prisma queries under an RLS-enforced DB role and user context. */
+/**
+ * Runs Prisma queries under an RLS-enforced DB role and user context.
+ * @internal Prefer `#/data/repositories` for application data access.
+ */
 export async function withUserRlsContext<T>(
 	userId: string,
 	fn: (tx: PrismaTransaction) => Promise<T>,

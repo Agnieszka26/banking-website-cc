@@ -51,7 +51,7 @@ ALTER TABLE public.verification ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.news ENABLE ROW LEVEL SECURITY;
 
 -- ---------------------------------------------------------------------------
--- profiles
+-- profiles (LEGACY — app uses Plaid API; tables retained for safe migrations)
 -- ---------------------------------------------------------------------------
 
 DROP POLICY IF EXISTS profiles_own_data ON public.profiles;
@@ -69,7 +69,7 @@ CREATE POLICY profiles_service_role ON public.profiles
   WITH CHECK (true);
 
 -- ---------------------------------------------------------------------------
--- accounts (bank accounts)
+-- accounts (LEGACY bank accounts — not Plaid dashboard data)
 -- ---------------------------------------------------------------------------
 
 DROP POLICY IF EXISTS accounts_own_data ON public.accounts;
@@ -87,7 +87,7 @@ CREATE POLICY accounts_service_role ON public.accounts
   WITH CHECK (true);
 
 -- ---------------------------------------------------------------------------
--- transactions (owned via linked bank account)
+-- transactions (LEGACY — owned via legacy accounts table)
 -- ---------------------------------------------------------------------------
 
 DROP POLICY IF EXISTS transactions_own_data ON public.transactions;

@@ -16,7 +16,10 @@ export function formatPlDate(date: string): string {
 }
 
 /** Returns ISO start/end dates covering the last `days` days (inclusive of today). */
-export function getDateRange(days = 30): { startDate: string; endDate: string } {
+export function getDateRange(days = 30): {
+	startDate: string;
+	endDate: string;
+} {
 	const end = new Date();
 	const start = new Date();
 	start.setDate(end.getDate() - days);
