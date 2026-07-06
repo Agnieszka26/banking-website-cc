@@ -10,6 +10,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { FontScaleProvider } from "#/components/FontScaleProvider";
 import Footer from "#/components/Footer";
 import { Navbar } from "#/components/Navbar";
+import { RootError } from "#/components/RootError";
 import { SessionSync } from "#/components/SessionSync";
 import appCss from "../styles.css?url";
 
@@ -50,6 +51,7 @@ export const Route = createRootRoute({
 	}),
 	shellComponent: RootDocument,
 	component: RootLayout,
+	errorComponent: RootError,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
