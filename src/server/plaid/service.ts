@@ -24,6 +24,30 @@ async function getAccessTokenForUser(userId: string): Promise<string | null> {
 	return plaidLinkRepository.getAccessToken(userId);
 }
 
+async function hydrateAccountsFromDb(
+	userId: string,
+): Promise<DashboardAccount[] | null> {
+	const dbCached = await plaidSyncRepository.getCachedAccounts(userId);
+	if (dbCached.length === 0) {
+		return null;
+	}
+
+	plaidAccountsCache.set(userId, dbCached);
+	return dbCached;
+}
+
+async function hydrateTransactionsFromDb(
+	userId: string,
+): Promise<DashboardTransaction[] | null> {
+	const dbCached = await plaidSyncRepository.getCachedTransactions(userId);
+	if (dbCached.length === 0) {
+		return null;
+	}
+
+	plaidTransactionsCache.set(userId, dbCached);
+	return dbCached;
+}
+
 async function ensureAccountsSynced(userId: string, accessToken: string): Promise<void> {
 	const timestamps = await plaidSyncRepository.getSyncTimestamps(userId);
 	if (!needsPlaidSync(timestamps, "accounts")) {
@@ -33,10 +57,14 @@ async function ensureAccountsSynced(userId: string, accessToken: string): Promis
 	try {
 		await syncUserPlaidData(userId, "accounts");
 	} catch (syncError) {
-		console.error("Plaid account sync failed; trying live fallback", {
+		console.error("Plaid account sync failed; trying cache and live fallback", {
 			userId,
 			error: syncError instanceof Error ? syncError.message : syncError,
 		});
+
+		if (await hydrateAccountsFromDb(userId)) {
+			return;
+		}
 
 		try {
 			const accounts = await fetchPlaidAccounts(accessToken);
@@ -62,10 +90,14 @@ async function ensureTransactionsSynced(
 	try {
 		await syncUserPlaidData(userId, "transactions");
 	} catch (syncError) {
-		console.error("Plaid transaction sync failed; trying live fallback", {
+		console.error("Plaid transaction sync failed; trying cache and live fallback", {
 			userId,
 			error: syncError instanceof Error ? syncError.message : syncError,
 		});
+
+		if (await hydrateTransactionsFromDb(userId)) {
+			return;
+		}
 
 		try {
 			const transactions = await fetchPlaidTransactions(
@@ -98,15 +130,28 @@ async function loadAccountsForUser(
 		return afterSyncMemory;
 	}
 
-	const dbCached = await plaidSyncRepository.getCachedAccounts(userId);
-	if (dbCached.length > 0) {
-		plaidAccountsCache.set(userId, dbCached);
+	const dbCached = await hydrateAccountsFromDb(userId);
+	if (dbCached) {
 		return dbCached;
 	}
 
-	const live = await fetchPlaidAccounts(accessToken);
-	plaidAccountsCache.set(userId, live);
-	return live;
+	try {
+		const live = await fetchPlaidAccounts(accessToken);
+		plaidAccountsCache.set(userId, live);
+		return live;
+	} catch (liveError) {
+		console.error("Plaid live account fetch failed", {
+			userId,
+			error: liveError instanceof Error ? liveError.message : liveError,
+		});
+
+		const staleDbCached = await hydrateAccountsFromDb(userId);
+		if (staleDbCached) {
+			return staleDbCached;
+		}
+
+		throw liveError;
+	}
 }
 
 async function loadTransactionsForUser(
@@ -125,18 +170,31 @@ async function loadTransactionsForUser(
 		return afterSyncMemory;
 	}
 
-	const dbCached = await plaidSyncRepository.getCachedTransactions(userId);
-	if (dbCached.length > 0) {
-		plaidTransactionsCache.set(userId, dbCached);
+	const dbCached = await hydrateTransactionsFromDb(userId);
+	if (dbCached) {
 		return dbCached;
 	}
 
-	const live = await fetchPlaidTransactions(
-		accessToken,
-		PLAID_DASHBOARD_TRANSACTION_LIMIT,
-	);
-	plaidTransactionsCache.set(userId, live);
-	return live;
+	try {
+		const live = await fetchPlaidTransactions(
+			accessToken,
+			PLAID_DASHBOARD_TRANSACTION_LIMIT,
+		);
+		plaidTransactionsCache.set(userId, live);
+		return live;
+	} catch (liveError) {
+		console.error("Plaid live transaction fetch failed", {
+			userId,
+			error: liveError instanceof Error ? liveError.message : liveError,
+		});
+
+		const staleDbCached = await hydrateTransactionsFromDb(userId);
+		if (staleDbCached) {
+			return staleDbCached;
+		}
+
+		throw liveError;
+	}
 }
 
 /** Loads account balances and summary for the dashboard. */
