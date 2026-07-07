@@ -14,7 +14,7 @@ import { Navbar } from "#/components/Navbar";
 import { RootError } from "#/components/RootError";
 import { RootNotFound } from "#/components/RootNotFound";
 import { SessionSync } from "#/components/SessionSync";
-import { I18nProvider, resolveLocaleFromPathname } from "#/lib/i18n";
+import { I18nProvider, resolveAppLocale } from "#/lib/i18n";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -58,7 +58,7 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	const locale = useRouterState({
-		select: (state) => resolveLocaleFromPathname(state.location.pathname),
+		select: (state) => resolveAppLocale(state.location.pathname),
 	});
 
 	return (
@@ -92,7 +92,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 function RootLayout() {
 	const locale = useRouterState({
-		select: (state) => resolveLocaleFromPathname(state.location.pathname),
+		select: (state) => resolveAppLocale(state.location.pathname),
 	});
 
 	return (

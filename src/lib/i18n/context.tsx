@@ -9,7 +9,10 @@ import {
 import { writeLocaleCookie } from "#/lib/i18n/cookie";
 import type { Locale } from "#/lib/i18n/locales";
 import { getMessages, type Messages, translate } from "#/lib/i18n/messages";
-import { resolveLocaleFromPathname } from "#/lib/i18n/paths";
+import {
+	getLocaleFromPathname,
+	resolveAppLocale,
+} from "#/lib/i18n/paths";
 
 type I18nContextValue = {
 	locale: Locale;
@@ -25,6 +28,10 @@ type I18nProviderProps = {
 };
 
 export function I18nProvider({ locale, children }: I18nProviderProps) {
+	const pathname = useRouterState({
+		select: (state) => state.location.pathname,
+	});
+
 	const value = useMemo<I18nContextValue>(() => {
 		const messages = getMessages(locale);
 		return {
@@ -36,8 +43,12 @@ export function I18nProvider({ locale, children }: I18nProviderProps) {
 
 	useEffect(() => {
 		document.documentElement.lang = locale;
-		writeLocaleCookie(locale);
-	}, [locale]);
+		// Only persist when the URL carries an explicit locale — avoids overwriting
+		// the cookie with DEFAULT_LOCALE during legacy non-localized redirect hops.
+		if (getLocaleFromPathname(pathname)) {
+			writeLocaleCookie(locale);
+		}
+	}, [locale, pathname]);
 
 	return (
 		<I18nContext.Provider value={value}>{children}</I18nContext.Provider>
@@ -53,11 +64,10 @@ export function useI18n(): I18nContextValue {
 }
 
 function useResolvedLocale(): Locale {
-	const context = useContext(I18nContext);
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	});
-	return context?.locale ?? resolveLocaleFromPathname(pathname);
+	return resolveAppLocale(pathname);
 }
 
 /** Shorthand for `useI18n().t`, with URL-based fallback outside the provider. */

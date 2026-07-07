@@ -18,6 +18,7 @@ import { Route as LocaleIndexRouteImport } from './routes/$locale/index'
 import { Route as SignUpSplatRouteImport } from './routes/sign-up.$'
 import { Route as SignInSplatRouteImport } from './routes/sign-in.$'
 import { Route as NewsNewsIdRouteImport } from './routes/news/$newsId'
+import { Route as DashboardSplatRouteImport } from './routes/dashboard.$'
 import { Route as LocaleContactRouteImport } from './routes/$locale/contact'
 import { Route as LocaleDashboardRouteRouteImport } from './routes/$locale/dashboard/route'
 import { Route as LocaleNewsIndexRouteImport } from './routes/$locale/news/index'
@@ -79,6 +80,11 @@ const NewsNewsIdRoute = NewsNewsIdRouteImport.update({
   id: '/news/$newsId',
   path: '/news/$newsId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardSplatRoute = DashboardSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => DashboardRoute,
 } as any)
 const LocaleContactRoute = LocaleContactRouteImport.update({
   id: '/contact',
@@ -167,9 +173,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$locale': typeof LocaleRouteRouteWithChildren
   '/contact': typeof ContactRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/$locale/dashboard': typeof LocaleDashboardRouteRouteWithChildren
   '/$locale/contact': typeof LocaleContactRoute
+  '/dashboard/$': typeof DashboardSplatRoute
   '/news/$newsId': typeof NewsNewsIdRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
@@ -193,8 +200,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/$locale/contact': typeof LocaleContactRoute
+  '/dashboard/$': typeof DashboardSplatRoute
   '/news/$newsId': typeof NewsNewsIdRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
@@ -220,9 +228,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$locale': typeof LocaleRouteRouteWithChildren
   '/contact': typeof ContactRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/$locale/dashboard': typeof LocaleDashboardRouteRouteWithChildren
   '/$locale/contact': typeof LocaleContactRoute
+  '/dashboard/$': typeof DashboardSplatRoute
   '/news/$newsId': typeof NewsNewsIdRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
@@ -252,6 +261,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/$locale/dashboard'
     | '/$locale/contact'
+    | '/dashboard/$'
     | '/news/$newsId'
     | '/sign-in/$'
     | '/sign-up/$'
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/$locale/contact'
+    | '/dashboard/$'
     | '/news/$newsId'
     | '/sign-in/$'
     | '/sign-up/$'
@@ -304,6 +315,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/$locale/dashboard'
     | '/$locale/contact'
+    | '/dashboard/$'
     | '/news/$newsId'
     | '/sign-in/$'
     | '/sign-up/$'
@@ -329,7 +341,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LocaleRouteRoute: typeof LocaleRouteRouteWithChildren
   ContactRoute: typeof ContactRoute
-  DashboardRoute: typeof DashboardRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   NewsNewsIdRoute: typeof NewsNewsIdRoute
   SignInSplatRoute: typeof SignInSplatRoute
   SignUpSplatRoute: typeof SignUpSplatRoute
@@ -401,6 +413,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/news/$newsId'
       preLoaderRoute: typeof NewsNewsIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/$': {
+      id: '/dashboard/$'
+      path: '/$'
+      fullPath: '/dashboard/$'
+      preLoaderRoute: typeof DashboardSplatRouteImport
+      parentRoute: typeof DashboardRoute
     }
     '/$locale/contact': {
       id: '/$locale/contact'
@@ -581,11 +600,23 @@ const LocaleRouteRouteWithChildren = LocaleRouteRoute._addFileChildren(
   LocaleRouteRouteChildren,
 )
 
+interface DashboardRouteChildren {
+  DashboardSplatRoute: typeof DashboardSplatRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardSplatRoute: DashboardSplatRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LocaleRouteRoute: LocaleRouteRouteWithChildren,
   ContactRoute: ContactRoute,
-  DashboardRoute: DashboardRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   NewsNewsIdRoute: NewsNewsIdRoute,
   SignInSplatRoute: SignInSplatRoute,
   SignUpSplatRoute: SignUpSplatRoute,

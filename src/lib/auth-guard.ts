@@ -1,5 +1,5 @@
 import { redirect } from "@tanstack/react-router";
-import { resolveLocaleFromPathname } from "#/lib/i18n/paths";
+import { resolveAppLocale } from "#/lib/i18n/paths";
 import {
 	type AuthenticatedUser,
 	type SessionUserSource,
@@ -19,7 +19,7 @@ export function authenticateRouteUser(
 	location: { href: string; pathname: string },
 ): AuthenticatedUser {
 	if (!session) {
-		const locale = resolveLocaleFromPathname(location.pathname);
+		const locale = resolveAppLocale(location.pathname);
 		throw redirect({
 			to: "/$locale/sign-in/$",
 			params: { locale },

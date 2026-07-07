@@ -1,9 +1,11 @@
+import { readLocaleFromCookieHeader } from "#/lib/i18n/cookie";
 import {
 	DEFAULT_LOCALE,
 	isLocale,
 	type Locale,
 	SUPPORTED_LOCALES,
 } from "#/lib/i18n/locales";
+import type { SafeRedirectTarget } from "#/lib/redirect-safety";
 
 const LOCALE_PREFIX_PATTERN = new RegExp(
 	`^/(${SUPPORTED_LOCALES.join("|")})(?=/|$)`,
@@ -48,4 +50,35 @@ export function switchLocaleInPathname(
 
 export function resolveLocaleFromPathname(pathname: string): Locale {
 	return getLocaleFromPathname(pathname) ?? DEFAULT_LOCALE;
+}
+
+/**
+ * Resolves the active locale from the URL, falling back to the persisted cookie
+ * on the client when the path has no locale prefix (e.g. legacy redirect hops).
+ */
+export function resolveAppLocale(pathname: string): Locale {
+	const fromPath = getLocaleFromPathname(pathname);
+	if (fromPath) {
+		return fromPath;
+	}
+
+	if (typeof document !== "undefined") {
+		const fromCookie = readLocaleFromCookieHeader(document.cookie);
+		if (fromCookie && isLocale(fromCookie)) {
+			return fromCookie;
+		}
+	}
+
+	return DEFAULT_LOCALE;
+}
+
+/** Prefixes a validated post-login redirect target with the active locale. */
+export function localizeRedirectTarget(
+	target: SafeRedirectTarget,
+	locale: Locale,
+): SafeRedirectTarget {
+	return {
+		...target,
+		pathname: buildLocalizedPathname(locale, target.pathname),
+	};
 }

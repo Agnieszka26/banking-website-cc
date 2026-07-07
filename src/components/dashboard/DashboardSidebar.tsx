@@ -22,6 +22,7 @@ import {
 import { useState } from "react";
 import { contactEmail, contactPhone, contactPhoneHref } from "#/config/contact";
 import { logout } from "#/lib/auth-client";
+import { stripLocaleFromPathname, useLocalizedPath } from "#/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const navItems: Array<{
@@ -51,6 +52,8 @@ type DashboardSidebarProps = {
 /** Dashboard navigation sidebar with user info and sign-out. */
 export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
+	const pathWithoutLocale = stripLocaleFromPathname(pathname);
+	const localize = useLocalizedPath();
 	const navigate = useNavigate();
 	const router = useRouter();
 	const posthog = usePostHog();
@@ -93,13 +96,13 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 			<nav className="flex flex-1 flex-col gap-1 p-4">
 				{navItems.map(({ label, to, icon: Icon, exact }) => {
 					const isActive = exact
-						? pathname === to || pathname === `${to}/`
-						: pathname.startsWith(to);
+						? pathWithoutLocale === to || pathWithoutLocale === `${to}/`
+						: pathWithoutLocale.startsWith(to);
 
 					return (
 						<Link
 							key={label}
-							to={to}
+							to={localize(to)}
 							className={cn(
 								"flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
 								isActive

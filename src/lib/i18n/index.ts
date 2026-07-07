@@ -13,6 +13,8 @@ export { writeLocaleCookie } from "#/lib/i18n/cookie";
 export {
 	buildLocalizedPathname,
 	getLocaleFromPathname,
+	localizeRedirectTarget,
+	resolveAppLocale,
 	resolveLocaleFromPathname,
 	stripLocaleFromPathname,
 	switchLocaleInPathname,
