@@ -3,26 +3,20 @@ import { plaidLinkRepository, plaidSyncRepository } from "#/data/repositories";
 import { requireSession } from "#/lib/session.server";
 import { plaidAccountsCache, plaidTransactionsCache } from "./cache";
 import { toDashboardUser } from "./dashboard-mappers";
+import { fetchPlaidAccounts, fetchPlaidTransactions } from "./plaid-api";
 import { buildAccountSummary } from "./plaid-mappers";
-import {
-	fetchPlaidAccounts,
-	fetchPlaidTransactions,
-} from "./plaid-api";
-import { needsPlaidSync } from "./sync-staleness";
 import { syncUserPlaidData } from "./sync.service";
+import { PLAID_DASHBOARD_TRANSACTION_LIMIT } from "./sync-config";
+import { needsPlaidSync } from "./sync-staleness";
 import type {
 	DashboardAccount,
 	DashboardOverview,
 	DashboardTransaction,
 	DashboardTransactionsPayload,
 } from "./types";
-import { PLAID_DASHBOARD_TRANSACTION_LIMIT } from "./sync-config";
-
 
 /** DB cache present (may be empty after a successful sync) vs never synced / unreadable. */
-type DbHydrateResult<T> =
-	| { kind: "data"; value: T }
-	| { kind: "absent" };
+type DbHydrateResult<T> = { kind: "data"; value: T } | { kind: "absent" };
 
 type SyncFallbackState = {
 	liveFetchAttempted: boolean;
@@ -136,10 +130,13 @@ async function ensureTransactionsSynced(
 		await syncUserPlaidData(userId, "transactions");
 		return idleSyncFallback;
 	} catch (syncError) {
-		console.error("Plaid transaction sync failed; trying cache and live fallback", {
-			userId,
-			error: syncError instanceof Error ? syncError.message : syncError,
-		});
+		console.error(
+			"Plaid transaction sync failed; trying cache and live fallback",
+			{
+				userId,
+				error: syncError instanceof Error ? syncError.message : syncError,
+			},
+		);
 
 		const hydrated = await hydrateTransactionsFromDb(userId);
 		if (hydrated.kind === "data") {

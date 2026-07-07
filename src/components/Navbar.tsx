@@ -1,7 +1,9 @@
-﻿﻿import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+﻿import { Link } from "@tanstack/react-router";
 import { Globe, Menu, Phone, X } from "lucide-react";
+import { useState } from "react";
+import { useFontScale } from "#/components/FontScaleProvider";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import logo from "../../public/assets/logo.png";
 import { Button } from "./ui/button";
 import { ButtonGroup } from "./ui/button-group";
@@ -12,10 +14,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "./ui/select";
-import { Switch } from "./ui/switch";
 import { Separator } from "./ui/separator";
-import { useFontScale } from "#/components/FontScaleProvider";
-import { cn } from "@/lib/utils";
+import { Switch } from "./ui/switch";
 
 const NavbarLogo = () => {
 	return (
@@ -33,7 +33,12 @@ const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 	const { decrease, increase, canDecrease, canIncrease } = useFontScale();
 
 	return (
-		<div className={cn("flex items-center gap-2", compact && "w-full justify-between")}>
+		<div
+			className={cn(
+				"flex items-center gap-2",
+				compact && "w-full justify-between",
+			)}
+		>
 			{compact && (
 				<span className="text-sm font-medium text-muted-foreground">
 					Rozmiar czcionki
@@ -46,7 +51,9 @@ const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 					size={compact ? "sm" : "default"}
 					aria-label="Zmniejsz czcionke"
 					disabled={!canDecrease}
-					onClick={() => {decrease()}}
+					onClick={() => {
+						decrease();
+					}}
 				>
 					A-
 				</Button>
@@ -56,7 +63,9 @@ const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 					size={compact ? "sm" : "default"}
 					aria-label="Poweksz czcionke"
 					disabled={!canIncrease}
-					onClick={() => {increase()}}
+					onClick={() => {
+						increase();
+					}}
 				>
 					A+
 				</Button>
@@ -95,7 +104,9 @@ const LanguageSelect = ({ compact = false }: { compact?: boolean }) => {
 						<div className="flex items-center gap-2">
 							<Globe className="text-green-800 shrink-0" />
 							<span className="truncate">
-								{compact ? "Wybierz język" : (
+								{compact ? (
+									"Wybierz język"
+								) : (
 									<>
 										<span className="hidden xl:inline">Wybierz język</span>
 										<span className="xl:hidden">Język</span>
@@ -195,7 +206,8 @@ export const Navbar = () => {
 								variant="outline"
 								size="icon"
 								className="shrink-0"
-								aria-label={mobileOpen ? "Zamknij menu" : "Otwórz menu"}								aria-expanded={mobileOpen}
+								aria-label={mobileOpen ? "Zamknij menu" : "Otwórz menu"}
+								aria-expanded={mobileOpen}
 								onClick={() => setMobileOpen((open) => !open)}
 							>
 								{mobileOpen ? (

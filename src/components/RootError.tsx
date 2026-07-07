@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Button, buttonVariants } from "#/components/ui/button";
 import { RootFallbackCard } from "#/components/RootFallbackCard";
+import { Button, buttonVariants } from "#/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type RootErrorProps = {

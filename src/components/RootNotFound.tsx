@@ -1,6 +1,6 @@
 import { Link, type NotFoundRouteProps } from "@tanstack/react-router";
-import { buttonVariants } from "#/components/ui/button";
 import { RootFallbackCard } from "#/components/RootFallbackCard";
+import { buttonVariants } from "#/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type RootNotFoundProps = Pick<NotFoundRouteProps, "routeId">;

@@ -34,7 +34,9 @@ const globalForRlsPrisma = globalThis as unknown as {
 
 function getRlsPrisma(): PrismaClient {
 	if (!globalForRlsPrisma.prismaRls) {
-		const adapter = new PrismaPg({ connectionString: getRlsConnectionString() });
+		const adapter = new PrismaPg({
+			connectionString: getRlsConnectionString(),
+		});
 		globalForRlsPrisma.prismaRls = new PrismaClientConstructor({ adapter });
 	}
 
@@ -55,11 +57,7 @@ async function assertRlsCapableSession(tx: PrismaTransaction): Promise<void> {
 		throw new Error("Unable to verify database session role for RLS.");
 	}
 
-	if (
-		BYPASS_ROLES.has(row.session_user) ||
-		row.rolsuper ||
-		row.rolbypassrls
-	) {
+	if (BYPASS_ROLES.has(row.session_user) || row.rolsuper || row.rolbypassrls) {
 		throw new Error(
 			`RLS queries must not run as ${row.session_user} (superuser or BYPASSRLS). Use DATABASE_URL_RLS from \`npm run db:rls-user\`.`,
 		);

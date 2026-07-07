@@ -1,8 +1,8 @@
 import { redirect } from "@tanstack/react-router";
 import {
-	toAuthenticatedUser,
 	type AuthenticatedUser,
 	type SessionUserSource,
+	toAuthenticatedUser,
 } from "#/lib/session-user";
 
 export { getSafeRedirectTarget } from "#/lib/redirect-safety";

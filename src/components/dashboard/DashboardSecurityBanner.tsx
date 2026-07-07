@@ -16,8 +16,8 @@ export function DashboardSecurityBanner() {
 						<span className="font-semibold">
 							Bezpieczeństwo jest dla nas najważniejsze.
 						</span>{" "}
-						Nigdy nie podawaj danych logowania przez telefon ani e-mail.
-						Zawsze sprawdzaj adres strony banku.
+						Nigdy nie podawaj danych logowania przez telefon ani e-mail. Zawsze
+						sprawdzaj adres strony banku.
 					</p>
 				</div>
 				<Link

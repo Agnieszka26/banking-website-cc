@@ -1,7 +1,4 @@
-import type {
-	DashboardAccount,
-	DashboardTransaction,
-} from "./types";
+import type { DashboardAccount, DashboardTransaction } from "./types";
 
 type CacheEntry<T> = {
 	value: T;

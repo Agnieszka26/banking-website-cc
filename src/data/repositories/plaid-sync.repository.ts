@@ -4,15 +4,15 @@ import {
 	mapCachedAccount,
 	mapCachedTransaction,
 } from "#/server/plaid/plaid-mappers";
-import type {
-	DashboardAccount,
-	DashboardTransaction,
-} from "#/server/plaid/types";
 import {
 	PLAID_DASHBOARD_TRANSACTION_LIMIT,
 	type PlaidSyncTimestamps,
 } from "#/server/plaid/sync-config";
 import type { SyncableTransaction } from "#/server/plaid/sync-types";
+import type {
+	DashboardAccount,
+	DashboardTransaction,
+} from "#/server/plaid/types";
 
 /**
  * User-scoped read/write access to Plaid sync cache tables.

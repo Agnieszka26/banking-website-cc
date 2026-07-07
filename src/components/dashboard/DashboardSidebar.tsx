@@ -1,5 +1,10 @@
 import { usePostHog } from "@posthog/react";
-import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
+import {
+	Link,
+	useNavigate,
+	useRouter,
+	useRouterState,
+} from "@tanstack/react-router";
 import {
 	CreditCard,
 	FileText,
@@ -15,11 +20,7 @@ import {
 	Wallet,
 } from "lucide-react";
 import { useState } from "react";
-import {
-	contactEmail,
-	contactPhone,
-	contactPhoneHref,
-} from "#/config/contact";
+import { contactEmail, contactPhone, contactPhoneHref } from "#/config/contact";
 import { logout } from "#/lib/auth-client";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +36,11 @@ const navItems: Array<{
 	{ label: "Karty", to: "/dashboard/cards", icon: CreditCard },
 	{ label: "Lokaty", to: "/dashboard/deposits", icon: PiggyBank },
 	{ label: "Kredyty", to: "/dashboard/loans", icon: HandCoins },
-	{ label: "Wnioski i dyspozycje", to: "/dashboard/applications", icon: FileText },
+	{
+		label: "Wnioski i dyspozycje",
+		to: "/dashboard/applications",
+		icon: FileText,
+	},
 	{ label: "Ustawienia", to: "/dashboard/settings", icon: Settings },
 ];
 

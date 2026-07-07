@@ -39,7 +39,9 @@ describe("getSafeRedirectTarget (SSR)", () => {
 			pathname: "/dashboard",
 			search: {},
 		});
-		expect(getSafeRedirectTarget("data:text/html,<script>alert(1)</script>")).toEqual({
+		expect(
+			getSafeRedirectTarget("data:text/html,<script>alert(1)</script>"),
+		).toEqual({
 			pathname: "/dashboard",
 			search: {},
 		});
@@ -63,9 +65,7 @@ describe("getSafeRedirectTarget (client)", () => {
 	});
 
 	it("rejects external origins", () => {
-		expect(
-			getSafeRedirectTarget("https://evil.example/steal"),
-		).toEqual({
+		expect(getSafeRedirectTarget("https://evil.example/steal")).toEqual({
 			pathname: "/dashboard",
 			search: {},
 		});
@@ -74,8 +74,8 @@ describe("getSafeRedirectTarget (client)", () => {
 
 describe("getSafeRedirectPath", () => {
 	it("serializes pathname, search, and hash", () => {
-		expect(
-			getSafeRedirectPath("/reports?month=3#summary"),
-		).toBe("/reports?month=3#summary");
+		expect(getSafeRedirectPath("/reports?month=3#summary")).toBe(
+			"/reports?month=3#summary",
+		);
 	});
 });

@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+	PLAID_DB_ACCOUNTS_MAX_AGE_MS,
+	PLAID_DB_TRANSACTIONS_MAX_AGE_MS,
+} from "#/server/plaid/sync-config";
+import {
 	isAccountsCacheStale,
 	isTransactionsCacheStale,
 	needsPlaidSync,
 } from "#/server/plaid/sync-staleness";
-import {
-	PLAID_DB_ACCOUNTS_MAX_AGE_MS,
-	PLAID_DB_TRANSACTIONS_MAX_AGE_MS,
-} from "#/server/plaid/sync-config";
 
 describe("isAccountsCacheStale", () => {
 	it("treats missing timestamps as stale", () => {
@@ -47,7 +47,9 @@ describe("needsPlaidSync", () => {
 		const now = Date.now();
 		const timestamps = {
 			accountsSyncedAt: new Date(now),
-			transactionsSyncedAt: new Date(now - PLAID_DB_TRANSACTIONS_MAX_AGE_MS - 1),
+			transactionsSyncedAt: new Date(
+				now - PLAID_DB_TRANSACTIONS_MAX_AGE_MS - 1,
+			),
 			syncError: null,
 		};
 

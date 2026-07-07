@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createTtlCache, invalidatePlaidCache, plaidAccountsCache, plaidTransactionsCache } from "#/server/plaid/cache";
+import {
+	createTtlCache,
+	invalidatePlaidCache,
+	plaidAccountsCache,
+	plaidTransactionsCache,
+} from "#/server/plaid/cache";
 
 describe("createTtlCache", () => {
 	afterEach(() => {

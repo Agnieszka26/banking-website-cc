@@ -28,9 +28,7 @@ export function loginWithIdentifier(input: {
 	});
 }
 
-type LogoutResult =
-	| { ok: true }
-	| { ok: false; error: string };
+type LogoutResult = { ok: true } | { ok: false; error: string };
 
 /**
  * Ends the Better Auth session. Returns `{ ok: false }` when sign-out fails so

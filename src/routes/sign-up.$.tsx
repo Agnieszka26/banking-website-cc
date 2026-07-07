@@ -26,8 +26,10 @@ function RouteComponent() {
 		try {
 			const normalizedUsername = username.trim().toLowerCase();
 			const fullName =
-				[firstName, lastName].map((part) => part.trim()).filter(Boolean).join(" ") ||
-				normalizedUsername;
+				[firstName, lastName]
+					.map((part) => part.trim())
+					.filter(Boolean)
+					.join(" ") || normalizedUsername;
 
 			const { error: signUpError } = await signUp.email({
 				email: `${normalizedUsername}@example.com`,
@@ -92,7 +94,10 @@ function RouteComponent() {
 					</div>
 					<div className="grid grid-cols-2 gap-3">
 						<div>
-							<label htmlFor="sign-up-first-name" className="mb-2 block text-sm">
+							<label
+								htmlFor="sign-up-first-name"
+								className="mb-2 block text-sm"
+							>
 								Imię
 							</label>
 							<input
