@@ -13,6 +13,7 @@
 		"continue": "Dalej",
 		"signIn": "Zaloguj się",
 		"signUp": "Załóż konto",
+		"createAccount": "Utwórz konto",
 		"subscribe": "Zapisz się",
 		"tryAgain": "Spróbuj ponownie",
 		"backToHome": "Strona główna",
@@ -23,6 +24,7 @@
 		"welcomeBack": "Witaj ponownie, {{name}}",
 		"signedInLead": "Jesteś zalogowany na swoje konto.",
 		"loginTitle": "Logowanie",
+		"signUpTitle": "Rejestracja",
 		"newsletterLead": "Otrzymuj aktualności, porady i informacje o bezpieczeństwie — bez spamu."
 	},
 	"home": {
@@ -31,19 +33,22 @@
 		"openDashboard": "Przejdź do panelu"
 	},
 	"errors": {
+		"signOutFailed": "Wylogowanie nie powiodło się",
 		"generic": "Coś poszło nie tak",
 		"notFoundTitle": "Nie znaleziono strony",
 		"notFoundDescription": "Adres może być nieprawidłowy lub strona została przeniesiona.",
 		"rootErrorTitle": "Coś poszło nie tak",
 		"rootErrorDescription": "Nie udało się załadować strony. Spróbuj ponownie lub wróć na stronę główną.",
 		"loginFailed": "Logowanie nie powiodło się",
+		"signUpFailed": "Rejestracja nie powiodła się",
 		"invalidEmail": "Wprowadź poprawny adres e-mail.",
 		"emailRequired": "Podaj adres e-mail."
 	},
 	"loading": {
 		"default": "Ładowanie…",
 		"authCheck": "Sprawdzanie sesji…",
-		"signingIn": "Logowanie…"
+		"signingIn": "Logowanie…",
+		"signingUp": "Tworzenie konta…"
 	},
 	"language": {
 		"label": "Język",
@@ -79,6 +84,119 @@
 		"identifierPlaceholder": "Podaj identyfikator",
 		"emailPlaceholder": "twoj@email.pl",
 		"loginHelp": "pomoc w logowaniu",
-		"noAccount": "Nie masz konta?"
+		"noAccount": "Nie masz konta?",
+		"hasAccount": "Masz już konto?",
+		"firstName": "Imię",
+		"lastName": "Nazwisko",
+		"passwordHint": "Minimum 8 znaków"
+	},
+	"dashboard": {
+		"defaultUser": "Użytkownik",
+		"nav": {
+			"transfers": "Przelewy",
+			"overview": "Pulpit",
+			"accounts": "Rachunki",
+			"payments": "Przelewy",
+			"cards": "Karty",
+			"deposits": "Lokaty",
+			"loans": "Kredyty",
+			"applications": "Wnioski i dyspozycje",
+			"settings": "Ustawienia"
+		},
+		"sidebar": {
+			"signOut": "Wyloguj",
+			"signingOut": "Wylogowywanie…",
+			"needHelp": "Potrzebujesz pomocy?",
+			"writeToUs": "Napisz do nas"
+		},
+		"greeting": "Dzień dobry, {{name}}",
+		"lastSignIn": "Ostatnie logowanie: {{date}}",
+		"panels": {
+			"myAccounts": "Moje rachunki",
+			"quickTransfer": "Szybki przelew",
+			"messages": "Wiadomości",
+			"recentTransactions": "Ostatnie operacje",
+			"mySummary": "Moje podsumowanie",
+			"shortcuts": "Na skróty",
+			"showAll": "Zobacz wszystkie"
+		},
+		"empty": {
+			"noAccounts": "Brak połączonych rachunków.",
+			"noTransactions": "Brak transakcji do wyświetlenia.",
+			"noAccountTransactions": "Brak transakcji na tym rachunku.",
+			"connectForSummary": "Połącz konto bankowe, aby zobaczyć podsumowanie.",
+			"comingSoon": "Wkrótce dostępne."
+		},
+		"transfer": {
+			"toOwnAccount": "Na własny rachunek",
+			"toRecipient": "Do odbiorcy",
+			"taxes": "ZUS / US",
+			"execute": "Wykonaj przelew",
+			"history": "Historia przelewów"
+		},
+		"transferForms": {
+			"ownTitle": "Przelew własny",
+			"recipientTitle": "Przelew do odbiorcy",
+			"taxTitle": "Przelew ZUS / US",
+			"sourceAccount": "Rachunek źródłowy",
+			"destinationAccount": "Rachunek docelowy",
+			"amount": "Kwota",
+			"transferTitle": "Tytuł przelewu",
+			"recipientName": "Nazwa odbiorcy",
+			"recipientAccountNumber": "Numer rachunku odbiorcy",
+			"paymentType": "Rodzaj płatności",
+			"paymentTypeZus": "ZUS",
+			"paymentTypeTaxOffice": "Urząd Skarbowy",
+			"accountNumber": "Numer rachunku",
+			"paymentId": "Identyfikator płatności",
+			"selectAccount": "Wybierz rachunek",
+			"selectPaymentType": "Wybierz rodzaj płatności",
+			"execute": "Wykonaj przelew",
+			"makeTransfer": "Wykonaj przelew",
+			"cancel": "Anuluj",
+			"success": "Przelew został złożony pomyślnie.",
+			"errors": {
+				"required": "To pole jest wymagane.",
+				"amountPositive": "Kwota musi być większa od 0.",
+				"sameAccounts": "Rachunek źródłowy i docelowy nie mogą być takie same.",
+				"invalidAccountNumber": "Podaj prawidłowy 26-cyfrowy numer rachunku.",
+				"needTwoAccounts": "Przelew własny wymaga co najmniej dwóch połączonych rachunków."
+			}
+		},
+		"messages": {
+			"securityNotice": "Komunikat bezpieczeństwa",
+			"transferConfirmation": "Potwierdzenie przelewu",
+			"newDepositOffer": "Nowa oferta lokaty"
+		},
+		"shortcuts": {
+			"changeCardLimit": "Zmień limit karty",
+			"blockCard": "Zablokuj kartę",
+			"openDeposit": "Otwórz lokatę",
+			"submitApplication": "Złóż wniosek"
+		},
+		"summary": {
+			"availableFunds": "Dostępne środki",
+			"savings": "Oszczędności",
+			"linkedAccounts": "Połączone rachunki",
+			"activeAccounts": "{{count}} aktywne",
+			"viewFull": "Zobacz pełne podsumowanie"
+		},
+		"account": {
+			"backToDashboard": "Powrót do pulpitu",
+			"recentTransactions": "Ostatnie operacje"
+		},
+		"securityBanner": {
+			"headline": "Bezpieczeństwo jest dla nas najważniejsze.",
+			"body": "Nigdy nie podawaj danych logowania przez telefon ani e-mail. Zawsze sprawdzaj adres strony banku.",
+			"learnMore": "Dowiedz się więcej"
+		},
+		"connectBank": {
+			"title": "Połącz konto bankowe",
+			"description": "Aby wyświetlić rachunki i transakcje, połącz konto przez bezpieczny moduł Plaid. W środowisku sandbox możesz użyć danych testowych Plaid.",
+			"connecting": "Łączenie…",
+			"connectButton": "Połącz konto przez Plaid",
+			"linkTokenError": "Nie udało się przygotować połączenia z bankiem.",
+			"connectError": "Nie udało się połączyć konta bankowego."
+		}
 	}
 }

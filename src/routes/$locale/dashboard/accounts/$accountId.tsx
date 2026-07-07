@@ -2,15 +2,26 @@ import { usePostHog } from "@posthog/react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { useEffect } from "react";
-import { useLocalizedPath } from "#/lib/i18n";
+import { useLocalizedPath, useTranslation } from "#/lib/i18n";
+import type {
+	DashboardAccount,
+	DashboardTransaction,
+} from "#/server/plaid";
 import {
 	ACCOUNTS_CACHE_TTL_MS,
 	formatMoney,
 	getDashboardData,
 } from "#/server/plaid";
 
+type AccountDetailsLoaderData = {
+	account: DashboardAccount;
+	transactions: DashboardTransaction[];
+};
+
 export const Route = createFileRoute("/$locale/dashboard/accounts/$accountId")({
-	loader: async ({ params }) => {
+	loader: async ({
+		params,
+	}): Promise<AccountDetailsLoaderData> => {
 		const data = await getDashboardData();
 		const account = data.accounts.find((item) => item.id === params.accountId);
 
@@ -25,7 +36,9 @@ export const Route = createFileRoute("/$locale/dashboard/accounts/$accountId")({
 });
 
 function AccountDetailsPage() {
-	const { account, transactions } = Route.useLoaderData();
+	const t = useTranslation();
+	const { account, transactions }: AccountDetailsLoaderData =
+		Route.useLoaderData();
 	const posthog = usePostHog();
 	const localize = useLocalizedPath();
 
@@ -43,7 +56,7 @@ function AccountDetailsPage() {
 				className="inline-flex items-center gap-1 text-sm font-medium text-bank-green hover:underline"
 			>
 				<ChevronLeft className="size-4" />
-				Powrót do pulpitu
+				{t("dashboard.account.backToDashboard")}
 			</Link>
 
 			<header className="rounded-xl border border-border bg-card p-6 shadow-sm">
@@ -57,10 +70,12 @@ function AccountDetailsPage() {
 			</header>
 
 			<section className="rounded-xl border border-border bg-card p-6 shadow-sm">
-				<h2 className="text-lg font-semibold">Ostatnie operacje</h2>
+				<h2 className="text-lg font-semibold">
+					{t("dashboard.account.recentTransactions")}
+				</h2>
 				{transactions.length === 0 ? (
 					<p className="mt-3 text-sm text-muted-foreground">
-						Brak transakcji na tym rachunku.
+						{t("dashboard.empty.noAccountTransactions")}
 					</p>
 				) : (
 					<ul className="mt-4 space-y-3">

@@ -1,9 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { DashboardPlaceholder } from "#/components/dashboard/DashboardPlaceholder";
 
 export const Route = createFileRoute("/$locale/dashboard/settings")({
-	component: RouteComponent,
+	component: () => (
+		<DashboardPlaceholder titleKey="dashboard.nav.settings" />
+	),
 });
-
-function RouteComponent() {
-	return <div>Hello "/dashboard/settings"!</div>;
-}

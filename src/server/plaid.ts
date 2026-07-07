@@ -5,4 +5,8 @@ export {
 	exchangePublicToken,
 	getDashboardData,
 } from "./plaid/functions";
-export type { DashboardAccount } from "./plaid/types";
+export type {
+	DashboardAccount,
+	DashboardData,
+	DashboardTransaction,
+} from "./plaid/types";

@@ -3,11 +3,13 @@ import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
 import { type PlaidLinkOnSuccess, usePlaidLink } from "react-plaid-link";
+import { useTranslation } from "#/lib/i18n";
 import { createLinkToken, exchangePublicToken } from "#/server/plaid";
 import { Button } from "@/components/ui/button";
 
 /** Plaid Link flow for connecting a bank account to the dashboard. */
 export function ConnectBankAccount() {
+	const t = useTranslation();
 	const router = useRouter();
 	const posthog = usePostHog();
 	const createLinkTokenFn = useServerFn(createLinkToken);
@@ -20,9 +22,9 @@ export function ConnectBankAccount() {
 		createLinkTokenFn()
 			.then((data) => setLinkToken(data.linkToken))
 			.catch(() => {
-				setError("Nie udało się przygotować połączenia z bankiem.");
+				setError(t("dashboard.connectBank.linkTokenError"));
 			});
-	}, [createLinkTokenFn]);
+	}, [createLinkTokenFn, t]);
 
 	const onSuccess = useCallback<PlaidLinkOnSuccess>(
 		async (publicToken) => {
@@ -34,13 +36,13 @@ export function ConnectBankAccount() {
 				posthog.capture("bank_account_connected");
 				await router.invalidate();
 			} catch {
-				setError("Nie udało się połączyć konta bankowego.");
+				setError(t("dashboard.connectBank.connectError"));
 				posthog.capture("bank_account_connect_failed");
 			} finally {
 				setIsLinking(false);
 			}
 		},
-		[exchangePublicTokenFn, router, posthog],
+		[exchangePublicTokenFn, router, posthog, t],
 	);
 
 	const { open, ready } = usePlaidLink({
@@ -51,11 +53,10 @@ export function ConnectBankAccount() {
 	return (
 		<div className="rounded-xl border border-dashed border-bank-green/40 bg-bank-green-light/50 p-6">
 			<h2 className="text-lg font-semibold text-foreground">
-				Połącz konto bankowe
+				{t("dashboard.connectBank.title")}
 			</h2>
 			<p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-				Aby wyświetlić rachunki i transakcje, połącz konto przez bezpieczny
-				moduł Plaid. W środowisku sandbox możesz użyć danych testowych Plaid.
+				{t("dashboard.connectBank.description")}
 			</p>
 			{error && <p className="mt-3 text-sm text-destructive">{error}</p>}
 			<Button
@@ -66,7 +67,9 @@ export function ConnectBankAccount() {
 					open();
 				}}
 			>
-				{isLinking ? "Łączenie..." : "Połącz konto przez Plaid"}
+				{isLinking
+					? t("dashboard.connectBank.connecting")
+					: t("dashboard.connectBank.connectButton")}
 			</Button>
 		</div>
 	);

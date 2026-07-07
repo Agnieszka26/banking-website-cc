@@ -6,6 +6,7 @@ import { DashboardSecurityBanner } from "#/components/dashboard/DashboardSecurit
 import { DashboardSidebar } from "#/components/dashboard/DashboardSidebar";
 import { getSession } from "#/lib/auth.functions";
 import { authenticateRouteUser } from "#/lib/auth-guard";
+import { useTranslation } from "#/lib/i18n";
 
 export const Route = createFileRoute("/$locale/dashboard")({
 	beforeLoad: async ({ location }) => {
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/$locale/dashboard")({
 function RouteComponent() {
 	const { user } = Route.useRouteContext();
 	const posthog = usePostHog();
+	const t = useTranslation();
 
 	useEffect(() => {
 		if (user) {
@@ -33,7 +35,7 @@ function RouteComponent() {
 
 	return (
 		<div className="flex flex-1 bg-bank-bg">
-			<DashboardSidebar userName={user?.name ?? "Użytkownik"} />
+			<DashboardSidebar userName={user?.name ?? t("dashboard.defaultUser")} />
 			<div className="flex min-w-0 flex-1 flex-col">
 				<div className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
 					<Outlet />

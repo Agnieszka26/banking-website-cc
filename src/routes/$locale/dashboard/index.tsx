@@ -15,8 +15,9 @@ import {
 } from "lucide-react";
 import { ConnectBankAccount } from "#/components/dashboard/ConnectBankAccount";
 import { DashboardPanel } from "#/components/dashboard/DashboardPanel";
-import { useLocalizedPath } from "#/lib/i18n";
-import type { DashboardAccount } from "#/server/plaid";
+import { QuickTransfer } from "#/components/dashboard/transfers/QuickTransfer";
+import { useLocalizedPath, useTranslation } from "#/lib/i18n";
+import type { DashboardAccount, DashboardData } from "#/server/plaid";
 import {
 	ACCOUNTS_CACHE_TTL_MS,
 	formatMoney,
@@ -27,23 +28,24 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/$locale/dashboard/")({
-	loader: () => getDashboardData(),
+	loader: async (): Promise<DashboardData> => getDashboardData(),
 	staleTime: ACCOUNTS_CACHE_TTL_MS,
 	component: DashboardHome,
 });
-//TODO: Replace hardcoded dates with dynamic data.
+
+// TODO: Replace hardcoded dates with dynamic data.
 const messages = [
-	{ title: "Komunikat bezpieczeństwa", date: "24.04.2025" },
-	{ title: "Potwierdzenie przelewu", date: "23.04.2025" },
-	{ title: "Nowa oferta lokaty", date: "20.04.2025" },
-];
+	{ titleKey: "dashboard.messages.securityNotice", date: "24.04.2025" },
+	{ titleKey: "dashboard.messages.transferConfirmation", date: "23.04.2025" },
+	{ titleKey: "dashboard.messages.newDepositOffer", date: "20.04.2025" },
+] as const;
 
 const shortcuts = [
-	{ label: "Zmień limit karty", icon: ArrowLeftRight },
-	{ label: "Zablokuj kartę", icon: Lock },
-	{ label: "Otwórz lokatę", icon: PiggyBank },
-	{ label: "Złóż wniosek", icon: FileText },
-];
+	{ labelKey: "dashboard.shortcuts.changeCardLimit", icon: ArrowLeftRight },
+	{ labelKey: "dashboard.shortcuts.blockCard", icon: Lock },
+	{ labelKey: "dashboard.shortcuts.openDeposit", icon: PiggyBank },
+	{ labelKey: "dashboard.shortcuts.submitApplication", icon: FileText },
+] as const;
 
 function getAccountIcon(account: DashboardAccount): LucideIcon {
 	if (account.type.includes("savings")) return PiggyBank;
@@ -56,8 +58,8 @@ function getTransactionIcon(amount: number): LucideIcon {
 }
 
 function DashboardHome() {
-	//TODO: Add navigation or onClick handlers to interactive buttons.
-	const data = Route.useLoaderData();
+	const t = useTranslation();
+	const data: DashboardData = Route.useLoaderData();
 	const posthog = usePostHog();
 	const localize = useLocalizedPath();
 
@@ -65,11 +67,11 @@ function DashboardHome() {
 		<div className="mx-auto max-w-7xl space-y-6">
 			<header>
 				<h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-					Dzień dobry, {data.user.fullName}
+					{t("dashboard.greeting", { name: data.user.fullName })}
 				</h1>
 				{data.user.lastSignIn && (
 					<p className="mt-1 text-sm text-muted-foreground">
-						Ostatnie logowanie: {data.user.lastSignIn}
+						{t("dashboard.lastSignIn", { date: data.user.lastSignIn })}
 					</p>
 				)}
 			</header>
@@ -77,10 +79,10 @@ function DashboardHome() {
 			{!data.linked && <ConnectBankAccount />}
 
 			<div className="grid gap-5 lg:grid-cols-3">
-				<DashboardPanel title="Moje rachunki" showAllLink>
+				<DashboardPanel title={t("dashboard.panels.myAccounts")} showAllLink>
 					{data.accounts.length === 0 ? (
 						<p className="text-sm text-muted-foreground">
-							Brak połączonych rachunków.
+							{t("dashboard.empty.noAccounts")}
 						</p>
 					) : (
 						<ul className="space-y-1">
@@ -118,58 +120,27 @@ function DashboardHome() {
 					)}
 				</DashboardPanel>
 
-				<DashboardPanel title="Szybki przelew">
-					<div className="grid grid-cols-3 gap-3">
-						{[
-							{ label: "Na własny rachunek", icon: Wallet },
-							{ label: "Do odbiorcy", icon: User },
-							{ label: "ZUS / US", icon: Building2 },
-						].map((action) => (
-							<button
-								key={action.label}
-								type="button"
-								className="flex flex-col items-center gap-2 rounded-lg border border-border bg-muted/30 px-2 py-4 text-center transition-colors hover:border-bank-green/30 hover:bg-bank-green-light"
-								onClick={() =>
-									posthog.capture("transfer_type_selected", {
-										transfer_type: action.label,
-									})
-								}
-							>
-								<div className="flex size-10 items-center justify-center rounded-lg bg-card">
-									<action.icon className="size-5 text-bank-green" />
-								</div>
-								<span className="text-xs font-medium leading-tight text-foreground">
-									{action.label}
-								</span>
-							</button>
-						))}
-					</div>
-					<Button
-						className="mt-5 h-11 w-full bg-bank-green text-base font-semibold hover:bg-bank-green/90"
-						disabled={!data.linked}
-						onClick={() => posthog.capture("transfer_initiated")}
-					>
-						Wykonaj przelew
-					</Button>
-					<button
-						type="button"
+				<DashboardPanel title={t("dashboard.panels.quickTransfer")}>
+					<QuickTransfer accounts={data.accounts} />
+					<Link
 						className="mt-3 w-full text-center text-sm font-medium text-bank-green hover:underline"
 						onClick={() => posthog.capture("transfer_history_viewed")}
+						to={localize(`/dashboard/transfers`)}
 					>
-						Historia przelewów
-					</button>
+						{t("dashboard.transfer.history")}
+					</Link>
 				</DashboardPanel>
 
-				<DashboardPanel title="Wiadomości" showAllLink>
+				<DashboardPanel title={t("dashboard.panels.messages")} showAllLink>
 					<ul className="space-y-1">
 						{messages.map((message) => (
-							<li key={message.title}>
+							<li key={message.titleKey}>
 								<button
 									type="button"
 									className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-muted/60"
 									onClick={() =>
 										posthog.capture("dashboard_message_opened", {
-											message_title: message.title,
+											message_title: t(message.titleKey),
 										})
 									}
 								>
@@ -178,7 +149,7 @@ function DashboardHome() {
 									</div>
 									<div className="min-w-0 flex-1">
 										<p className="truncate text-sm font-medium">
-											{message.title}
+											{t(message.titleKey)}
 										</p>
 										<p className="text-xs text-muted-foreground">
 											{message.date}
@@ -191,10 +162,13 @@ function DashboardHome() {
 					</ul>
 				</DashboardPanel>
 
-				<DashboardPanel title="Ostatnie operacje" showAllLink>
+				<DashboardPanel
+					title={t("dashboard.panels.recentTransactions")}
+					showAllLink
+				>
 					{data.transactions.length === 0 ? (
 						<p className="text-sm text-muted-foreground">
-							Brak transakcji do wyświetlenia.
+							{t("dashboard.empty.noTransactions")}
 						</p>
 					) : (
 						<ul className="space-y-1">
@@ -231,13 +205,13 @@ function DashboardHome() {
 					)}
 				</DashboardPanel>
 
-				<DashboardPanel title="Moje podsumowanie">
+				<DashboardPanel title={t("dashboard.panels.mySummary")}>
 					{data.summary ? (
 						<>
 							<dl className="space-y-4">
 								<div className="flex items-center justify-between gap-4">
 									<dt className="text-sm text-muted-foreground">
-										Dostępne środki
+										{t("dashboard.summary.availableFunds")}
 									</dt>
 									<dd className="text-sm font-semibold text-bank-green">
 										{formatMoney(
@@ -248,7 +222,7 @@ function DashboardHome() {
 								</div>
 								<div className="flex items-center justify-between gap-4">
 									<dt className="text-sm text-muted-foreground">
-										Oszczędności
+										{t("dashboard.summary.savings")}
 									</dt>
 									<dd className="text-sm font-semibold">
 										{formatMoney(data.summary.savings, data.summary.currency)}
@@ -256,10 +230,12 @@ function DashboardHome() {
 								</div>
 								<div className="flex items-center justify-between gap-4">
 									<dt className="text-sm text-muted-foreground">
-										Połączone rachunki
+										{t("dashboard.summary.linkedAccounts")}
 									</dt>
 									<dd className="text-sm font-semibold">
-										{data.accounts.length} aktywne
+										{t("dashboard.summary.activeAccounts", {
+											count: data.accounts.length,
+										})}
 									</dd>
 								</div>
 							</dl>
@@ -267,26 +243,26 @@ function DashboardHome() {
 								variant="outline"
 								className="mt-6 w-full border-bank-green text-bank-green hover:bg-bank-green hover:text-white"
 							>
-								Zobacz pełne podsumowanie
+								{t("dashboard.summary.viewFull")}
 							</Button>
 						</>
 					) : (
 						<p className="text-sm text-muted-foreground">
-							Połącz konto bankowe, aby zobaczyć podsumowanie.
+							{t("dashboard.empty.connectForSummary")}
 						</p>
 					)}
 				</DashboardPanel>
 
-				<DashboardPanel title="Na skróty">
+				<DashboardPanel title={t("dashboard.panels.shortcuts")}>
 					<ul className="space-y-1">
 						{shortcuts.map((shortcut) => (
-							<li key={shortcut.label}>
+							<li key={shortcut.labelKey}>
 								<button
 									type="button"
 									className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-muted/60"
 									onClick={() =>
 										posthog.capture("dashboard_shortcut_clicked", {
-											shortcut_label: shortcut.label,
+											shortcut_label: t(shortcut.labelKey),
 										})
 									}
 								>
@@ -294,7 +270,7 @@ function DashboardHome() {
 										<shortcut.icon className="size-4 text-bank-green" />
 									</div>
 									<span className="flex-1 text-sm font-medium">
-										{shortcut.label}
+										{t(shortcut.labelKey)}
 									</span>
 									<ChevronRight className="size-4 text-muted-foreground" />
 								</button>
