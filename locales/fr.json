@@ -20,8 +20,15 @@
 	},
 	"greetings": {
 		"welcome": "Bienvenue",
+		"welcomeBack": "Bon retour, {{name}}",
+		"signedInLead": "Vous êtes connecté à votre compte.",
 		"loginTitle": "Connexion",
 		"newsletterLead": "Recevez des actualités, des conseils et des informations de sécurité — sans spam."
+	},
+	"home": {
+		"signedInAs": "Connecté en tant que",
+		"email": "E-mail",
+		"openDashboard": "Accéder au tableau de bord"
 	},
 	"errors": {
 		"generic": "Une erreur s'est produite",

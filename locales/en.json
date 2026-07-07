@@ -20,8 +20,15 @@
 	},
 	"greetings": {
 		"welcome": "Welcome",
+		"welcomeBack": "Welcome back, {{name}}",
+		"signedInLead": "You are signed in to your account.",
 		"loginTitle": "Sign in",
 		"newsletterLead": "Get updates, tips, and security news — no spam."
+	},
+	"home": {
+		"signedInAs": "Signed in as",
+		"email": "Email",
+		"openDashboard": "Go to dashboard"
 	},
 	"errors": {
 		"generic": "Something went wrong",

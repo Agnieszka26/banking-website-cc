@@ -20,8 +20,15 @@
 	},
 	"greetings": {
 		"welcome": "Witamy",
+		"welcomeBack": "Witaj ponownie, {{name}}",
+		"signedInLead": "Jesteś zalogowany na swoje konto.",
 		"loginTitle": "Logowanie",
 		"newsletterLead": "Otrzymuj aktualności, porady i informacje o bezpieczeństwie — bez spamu."
+	},
+	"home": {
+		"signedInAs": "Zalogowany jako",
+		"email": "E-mail",
+		"openDashboard": "Przejdź do panelu"
 	},
 	"errors": {
 		"generic": "Coś poszło nie tak",
