@@ -1,0 +1,77 @@
+{
+	"navigation": {
+		"home": "Home",
+		"news": "News",
+		"contact": "Contact",
+		"signIn": "Sign in",
+		"signUp": "Sign up",
+		"dashboard": "Dashboard",
+		"help": "Help",
+		"helpline": "Helpline: {{phone}}"
+	},
+	"buttons": {
+		"continue": "Continue",
+		"signIn": "Sign in",
+		"signUp": "Sign up",
+		"subscribe": "Subscribe",
+		"tryAgain": "Try again",
+		"backToHome": "Back to home",
+		"backToTop": "Back to top"
+	},
+	"greetings": {
+		"welcome": "Welcome",
+		"loginTitle": "Sign in",
+		"newsletterLead": "Get updates, tips, and security news — no spam."
+	},
+	"errors": {
+		"generic": "Something went wrong",
+		"notFoundTitle": "Page not found",
+		"notFoundDescription": "The address may be wrong or the page may have moved.",
+		"rootErrorTitle": "Something went wrong",
+		"rootErrorDescription": "We couldn't load this page. Try again or return to the home page.",
+		"loginFailed": "Sign in failed",
+		"invalidEmail": "Enter a valid email address.",
+		"emailRequired": "Enter your email address."
+	},
+	"loading": {
+		"default": "Loading…",
+		"authCheck": "Checking your session…",
+		"signingIn": "Signing in…"
+	},
+	"language": {
+		"label": "Language",
+		"select": "Choose language",
+		"short": "Lang"
+	},
+	"accessibility": {
+		"fontSize": "Font size",
+		"decreaseFont": "Decrease font size",
+		"increaseFont": "Increase font size",
+		"highContrast": "High contrast",
+		"openMenu": "Open menu",
+		"closeMenu": "Close menu"
+	},
+	"footer": {
+		"tagline": "Modern online banking — secure, transparent, and always within reach.",
+		"resources": "Resources",
+		"security": "Security",
+		"terms": "Terms",
+		"privacy": "Privacy policy",
+		"accessibilityStatement": "Accessibility statement",
+		"contact": "Contact",
+		"newsletter": "Newsletter",
+		"email": "Email",
+		"phone": "Phone",
+		"address": "Address",
+		"copyright": "© {{year}} {{company}}. All rights reserved.",
+		"subscribeSuccess": "Thank you! Check your inbox to confirm your subscription."
+	},
+	"form": {
+		"identifier": "Identifier",
+		"password": "Password",
+		"identifierPlaceholder": "Enter your identifier",
+		"emailPlaceholder": "you@email.com",
+		"loginHelp": "Login help",
+		"noAccount": "Don't have an account?"
+	}
+}

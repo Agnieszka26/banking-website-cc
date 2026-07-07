@@ -1,0 +1,77 @@
+{
+	"navigation": {
+		"home": "Strona główna",
+		"news": "Aktualności",
+		"contact": "Kontakt",
+		"signIn": "Zaloguj się",
+		"signUp": "Załóż konto",
+		"dashboard": "Panel",
+		"help": "Pomoc",
+		"helpline": "Infolinia: {{phone}}"
+	},
+	"buttons": {
+		"continue": "Dalej",
+		"signIn": "Zaloguj się",
+		"signUp": "Załóż konto",
+		"subscribe": "Zapisz się",
+		"tryAgain": "Spróbuj ponownie",
+		"backToHome": "Strona główna",
+		"backToTop": "Wróć na górę strony"
+	},
+	"greetings": {
+		"welcome": "Witamy",
+		"loginTitle": "Logowanie",
+		"newsletterLead": "Otrzymuj aktualności, porady i informacje o bezpieczeństwie — bez spamu."
+	},
+	"errors": {
+		"generic": "Coś poszło nie tak",
+		"notFoundTitle": "Nie znaleziono strony",
+		"notFoundDescription": "Adres może być nieprawidłowy lub strona została przeniesiona.",
+		"rootErrorTitle": "Coś poszło nie tak",
+		"rootErrorDescription": "Nie udało się załadować strony. Spróbuj ponownie lub wróć na stronę główną.",
+		"loginFailed": "Logowanie nie powiodło się",
+		"invalidEmail": "Wprowadź poprawny adres e-mail.",
+		"emailRequired": "Podaj adres e-mail."
+	},
+	"loading": {
+		"default": "Ładowanie…",
+		"authCheck": "Sprawdzanie sesji…",
+		"signingIn": "Logowanie…"
+	},
+	"language": {
+		"label": "Język",
+		"select": "Wybierz język",
+		"short": "Język"
+	},
+	"accessibility": {
+		"fontSize": "Rozmiar czcionki",
+		"decreaseFont": "Zmniejsz czcionkę",
+		"increaseFont": "Powiększ czcionkę",
+		"highContrast": "Wysoki kontrast",
+		"openMenu": "Otwórz menu",
+		"closeMenu": "Zamknij menu"
+	},
+	"footer": {
+		"tagline": "Nowoczesne bankowości online — bezpiecznie, przejrzyście i zawsze pod ręką.",
+		"resources": "Zasoby",
+		"security": "Bezpieczeństwo",
+		"terms": "Regulaminy",
+		"privacy": "Polityka prywatności",
+		"accessibilityStatement": "Deklaracja dostępności",
+		"contact": "Kontakt",
+		"newsletter": "Newsletter",
+		"email": "E-mail",
+		"phone": "Telefon",
+		"address": "Adres",
+		"copyright": "© {{year}} {{company}}. Wszelkie prawa zastrzeżone.",
+		"subscribeSuccess": "Dziękujemy! Sprawdź skrzynkę, aby potwierdzić subskrypcję."
+	},
+	"form": {
+		"identifier": "Identyfikator",
+		"password": "Hasło",
+		"identifierPlaceholder": "Podaj identyfikator",
+		"emailPlaceholder": "twoj@email.pl",
+		"loginHelp": "pomoc w logowaniu",
+		"noAccount": "Nie masz konta?"
+	}
+}

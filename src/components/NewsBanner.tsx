@@ -7,6 +7,7 @@ import {
 	Phone,
 	ShieldCheck,
 } from "lucide-react";
+import { useLocalizedPath } from "#/lib/i18n";
 import type { NewsItem } from "#/server/news/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,6 +30,7 @@ function getDateParts(value?: string) {
 
 export default function NewsBanner({ latest }: { latest?: NewsItem | null }) {
 	const { day, month, year } = getDateParts(latest?.created_at);
+	const localize = useLocalizedPath();
 
 	return (
 		<section className="w-full grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -59,13 +61,13 @@ export default function NewsBanner({ latest }: { latest?: NewsItem | null }) {
 						</p>
 
 						{latest ? (
-							<Link to="/news/$newsId" params={{ newsId: String(latest.id) }}>
+							<Link to={localize(`/news/${latest.id}`)}>
 								<Button variant="link" className="px-0 h-auto">
 									Czytaj więcej <ChevronRight className="w-4 h-4 ml-1" />
 								</Button>
 							</Link>
 						) : (
-							<Link to="/news">
+							<Link to={localize("/news")}>
 								<Button variant="link" className="px-0 h-auto">
 									Czytaj więcej <ChevronRight className="w-4 h-4 ml-1" />
 								</Button>

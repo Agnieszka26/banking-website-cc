@@ -7,34 +7,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
 	companyName,
-	companyTagline,
 	contactItems,
 	type FooterNavLink,
 	resourceLinks,
 	socialLinks,
 } from "#/config/footer";
+import { useLocalizedPath, useTranslation } from "#/lib/i18n";
 import { cn } from "@/lib/utils";
 import logo from "../../public/assets/logo.png";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function validateNewsletterEmail(value: string): string | null {
-	const trimmed = value.trim();
-	if (!trimmed) {
-		return "Podaj adres e-mail.";
-	}
-	if (!EMAIL_PATTERN.test(trimmed)) {
-		return "Wprowadź poprawny adres e-mail.";
-	}
-	return null;
-}
-
 type FooterLinkListProps = {
 	title: string;
 	links: FooterNavLink[];
+	localize: (path: string) => string;
+	t: (key: string) => string;
 };
 
-function FooterLinkList({ title, links }: FooterLinkListProps) {
+function FooterLinkList({ title, links, localize, t }: FooterLinkListProps) {
 	return (
 		<nav aria-label={title}>
 			<h2 className="font-heading text-sm font-semibold tracking-tight text-foreground">
@@ -42,13 +33,13 @@ function FooterLinkList({ title, links }: FooterLinkListProps) {
 			</h2>
 			<ul className="mt-4 space-y-2.5">
 				{links.map((link) => (
-					<li key={link.label}>
+					<li key={link.labelKey}>
 						<Link
-							to={link.to}
+							to={localize(link.to)}
 							className="group inline-flex items-center text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 						>
 							<span className="relative">
-								{link.label}
+								{t(link.labelKey)}
 								<span
 									aria-hidden
 									className="absolute -bottom-px left-0 h-px w-0 bg-bank-green transition-all duration-300 group-hover:w-full"
@@ -63,6 +54,7 @@ function FooterLinkList({ title, links }: FooterLinkListProps) {
 }
 
 function FooterNewsletter() {
+	const t = useTranslation();
 	const formId = useId();
 	const emailId = `${formId}-email`;
 	const errorId = `${formId}-error`;
@@ -71,6 +63,17 @@ function FooterNewsletter() {
 	const [email, setEmail] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [submitted, setSubmitted] = useState(false);
+
+	const validateNewsletterEmail = (value: string): string | null => {
+		const trimmed = value.trim();
+		if (!trimmed) {
+			return t("errors.emailRequired");
+		}
+		if (!EMAIL_PATTERN.test(trimmed)) {
+			return t("errors.invalidEmail");
+		}
+		return null;
+	};
 
 	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -96,16 +99,16 @@ function FooterNewsletter() {
 				id={`${formId}-heading`}
 				className="font-heading text-sm font-semibold tracking-tight text-foreground"
 			>
-				Newsletter
+				{t("footer.newsletter")}
 			</h2>
 			<p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-				Otrzymuj aktualności, porady i informacje o bezpieczeństwie — bez spamu.
+				{t("greetings.newsletterLead")}
 			</p>
 
 			<form className="mt-4 space-y-3" onSubmit={handleSubmit} noValidate>
 				<div className="space-y-2">
 					<Label htmlFor={emailId} className="sr-only">
-						Adres e-mail
+						{t("form.emailPlaceholder")}
 					</Label>
 					<div className="flex flex-col gap-2 sm:flex-row">
 						<Input
@@ -114,7 +117,7 @@ function FooterNewsletter() {
 							type="email"
 							autoComplete="email"
 							inputMode="email"
-							placeholder="twoj@email.pl"
+							placeholder={t("form.emailPlaceholder")}
 							value={email}
 							onChange={(event: ChangeEvent<HTMLInputElement>) => {
 								const value = event.target.value;
@@ -142,7 +145,7 @@ function FooterNewsletter() {
 							className="h-10 shrink-0 gap-2 bg-bank-green text-white shadow-sm transition-all duration-200 hover:bg-bank-green/90 hover:shadow-md focus-visible:ring-bank-green/40"
 						>
 							<Send className="size-4 transition-transform duration-200 group-hover/button:translate-x-0.5" />
-							Zapisz się
+							{t("buttons.subscribe")}
 						</Button>
 					</div>
 					{error ? (
@@ -155,7 +158,7 @@ function FooterNewsletter() {
 							id={successId}
 							className="text-xs text-bank-green dark:text-bank-green"
 						>
-							Dziękujemy! Sprawdź skrzynkę, aby potwierdzić subskrypcję.
+							{t("footer.subscribeSuccess")}
 						</p>
 					) : null}
 				</div>
@@ -165,6 +168,8 @@ function FooterNewsletter() {
 }
 
 function BackToTopButton() {
+	const t = useTranslation();
+
 	const scrollToTop = useCallback(() => {
 		window.scrollTo({ top: 0, behavior: "smooth" });
 	}, []);
@@ -175,7 +180,7 @@ function BackToTopButton() {
 			variant="outline"
 			size="icon-sm"
 			onClick={scrollToTop}
-			aria-label="Wróć na górę strony"
+			aria-label={t("buttons.backToTop")}
 			className="rounded-full border-border/80 bg-background/80 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-bank-green/30 hover:shadow-md"
 		>
 			<ArrowUp className="size-4" />
@@ -184,6 +189,8 @@ function BackToTopButton() {
 }
 
 export default function Footer() {
+	const t = useTranslation();
+	const localize = useLocalizedPath();
 	const year = new Date().getFullYear();
 
 	return (
@@ -197,17 +204,17 @@ export default function Footer() {
 				<div className="grid gap-10 py-12 md:grid-cols-2 md:gap-8 lg:grid-cols-12 lg:gap-10 lg:py-16">
 					<div className="lg:col-span-4">
 						<Link
-							to="/"
+							to={localize("/")}
 							className="inline-flex rounded-lg transition-opacity duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 						>
 							<img
 								src={logo}
-								alt={`${companyName} — strona główna`}
+								alt={`${companyName} — ${t("navigation.home")}`}
 								className="size-14 object-contain sm:size-16"
 							/>
 						</Link>
 						<p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
-							{companyTagline}
+							{t("footer.tagline")}
 						</p>
 						<div className="mt-6 flex gap-2">
 							{socialLinks.map((social) => (
@@ -226,12 +233,17 @@ export default function Footer() {
 					</div>
 
 					<div className="lg:col-span-2">
-						<FooterLinkList title="Zasoby" links={resourceLinks} />
+						<FooterLinkList
+							title={t("footer.resources")}
+							links={resourceLinks}
+							localize={localize}
+							t={t}
+						/>
 					</div>
 
 					<div className="lg:col-span-3">
 						<h2 className="font-heading text-sm font-semibold tracking-tight text-foreground">
-							Kontakt
+							{t("footer.contact")}
 						</h2>
 						<ul className="mt-4 space-y-4">
 							{contactItems.map((item) => (
@@ -248,7 +260,7 @@ export default function Footer() {
 										</span>
 										<span className="min-w-0">
 											<span className="block text-xs font-medium uppercase tracking-wide text-muted-foreground">
-												{item.label}
+												{t(item.labelKey)}
 											</span>
 											<span className="mt-0.5 block text-sm text-foreground/90 transition-colors group-hover:text-foreground">
 												{item.value}
@@ -267,7 +279,7 @@ export default function Footer() {
 
 				<div className="flex flex-col items-center justify-between gap-4 border-t border-border/60 py-6 sm:flex-row">
 					<p className="text-center text-xs text-muted-foreground sm:text-left">
-						© {year} {companyName}. Wszelkie prawa zastrzeżone.
+						{t("footer.copyright", { year, company: companyName })}
 					</p>
 					<BackToTopButton />
 				</div>

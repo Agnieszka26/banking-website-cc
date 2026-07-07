@@ -2,13 +2,14 @@ import { usePostHog } from "@posthog/react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { useEffect } from "react";
+import { useLocalizedPath } from "#/lib/i18n";
 import {
 	ACCOUNTS_CACHE_TTL_MS,
 	formatMoney,
 	getDashboardData,
 } from "#/server/plaid";
 
-export const Route = createFileRoute("/dashboard/accounts/$accountId")({
+export const Route = createFileRoute("/$locale/dashboard/accounts/$accountId")({
 	loader: async ({ params }) => {
 		const data = await getDashboardData();
 		const account = data.accounts.find((item) => item.id === params.accountId);
@@ -26,6 +27,7 @@ export const Route = createFileRoute("/dashboard/accounts/$accountId")({
 function AccountDetailsPage() {
 	const { account, transactions } = Route.useLoaderData();
 	const posthog = usePostHog();
+	const localize = useLocalizedPath();
 
 	useEffect(() => {
 		posthog.capture("account_details_viewed", {
@@ -37,7 +39,7 @@ function AccountDetailsPage() {
 	return (
 		<div className="mx-auto max-w-3xl space-y-6">
 			<Link
-				to="/dashboard"
+				to={localize("/dashboard")}
 				className="inline-flex items-center gap-1 text-sm font-medium text-bank-green hover:underline"
 			>
 				<ChevronLeft className="size-4" />

@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/dashboard/payments")({
+export const Route = createFileRoute("/$locale/dashboard/settings")({
 	component: RouteComponent,
 });
 
 function RouteComponent() {
-	return <div>Hello "/dashboard/payments"!</div>;
+	return <div>Hello "/dashboard/settings"!</div>;
 }

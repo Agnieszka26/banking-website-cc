@@ -1,0 +1,77 @@
+{
+	"navigation": {
+		"home": "Accueil",
+		"news": "Actualités",
+		"contact": "Contact",
+		"signIn": "Se connecter",
+		"signUp": "Créer un compte",
+		"dashboard": "Tableau de bord",
+		"help": "Aide",
+		"helpline": "Assistance : {{phone}}"
+	},
+	"buttons": {
+		"continue": "Continuer",
+		"signIn": "Se connecter",
+		"signUp": "Créer un compte",
+		"subscribe": "S'abonner",
+		"tryAgain": "Réessayer",
+		"backToHome": "Accueil",
+		"backToTop": "Retour en haut"
+	},
+	"greetings": {
+		"welcome": "Bienvenue",
+		"loginTitle": "Connexion",
+		"newsletterLead": "Recevez des actualités, des conseils et des informations de sécurité — sans spam."
+	},
+	"errors": {
+		"generic": "Une erreur s'est produite",
+		"notFoundTitle": "Page introuvable",
+		"notFoundDescription": "L'adresse est peut-être incorrecte ou la page a été déplacée.",
+		"rootErrorTitle": "Une erreur s'est produite",
+		"rootErrorDescription": "Impossible de charger cette page. Réessayez ou retournez à l'accueil.",
+		"loginFailed": "Échec de la connexion",
+		"invalidEmail": "Saisissez une adresse e-mail valide.",
+		"emailRequired": "Saisissez votre adresse e-mail."
+	},
+	"loading": {
+		"default": "Chargement…",
+		"authCheck": "Vérification de la session…",
+		"signingIn": "Connexion…"
+	},
+	"language": {
+		"label": "Langue",
+		"select": "Choisir la langue",
+		"short": "Langue"
+	},
+	"accessibility": {
+		"fontSize": "Taille du texte",
+		"decreaseFont": "Réduire la taille du texte",
+		"increaseFont": "Augmenter la taille du texte",
+		"highContrast": "Contraste élevé",
+		"openMenu": "Ouvrir le menu",
+		"closeMenu": "Fermer le menu"
+	},
+	"footer": {
+		"tagline": "Banque en ligne moderne — sécurisée, transparente et toujours à portée de main.",
+		"resources": "Ressources",
+		"security": "Sécurité",
+		"terms": "Conditions",
+		"privacy": "Politique de confidentialité",
+		"accessibilityStatement": "Déclaration d'accessibilité",
+		"contact": "Contact",
+		"newsletter": "Newsletter",
+		"email": "E-mail",
+		"phone": "Téléphone",
+		"address": "Adresse",
+		"copyright": "© {{year}} {{company}}. Tous droits réservés.",
+		"subscribeSuccess": "Merci ! Consultez votre boîte mail pour confirmer l'abonnement."
+	},
+	"form": {
+		"identifier": "Identifiant",
+		"password": "Mot de passe",
+		"identifierPlaceholder": "Saisissez votre identifiant",
+		"emailPlaceholder": "vous@email.fr",
+		"loginHelp": "Aide à la connexion",
+		"noAccount": "Vous n'avez pas de compte ?"
+	}
+}

@@ -7,7 +7,7 @@ import { DashboardSidebar } from "#/components/dashboard/DashboardSidebar";
 import { getSession } from "#/lib/auth.functions";
 import { authenticateRouteUser } from "#/lib/auth-guard";
 
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute("/$locale/dashboard")({
 	beforeLoad: async ({ location }) => {
 		const session = await getSession();
 		const user = authenticateRouteUser(session, location);

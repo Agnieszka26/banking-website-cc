@@ -5,6 +5,7 @@ import {
 	HeadContent,
 	Outlet,
 	Scripts,
+	useRouterState,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { FontScaleProvider } from "#/components/FontScaleProvider";
@@ -13,6 +14,7 @@ import { Navbar } from "#/components/Navbar";
 import { RootError } from "#/components/RootError";
 import { RootNotFound } from "#/components/RootNotFound";
 import { SessionSync } from "#/components/SessionSync";
+import { I18nProvider, resolveLocaleFromPathname } from "#/lib/i18n";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -55,8 +57,12 @@ export const Route = createRootRoute({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+	const locale = useRouterState({
+		select: (state) => resolveLocaleFromPathname(state.location.pathname),
+	});
+
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang={locale} suppressHydrationWarning>
 			<head>
 				<script src="/font-scale-init.js" />
 				<HeadContent />
@@ -85,8 +91,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 function RootLayout() {
+	const locale = useRouterState({
+		select: (state) => resolveLocaleFromPathname(state.location.pathname),
+	});
+
 	return (
-		<>
+		<I18nProvider locale={locale}>
 			<header className="w-full shrink-0">
 				<Navbar />
 			</header>
@@ -108,6 +118,6 @@ function RootLayout() {
 					},
 				]}
 			/>
-		</>
+		</I18nProvider>
 	);
 }

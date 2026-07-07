@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { authClient, loginWithIdentifier } from "#/lib/auth-client";
 import { getSafeRedirectTarget } from "#/lib/auth-guard";
+import { useTranslation } from "#/lib/i18n";
 
 export type LoginSource = "home" | "sign-in";
 
@@ -15,6 +16,7 @@ type UseLoginOptions = {
 export function useLogin({ redirectTo, source }: UseLoginOptions) {
 	const navigate = useNavigate();
 	const posthog = usePostHog();
+	const t = useTranslation();
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,7 @@ export function useLogin({ redirectTo, source }: UseLoginOptions) {
 			});
 
 			if (signInError) {
-				setError(signInError.message ?? "Logowanie nie powiodło się");
+				setError(signInError.message ?? t("errors.loginFailed"));
 				return;
 			}
 
@@ -52,7 +54,7 @@ export function useLogin({ redirectTo, source }: UseLoginOptions) {
 			});
 		} catch (err) {
 			setError(
-				err instanceof Error ? err.message : "Logowanie nie powiodło się",
+				err instanceof Error ? err.message : t("errors.loginFailed"),
 			);
 		} finally {
 			setIsSubmitting(false);

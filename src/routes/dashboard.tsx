@@ -2,9 +2,9 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { getPreferredLocale } from "#/lib/i18n/functions";
 import { buildLocalizedPathname } from "#/lib/i18n/paths";
 
-export const Route = createFileRoute("/contact")({
+export const Route = createFileRoute("/dashboard")({
 	beforeLoad: async () => {
 		const locale = await getPreferredLocale();
-		throw redirect({ to: buildLocalizedPathname(locale, "/contact") });
+		throw redirect({ to: buildLocalizedPathname(locale, "/dashboard") });
 	},
 });

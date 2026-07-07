@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { ConnectBankAccount } from "#/components/dashboard/ConnectBankAccount";
 import { DashboardPanel } from "#/components/dashboard/DashboardPanel";
+import { useLocalizedPath } from "#/lib/i18n";
 import type { DashboardAccount } from "#/server/plaid";
 import {
 	ACCOUNTS_CACHE_TTL_MS,
@@ -25,7 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/dashboard/")({
+export const Route = createFileRoute("/$locale/dashboard/")({
 	loader: () => getDashboardData(),
 	staleTime: ACCOUNTS_CACHE_TTL_MS,
 	component: DashboardHome,
@@ -58,6 +59,7 @@ function DashboardHome() {
 	//TODO: Add navigation or onClick handlers to interactive buttons.
 	const data = Route.useLoaderData();
 	const posthog = usePostHog();
+	const localize = useLocalizedPath();
 
 	return (
 		<div className="mx-auto max-w-7xl space-y-6">
@@ -88,8 +90,7 @@ function DashboardHome() {
 								return (
 									<li key={account.id}>
 										<Link
-											to="/dashboard/accounts/$accountId"
-											params={{ accountId: account.id }}
+											to={localize(`/dashboard/accounts/${account.id}`)}
 											className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-muted/60"
 										>
 											<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-bank-green-light">

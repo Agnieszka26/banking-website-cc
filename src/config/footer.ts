@@ -3,25 +3,23 @@ import { Linkedin, Mail, MapPin, Phone } from "lucide-react";
 import { contactEmail, contactPhone, contactPhoneHref } from "#/config/contact";
 
 export const companyName = "Bank";
-export const companyTagline =
-	"Nowoczesne bankowości online — bezpiecznie, przejrzyście i zawsze pod ręką.";
 
 export type FooterNavLink = {
-	label: string;
+	labelKey: string;
 	to: string;
 };
 
 export const resourceLinks: FooterNavLink[] = [
-	{ label: "Bezpieczeństwo", to: "/" },
-	{ label: "Regulaminy", to: "/" },
-	{ label: "Polityka prywatności", to: "/" },
-	{ label: "Deklaracja dostępności", to: "/" },
-	{ label: "Aktualności", to: "/news" },
+	{ labelKey: "footer.security", to: "/" },
+	{ labelKey: "footer.terms", to: "/" },
+	{ labelKey: "footer.privacy", to: "/" },
+	{ labelKey: "footer.accessibilityStatement", to: "/" },
+	{ labelKey: "navigation.news", to: "/news" },
 ];
 
 export type FooterContactItem = {
 	id: string;
-	label: string;
+	labelKey: string;
 	value: string;
 	href: string;
 	icon: LucideIcon;
@@ -34,21 +32,21 @@ export const contactAddress =
 export const contactItems: FooterContactItem[] = [
 	{
 		id: "email",
-		label: "E-mail",
+		labelKey: "footer.email",
 		value: contactEmail,
 		href: `mailto:${contactEmail}`,
 		icon: Mail,
 	},
 	{
 		id: "phone",
-		label: "Telefon",
+		labelKey: "footer.phone",
 		value: contactPhone,
 		href: contactPhoneHref(),
 		icon: Phone,
 	},
 	{
 		id: "address",
-		label: "Adres",
+		labelKey: "footer.address",
 		value: contactAddress,
 		href: `https://maps.google.com/?q=${encodeURIComponent(contactAddress)}`,
 		icon: MapPin,

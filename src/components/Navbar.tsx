@@ -1,28 +1,26 @@
 ﻿import { Link } from "@tanstack/react-router";
-import { Globe, Menu, Phone, X } from "lucide-react";
+import { Menu, Phone, X } from "lucide-react";
 import { useState } from "react";
 import { useFontScale } from "#/components/FontScaleProvider";
+import { LanguageSwitcher } from "#/components/LanguageSwitcher";
 import { Label } from "@/components/ui/label";
+import { useLocalizedPath, useTranslation } from "#/lib/i18n";
 import { cn } from "@/lib/utils";
 import logo from "../../public/assets/logo.png";
 import { Button } from "./ui/button";
 import { ButtonGroup } from "./ui/button-group";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "./ui/select";
 import { Separator } from "./ui/separator";
 import { Switch } from "./ui/switch";
 
 const NavbarLogo = () => {
+	const localize = useLocalizedPath();
+	const t = useTranslation();
+
 	return (
-		<Link to="/" className="shrink-0 p-0">
+		<Link to={localize("/")} className="shrink-0 p-0">
 			<img
 				src={logo}
-				alt="Logo"
+				alt={t("navigation.home")}
 				className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 object-contain"
 			/>
 		</Link>
@@ -31,6 +29,7 @@ const NavbarLogo = () => {
 
 const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 	const { decrease, increase, canDecrease, canIncrease } = useFontScale();
+	const t = useTranslation();
 
 	return (
 		<div
@@ -41,7 +40,7 @@ const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 		>
 			{compact && (
 				<span className="text-sm font-medium text-muted-foreground">
-					Rozmiar czcionki
+					{t("accessibility.fontSize")}
 				</span>
 			)}
 			<ButtonGroup>
@@ -49,7 +48,7 @@ const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 					type="button"
 					variant="outline"
 					size={compact ? "sm" : "default"}
-					aria-label="Zmniejsz czcionke"
+					aria-label={t("accessibility.decreaseFont")}
 					disabled={!canDecrease}
 					onClick={() => {
 						decrease();
@@ -61,7 +60,7 @@ const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 					type="button"
 					variant="outline"
 					size={compact ? "sm" : "default"}
-					aria-label="Poweksz czcionke"
+					aria-label={t("accessibility.increaseFont")}
 					disabled={!canIncrease}
 					onClick={() => {
 						increase();
@@ -75,6 +74,8 @@ const BiggerSmallerFont = ({ compact = false }: { compact?: boolean }) => {
 };
 
 const HighContrastToggle = ({ compact = false }: { compact?: boolean }) => {
+	const t = useTranslation();
+
 	return (
 		<div
 			className={cn(
@@ -88,44 +89,10 @@ const HighContrastToggle = ({ compact = false }: { compact?: boolean }) => {
 					htmlFor={compact ? "high-contrast-mobile" : "high-contrast"}
 					className="text-sm sm:text-base cursor-pointer"
 				>
-					Wysoki kontrast
+					{t("accessibility.highContrast")}
 				</Label>
 			</div>
 		</div>
-	);
-};
-
-const LanguageSelect = ({ compact = false }: { compact?: boolean }) => {
-	return (
-		<Select>
-			<SelectTrigger className={cn(compact && "w-full")}>
-				<SelectValue
-					placeholder={
-						<div className="flex items-center gap-2">
-							<Globe className="text-green-800 shrink-0" />
-							<span className="truncate">
-								{compact ? (
-									"Wybierz język"
-								) : (
-									<>
-										<span className="hidden xl:inline">Wybierz język</span>
-										<span className="xl:hidden">Język</span>
-									</>
-								)}
-							</span>
-						</div>
-					}
-				/>
-			</SelectTrigger>
-			<SelectContent>
-				<SelectItem value="pl">Polski</SelectItem>
-				<SelectItem value="en">Angielski</SelectItem>
-				<SelectItem value="de">Niemiecki</SelectItem>
-				<SelectItem value="es">Hiszpański</SelectItem>
-				<SelectItem value="fr">Francuski</SelectItem>
-				<SelectItem value="it">Włoski</SelectItem>
-			</SelectContent>
-		</Select>
 	);
 };
 
@@ -136,6 +103,8 @@ const InfoLine = ({
 	compact?: boolean;
 	iconOnly?: boolean;
 }) => {
+	const t = useTranslation();
+
 	return (
 		<a
 			href="tel:800000000"
@@ -148,7 +117,7 @@ const InfoLine = ({
 			<Phone className="text-green-800 shrink-0 w-4 h-4 sm:w-5 sm:h-5" />
 			{!iconOnly && (
 				<span className={cn(compact ? "inline" : "hidden xl:inline")}>
-					Infolinia: 800 000 000
+					{t("navigation.helpline", { phone: "800 000 000" })}
 				</span>
 			)}
 			{!compact && !iconOnly && (
@@ -168,7 +137,7 @@ function NavbarControls({ layout }: { layout: "desktop" | "mobile" }) {
 				<Separator />
 				<BiggerSmallerFont compact />
 				<HighContrastToggle compact />
-				<LanguageSelect compact />
+				<LanguageSwitcher compact />
 			</div>
 		);
 	}
@@ -180,13 +149,14 @@ function NavbarControls({ layout }: { layout: "desktop" | "mobile" }) {
 				<HighContrastToggle />
 			</div>
 			<InfoLine />
-			<LanguageSelect />
+			<LanguageSwitcher />
 		</div>
 	);
 }
 
 export const Navbar = () => {
 	const [mobileOpen, setMobileOpen] = useState(false);
+	const t = useTranslation();
 
 	return (
 		<nav className="sticky top-0 z-50 w-full border-b border-border bg-card/80 backdrop-blur-sm shadow-sm">
@@ -206,7 +176,11 @@ export const Navbar = () => {
 								variant="outline"
 								size="icon"
 								className="shrink-0"
-								aria-label={mobileOpen ? "Zamknij menu" : "Otwórz menu"}
+								aria-label={
+									mobileOpen
+										? t("accessibility.closeMenu")
+										: t("accessibility.openMenu")
+								}
 								aria-expanded={mobileOpen}
 								onClick={() => setMobileOpen((open) => !open)}
 							>
