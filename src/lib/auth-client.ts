@@ -7,7 +7,7 @@ export const authClient = createAuthClient({
 	plugins: [usernameClient()],
 });
 
-export const { signIn, signUp, signOut, useSession } = authClient;
+export const { signUp, useSession } = authClient;
 
 /**
  * Identifier-based login: authenticates by username/identifier + password.

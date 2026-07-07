@@ -5,12 +5,7 @@ import {
 	type SessionUserSource,
 } from "#/lib/session-user";
 
-export type { AuthenticatedUser } from "#/lib/session-user";
-export {
-	getSafeRedirectPath,
-	getSafeRedirectTarget,
-	type SafeRedirectTarget,
-} from "#/lib/redirect-safety";
+export { getSafeRedirectTarget } from "#/lib/redirect-safety";
 
 type RouteSession = SessionUserSource | null;
 

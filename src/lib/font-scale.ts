@@ -5,17 +5,17 @@ export const FONT_SCALE_MAX = 4;
 export const FONT_SCALE_DEFAULT = 2;
 
 /** Target root sizes in px — level 2 is the default 16px base. */
-export const FONT_SCALE_ROOT_PX = [14, 15, 16, 18, 20] as const;
+const FONT_SCALE_ROOT_PX = [14, 15, 16, 18, 20] as const;
 
 const DEFAULT_ROOT_PX = FONT_SCALE_ROOT_PX[FONT_SCALE_DEFAULT];
 
 /** Clamps a font scale level to the supported min/max range. */
-export function clampFontScale(level: number): number {
+function clampFontScale(level: number): number {
 	return Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, level));
 }
 
 /** Returns the CSS multiplier for a font scale level relative to the default size. */
-export function getFontScaleMultiplier(level: number): number {
+function getFontScaleMultiplier(level: number): number {
 	return FONT_SCALE_ROOT_PX[clampFontScale(level)] / DEFAULT_ROOT_PX;
 }
 

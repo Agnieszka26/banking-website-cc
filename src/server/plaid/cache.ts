@@ -47,7 +47,7 @@ export function createTtlCache<T>(ttlMs: number) {
 }
 
 export const ACCOUNTS_CACHE_TTL_MS = 60_000;
-export const TRANSACTIONS_CACHE_TTL_MS = 120_000;
+const TRANSACTIONS_CACHE_TTL_MS = 120_000;
 
 /**
  * Process-local L1 cache. `invalidatePlaidCache` clears entries for the current

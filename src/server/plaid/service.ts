@@ -18,7 +18,6 @@ import type {
 } from "./types";
 import { PLAID_DASHBOARD_TRANSACTION_LIMIT } from "./sync-config";
 
-export { mergeDashboardData, toDashboardUser } from "./dashboard-mappers";
 
 /** DB cache present (may be empty after a successful sync) vs never synced / unreadable. */
 type DbHydrateResult<T> =
