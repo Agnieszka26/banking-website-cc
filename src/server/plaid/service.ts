@@ -6,7 +6,10 @@ import { toDashboardUser } from "./dashboard-mappers";
 import { fetchPlaidAccounts, fetchPlaidTransactions } from "./plaid-api";
 import { buildAccountSummary } from "./plaid-mappers";
 import { syncUserPlaidData } from "./sync.service";
-import { PLAID_DASHBOARD_TRANSACTION_LIMIT } from "./sync-config";
+import {
+	PLAID_DASHBOARD_TRANSACTION_LIMIT,
+	PLAID_SYNC_TRANSACTION_LIMIT,
+} from "./sync-config";
 import { needsPlaidSync } from "./sync-staleness";
 import type {
 	DashboardAccount,
@@ -62,7 +65,10 @@ async function hydrateTransactionsFromDb(
 			return { kind: "absent" };
 		}
 
-		const dbCached = await plaidSyncRepository.getCachedTransactions(userId);
+		const dbCached = await plaidSyncRepository.getCachedTransactions(
+			userId,
+			PLAID_SYNC_TRANSACTION_LIMIT,
+		);
 		plaidTransactionsCache.set(userId, dbCached);
 		return { kind: "data", value: dbCached };
 	} catch (error) {
@@ -151,7 +157,7 @@ async function ensureTransactionsSynced(
 		try {
 			const transactions = await fetchPlaidTransactions(
 				accessToken,
-				PLAID_DASHBOARD_TRANSACTION_LIMIT,
+				PLAID_SYNC_TRANSACTION_LIMIT,
 			);
 			plaidTransactionsCache.set(userId, transactions);
 		} catch (liveError) {
@@ -258,7 +264,7 @@ async function loadTransactionsForUser(
 	try {
 		const live = await fetchPlaidTransactions(
 			accessToken,
-			PLAID_DASHBOARD_TRANSACTION_LIMIT,
+			PLAID_SYNC_TRANSACTION_LIMIT,
 		);
 		plaidTransactionsCache.set(userId, live);
 		return live;
@@ -327,11 +333,38 @@ export async function loadDashboardTransactions(): Promise<DashboardTransactions
 
 		return {
 			linked: true,
-			transactions,
+			transactions: transactions.slice(0, PLAID_DASHBOARD_TRANSACTION_LIMIT),
 		};
 	} catch (error) {
 		throw new Error(
 			`Failed to fetch dashboard transactions from Plaid: ${error instanceof Error ? error.message : "Unknown error"}`,
+		);
+	}
+}
+
+/** Loads the full synced transaction list for the transactions page. */
+export async function loadAllTransactions(): Promise<DashboardTransactionsPayload> {
+	const session = await requireSession("unauthorized");
+	const userId = session.user.id;
+	const accessToken = await getAccessTokenForUser(userId);
+
+	if (!accessToken) {
+		return {
+			linked: false,
+			transactions: [],
+		};
+	}
+
+	try {
+		const transactions = await loadTransactionsForUser(userId, accessToken);
+
+		return {
+			linked: true,
+			transactions,
+		};
+	} catch (error) {
+		throw new Error(
+			`Failed to fetch transactions from Plaid: ${error instanceof Error ? error.message : "Unknown error"}`,
 		);
 	}
 }

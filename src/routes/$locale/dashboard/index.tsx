@@ -165,6 +165,7 @@ function DashboardHome() {
 				<DashboardPanel
 					title={t("dashboard.panels.recentTransactions")}
 					showAllLink
+					showAllTo={localize("/dashboard/transactions")}
 				>
 					{data.transactions.length === 0 ? (
 						<p className="text-sm text-muted-foreground">

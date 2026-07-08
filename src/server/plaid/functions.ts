@@ -7,7 +7,11 @@ import { invalidatePlaidCache } from "./cache";
 import { plaidClient } from "./client";
 import { mergeDashboardData, toDashboardUser } from "./dashboard-mappers";
 import { parsePublicTokenInput } from "./schemas";
-import { loadDashboardOverview, loadDashboardTransactions } from "./service";
+import {
+	loadAllTransactions,
+	loadDashboardOverview,
+	loadDashboardTransactions,
+} from "./service";
 import { syncUserPlaidData } from "./sync.service";
 import type {
 	DashboardData,
@@ -137,4 +141,9 @@ export const exchangePublicToken = createServerFn({ method: "POST" })
 /** Loads linked accounts, recent transactions, and summary for the dashboard. */
 export const getDashboardData = createServerFn({ method: "GET" }).handler(
 	async (): Promise<DashboardData> => loadDashboardDataResilient(),
+);
+
+/** Loads the full transaction list for the transactions page. */
+export const getTransactions = createServerFn({ method: "GET" }).handler(
+	async (): Promise<DashboardTransactionsPayload> => loadAllTransactions(),
 );

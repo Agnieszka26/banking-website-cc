@@ -4,6 +4,7 @@ export {
 	createLinkToken,
 	exchangePublicToken,
 	getDashboardData,
+	getTransactions,
 } from "./plaid/functions";
 export type {
 	DashboardAccount,

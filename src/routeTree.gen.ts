@@ -28,6 +28,7 @@ import { Route as LocaleSignUpSplatRouteImport } from './routes/$locale/sign-up.
 import { Route as LocaleSignInSplatRouteImport } from './routes/$locale/sign-in.$'
 import { Route as LocaleNewsNewsIdRouteImport } from './routes/$locale/news/$newsId'
 import { Route as LocaleDashboardTransfersRouteImport } from './routes/$locale/dashboard/transfers'
+import { Route as LocaleDashboardTransactionsRouteImport } from './routes/$locale/dashboard/transactions'
 import { Route as LocaleDashboardSettingsRouteImport } from './routes/$locale/dashboard/settings'
 import { Route as LocaleDashboardPaymentsRouteImport } from './routes/$locale/dashboard/payments'
 import { Route as LocaleDashboardLoansRouteImport } from './routes/$locale/dashboard/loans'
@@ -133,6 +134,12 @@ const LocaleDashboardTransfersRoute =
     path: '/transfers',
     getParentRoute: () => LocaleDashboardRouteRoute,
   } as any)
+const LocaleDashboardTransactionsRoute =
+  LocaleDashboardTransactionsRouteImport.update({
+    id: '/transactions',
+    path: '/transactions',
+    getParentRoute: () => LocaleDashboardRouteRoute,
+  } as any)
 const LocaleDashboardSettingsRoute = LocaleDashboardSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -196,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/$locale/dashboard/loans': typeof LocaleDashboardLoansRoute
   '/$locale/dashboard/payments': typeof LocaleDashboardPaymentsRoute
   '/$locale/dashboard/settings': typeof LocaleDashboardSettingsRoute
+  '/$locale/dashboard/transactions': typeof LocaleDashboardTransactionsRoute
   '/$locale/dashboard/transfers': typeof LocaleDashboardTransfersRoute
   '/$locale/news/$newsId': typeof LocaleNewsNewsIdRoute
   '/$locale/sign-in/$': typeof LocaleSignInSplatRoute
@@ -223,6 +231,7 @@ export interface FileRoutesByTo {
   '/$locale/dashboard/loans': typeof LocaleDashboardLoansRoute
   '/$locale/dashboard/payments': typeof LocaleDashboardPaymentsRoute
   '/$locale/dashboard/settings': typeof LocaleDashboardSettingsRoute
+  '/$locale/dashboard/transactions': typeof LocaleDashboardTransactionsRoute
   '/$locale/dashboard/transfers': typeof LocaleDashboardTransfersRoute
   '/$locale/news/$newsId': typeof LocaleNewsNewsIdRoute
   '/$locale/sign-in/$': typeof LocaleSignInSplatRoute
@@ -253,6 +262,7 @@ export interface FileRoutesById {
   '/$locale/dashboard/loans': typeof LocaleDashboardLoansRoute
   '/$locale/dashboard/payments': typeof LocaleDashboardPaymentsRoute
   '/$locale/dashboard/settings': typeof LocaleDashboardSettingsRoute
+  '/$locale/dashboard/transactions': typeof LocaleDashboardTransactionsRoute
   '/$locale/dashboard/transfers': typeof LocaleDashboardTransfersRoute
   '/$locale/news/$newsId': typeof LocaleNewsNewsIdRoute
   '/$locale/sign-in/$': typeof LocaleSignInSplatRoute
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | '/$locale/dashboard/loans'
     | '/$locale/dashboard/payments'
     | '/$locale/dashboard/settings'
+    | '/$locale/dashboard/transactions'
     | '/$locale/dashboard/transfers'
     | '/$locale/news/$newsId'
     | '/$locale/sign-in/$'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/$locale/dashboard/loans'
     | '/$locale/dashboard/payments'
     | '/$locale/dashboard/settings'
+    | '/$locale/dashboard/transactions'
     | '/$locale/dashboard/transfers'
     | '/$locale/news/$newsId'
     | '/$locale/sign-in/$'
@@ -340,6 +352,7 @@ export interface FileRouteTypes {
     | '/$locale/dashboard/loans'
     | '/$locale/dashboard/payments'
     | '/$locale/dashboard/settings'
+    | '/$locale/dashboard/transactions'
     | '/$locale/dashboard/transfers'
     | '/$locale/news/$newsId'
     | '/$locale/sign-in/$'
@@ -497,6 +510,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocaleDashboardTransfersRouteImport
       parentRoute: typeof LocaleDashboardRouteRoute
     }
+    '/$locale/dashboard/transactions': {
+      id: '/$locale/dashboard/transactions'
+      path: '/transactions'
+      fullPath: '/$locale/dashboard/transactions'
+      preLoaderRoute: typeof LocaleDashboardTransactionsRouteImport
+      parentRoute: typeof LocaleDashboardRouteRoute
+    }
     '/$locale/dashboard/settings': {
       id: '/$locale/dashboard/settings'
       path: '/settings'
@@ -579,6 +599,7 @@ interface LocaleDashboardRouteRouteChildren {
   LocaleDashboardLoansRoute: typeof LocaleDashboardLoansRoute
   LocaleDashboardPaymentsRoute: typeof LocaleDashboardPaymentsRoute
   LocaleDashboardSettingsRoute: typeof LocaleDashboardSettingsRoute
+  LocaleDashboardTransactionsRoute: typeof LocaleDashboardTransactionsRoute
   LocaleDashboardTransfersRoute: typeof LocaleDashboardTransfersRoute
   LocaleDashboardIndexRoute: typeof LocaleDashboardIndexRoute
 }
@@ -591,6 +612,7 @@ const LocaleDashboardRouteRouteChildren: LocaleDashboardRouteRouteChildren = {
   LocaleDashboardLoansRoute: LocaleDashboardLoansRoute,
   LocaleDashboardPaymentsRoute: LocaleDashboardPaymentsRoute,
   LocaleDashboardSettingsRoute: LocaleDashboardSettingsRoute,
+  LocaleDashboardTransactionsRoute: LocaleDashboardTransactionsRoute,
   LocaleDashboardTransfersRoute: LocaleDashboardTransfersRoute,
   LocaleDashboardIndexRoute: LocaleDashboardIndexRoute,
 }
