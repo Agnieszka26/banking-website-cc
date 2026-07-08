@@ -8,7 +8,7 @@ export const PLAID_DB_TRANSACTIONS_MAX_AGE_MS = 10 * 60_000;
 export const PLAID_SYNC_TRANSACTION_LIMIT = 50;
 
 /** Dashboard display limit (subset of synced transactions). */
-export const PLAID_DASHBOARD_TRANSACTION_LIMIT = 8;
+export const PLAID_DASHBOARD_TRANSACTION_LIMIT = 16;
 
 export type PlaidSyncScope = "all" | "accounts" | "transactions";
 
