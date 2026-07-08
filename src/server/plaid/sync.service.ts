@@ -4,10 +4,7 @@ import {
 	fetchPlaidAccounts,
 	fetchPlaidTransactionSnapshot,
 } from "#/server/plaid/plaid-api";
-import {
-	PLAID_SYNC_TRANSACTION_LIMIT,
-	type PlaidSyncScope,
-} from "#/server/plaid/sync-config";
+import type { PlaidSyncScope } from "#/server/plaid/sync-config";
 
 /**
  * Pulls normalized Plaid data into Postgres cache tables for a user.
@@ -30,10 +27,7 @@ export async function syncUserPlaidData(
 					await plaidSyncRepository.replaceAccounts(userId, accounts);
 				})(),
 				(async () => {
-					const snapshot = await fetchPlaidTransactionSnapshot(
-						accessToken,
-						PLAID_SYNC_TRANSACTION_LIMIT,
-					);
+					const snapshot = await fetchPlaidTransactionSnapshot(accessToken);
 					await plaidSyncRepository.replaceTransactions(userId, snapshot);
 				})(),
 			]);
@@ -46,10 +40,7 @@ export async function syncUserPlaidData(
 		}
 
 		if (scope === "transactions") {
-			const snapshot = await fetchPlaidTransactionSnapshot(
-				accessToken,
-				PLAID_SYNC_TRANSACTION_LIMIT,
-			);
+			const snapshot = await fetchPlaidTransactionSnapshot(accessToken);
 			await plaidSyncRepository.replaceTransactions(userId, snapshot);
 		}
 	} catch (error) {

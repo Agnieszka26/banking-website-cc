@@ -149,10 +149,7 @@ async function ensureTransactionsSynced(
 		};
 
 		try {
-			const transactions = await fetchPlaidTransactions(
-				accessToken,
-				PLAID_DASHBOARD_TRANSACTION_LIMIT,
-			);
+			const transactions = await fetchPlaidTransactions(accessToken);
 			plaidTransactionsCache.set(userId, transactions);
 		} catch (liveError) {
 			fallback.liveFetchError = liveError;
@@ -256,10 +253,7 @@ async function loadTransactionsForUser(
 	}
 
 	try {
-		const live = await fetchPlaidTransactions(
-			accessToken,
-			PLAID_DASHBOARD_TRANSACTION_LIMIT,
-		);
+		const live = await fetchPlaidTransactions(accessToken);
 		plaidTransactionsCache.set(userId, live);
 		return live;
 	} catch (liveError) {
@@ -327,11 +321,38 @@ export async function loadDashboardTransactions(): Promise<DashboardTransactions
 
 		return {
 			linked: true,
-			transactions,
+			transactions: transactions.slice(0, PLAID_DASHBOARD_TRANSACTION_LIMIT),
 		};
 	} catch (error) {
 		throw new Error(
 			`Failed to fetch dashboard transactions from Plaid: ${error instanceof Error ? error.message : "Unknown error"}`,
+		);
+	}
+}
+
+/** Loads the full synced transaction list for the transactions page. */
+export async function loadAllTransactions(): Promise<DashboardTransactionsPayload> {
+	const session = await requireSession("unauthorized");
+	const userId = session.user.id;
+	const accessToken = await getAccessTokenForUser(userId);
+
+	if (!accessToken) {
+		return {
+			linked: false,
+			transactions: [],
+		};
+	}
+
+	try {
+		const transactions = await loadTransactionsForUser(userId, accessToken);
+
+		return {
+			linked: true,
+			transactions,
+		};
+	} catch (error) {
+		throw new Error(
+			`Failed to fetch transactions from Plaid: ${error instanceof Error ? error.message : "Unknown error"}`,
 		);
 	}
 }
