@@ -12,6 +12,9 @@ import type {
 	DashboardTransaction,
 } from "#/server/plaid/types";
 
+/** Plaid max page size for `/transactions/get`. */
+const PLAID_TRANSACTIONS_PAGE_SIZE = 500;
+
 function toSyncableTransaction(transaction: Transaction): SyncableTransaction {
 	const mapped = mapPlaidTransaction(transaction);
 	return {
@@ -30,38 +33,57 @@ export async function fetchPlaidAccounts(
 	return response.data.accounts.map(mapPlaidAccount);
 }
 
-/** Fetches, sorts, and normalizes recent transactions from Plaid. */
+async function fetchPlaidTransactionPages(
+	accessToken: string,
+	days = 30,
+): Promise<Transaction[]> {
+	const { startDate, endDate } = getDateRange(days);
+	const transactions: Transaction[] = [];
+	let offset = 0;
+	let totalTransactions = Number.POSITIVE_INFINITY;
+
+	while (offset < totalTransactions) {
+		const response = await plaidClient.transactionsGet({
+			access_token: accessToken,
+			start_date: startDate,
+			end_date: endDate,
+			options: {
+				count: PLAID_TRANSACTIONS_PAGE_SIZE,
+				offset,
+			},
+		});
+
+		totalTransactions = response.data.total_transactions;
+		const page = response.data.transactions;
+		transactions.push(...page);
+		offset += page.length;
+
+		if (page.length === 0) {
+			break;
+		}
+	}
+
+	return transactions;
+}
+
+function sortTransactionsByDateDesc(
+	transactions: Transaction[],
+): Transaction[] {
+	return transactions.sort((a, b) => b.date.localeCompare(a.date));
+}
+
+/** Fetches, sorts, and normalizes all transactions in the date window from Plaid. */
 export async function fetchPlaidTransactions(
 	accessToken: string,
-	limit: number,
 ): Promise<DashboardTransaction[]> {
-	const { startDate, endDate } = getDateRange(30);
-	const response = await plaidClient.transactionsGet({
-		access_token: accessToken,
-		start_date: startDate,
-		end_date: endDate,
-	});
-
-	return response.data.transactions
-		.sort((a, b) => b.date.localeCompare(a.date))
-		.slice(0, limit)
-		.map(mapPlaidTransaction);
+	const transactions = await fetchPlaidTransactionPages(accessToken);
+	return sortTransactionsByDateDesc(transactions).map(mapPlaidTransaction);
 }
 
 /** Full recent-transaction snapshot for DB sync (includes Plaid account ids). */
 export async function fetchPlaidTransactionSnapshot(
 	accessToken: string,
-	limit: number,
 ): Promise<SyncableTransaction[]> {
-	const { startDate, endDate } = getDateRange(30);
-	const response = await plaidClient.transactionsGet({
-		access_token: accessToken,
-		start_date: startDate,
-		end_date: endDate,
-	});
-
-	return response.data.transactions
-		.sort((a, b) => b.date.localeCompare(a.date))
-		.slice(0, limit)
-		.map(toSyncableTransaction);
+	const transactions = await fetchPlaidTransactionPages(accessToken);
+	return sortTransactionsByDateDesc(transactions).map(toSyncableTransaction);
 }

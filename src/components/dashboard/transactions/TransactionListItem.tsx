@@ -5,8 +5,8 @@ import { formatMoney, formatPlDate } from "#/server/plaid";
 import { getTransactionFlow } from "#/lib/transactions";
 import { cn } from "@/lib/utils";
 
-function getTransactionIcon(amount: number): LucideIcon {
-	return amount < 0 ? Building2 : ShoppingCart;
+function getTransactionIcon(isIncome: boolean): LucideIcon {
+	return isIncome ? Building2 : ShoppingCart;
 }
 
 type TransactionListItemProps = {
@@ -14,8 +14,8 @@ type TransactionListItemProps = {
 };
 
 export function TransactionListItem({ transaction }: TransactionListItemProps) {
-	const Icon = getTransactionIcon(transaction.amount);
 	const isIncome = getTransactionFlow(transaction.amount) === "income";
+	const Icon = getTransactionIcon(isIncome);
 
 	return (
 		<li>

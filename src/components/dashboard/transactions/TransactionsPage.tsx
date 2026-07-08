@@ -13,7 +13,6 @@ import {
 	type TransactionTypeFilter,
 	type TypeSortOrder,
 } from "#/lib/transactions";
-import type { DashboardTransactionsPayload } from "#/server/plaid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +23,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import type { DashboardTransactionsPayload } from "#/server/plaid/types";
 
 type TransactionsPageProps = {
 	data: DashboardTransactionsPayload;
@@ -34,7 +34,8 @@ export function TransactionsPage({ data }: TransactionsPageProps) {
 	const localize = useLocalizedPath();
 	const posthog = usePostHog();
 
-	const [search, setSearch] = useState("");
+	const [searchInput, setSearchInput] = useState("");
+	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [typeFilter, setTypeFilter] = useState<TransactionTypeFilter>("all");
 	const [dateSort, setDateSort] = useState<DateSortOrder>("desc");
 	const [amountSort, setAmountSort] = useState<AmountSortOrder>("none");
@@ -48,16 +49,25 @@ export function TransactionsPage({ data }: TransactionsPageProps) {
 		});
 	}, [posthog, data.linked, data.transactions.length]);
 
+	useEffect(() => {
+		const timeout = window.setTimeout(() => {
+			setDebouncedSearch(searchInput);
+			setPage(1);
+		}, 300);
+
+		return () => window.clearTimeout(timeout);
+	}, [searchInput]);
+
 	const query = useMemo<TransactionListQuery>(
 		() => ({
-			search,
+			search: debouncedSearch,
 			typeFilter,
 			dateSort,
 			amountSort,
 			typeSort,
 			page,
 		}),
-		[search, typeFilter, dateSort, amountSort, typeSort, page],
+		[debouncedSearch, typeFilter, dateSort, amountSort, typeSort, page],
 	);
 
 	const processed = useMemo(
@@ -105,11 +115,8 @@ export function TransactionsPage({ data }: TransactionsPageProps) {
 							<Input
 								id="transaction-search"
 								type="search"
-								value={search}
-								onChange={(event) => {
-									setSearch(event.target.value);
-									resetPage();
-								}}
+								value={searchInput}
+								onChange={(event) => setSearchInput(event.target.value)}
 								placeholder={t("dashboard.transactions.searchPlaceholder")}
 								className="pl-8"
 							/>

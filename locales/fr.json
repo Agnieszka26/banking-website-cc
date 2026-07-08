@@ -197,14 +197,14 @@
 			"searchPlaceholder": "Rechercher par nom ou date…",
 			"typeFilter": "Type",
 			"typeAll": "Tous les types",
-			"typeIncome": "Income",
-			"typeOutcome": "Outcome",
+			"typeIncome": "Revenu",
+			"typeOutcome": "Dépense",
 			"dateSort": "Date",
-			"dateNewest": "Nouveau premier",
-			"dateOldest": "Ancien premier",
+			"dateNewest": "Les plus récentes d’abord",
+			"dateOldest": "Les plus anciennes d’abord",
 			"typeSort": "Trier par type",
-			"typeIncomeFirst": "Income first",
-			"typeOutcomeFirst": "Outcome first",
+			"typeIncomeFirst": "Revenus d’abord",
+			"typeOutcomeFirst": "Dépenses d’abord",
 			"amountSort": "Montant",
 			"amountHighest": "Le plus élevé en premier",
 			"amountLowest": "Le plus bas en premier",
@@ -215,8 +215,7 @@
 			"previous": "Précédent",
 			"next": "Suivant",
 			"connectToView": "Connectez un compte bancaire pour voir les transactions."
-		},
-		"securityBanner": {
+		},		"securityBanner": {
 			"headline": "Votre sécurité est notre priorité.",
 			"body": "Ne communiquez jamais vos identifiants par téléphone ou e-mail. Vérifiez toujours l'adresse du site de la banque.",
 			"learnMore": "En savoir plus"

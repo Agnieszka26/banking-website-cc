@@ -4,10 +4,7 @@ import {
 	mapCachedAccount,
 	mapCachedTransaction,
 } from "#/server/plaid/plaid-mappers";
-import {
-	PLAID_DASHBOARD_TRANSACTION_LIMIT,
-	type PlaidSyncTimestamps,
-} from "#/server/plaid/sync-config";
+import type { PlaidSyncTimestamps } from "#/server/plaid/sync-config";
 import type { SyncableTransaction } from "#/server/plaid/sync-types";
 import type {
 	DashboardAccount,
@@ -55,13 +52,13 @@ export const plaidSyncRepository = {
 
 	async getCachedTransactions(
 		userId: string,
-		limit = PLAID_DASHBOARD_TRANSACTION_LIMIT,
+		limit?: number,
 	): Promise<DashboardTransaction[]> {
 		return withUserRlsContext(userId, async (tx) => {
 			const rows = await tx.plaidCachedTransaction.findMany({
 				where: { userId },
 				orderBy: { date: "desc" },
-				take: limit,
+				...(limit === undefined ? {} : { take: limit }),
 			});
 
 			return rows.map(mapCachedTransaction);

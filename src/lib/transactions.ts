@@ -1,4 +1,6 @@
 import type { DashboardTransaction } from "#/server/plaid";
+import {formatPlDate} from "#/server/plaid/format";
+
 
 export type TransactionFlow = "income" | "outcome";
 
@@ -41,9 +43,11 @@ function matchesSearch(transaction: DashboardTransaction, search: string): boole
 	return (
 		transaction.name.toLowerCase().includes(query) ||
 		transaction.date.includes(query) ||
+		formatPlDate(transaction.date).toLowerCase().includes(query) ||
 		transaction.currency.toLowerCase().includes(query)
 	);
-}
+}	
+
 
 function compareByType(
 	a: DashboardTransaction,

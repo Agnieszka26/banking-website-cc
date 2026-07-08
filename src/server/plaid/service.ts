@@ -6,10 +6,7 @@ import { toDashboardUser } from "./dashboard-mappers";
 import { fetchPlaidAccounts, fetchPlaidTransactions } from "./plaid-api";
 import { buildAccountSummary } from "./plaid-mappers";
 import { syncUserPlaidData } from "./sync.service";
-import {
-	PLAID_DASHBOARD_TRANSACTION_LIMIT,
-	PLAID_SYNC_TRANSACTION_LIMIT,
-} from "./sync-config";
+import { PLAID_DASHBOARD_TRANSACTION_LIMIT } from "./sync-config";
 import { needsPlaidSync } from "./sync-staleness";
 import type {
 	DashboardAccount,
@@ -65,10 +62,7 @@ async function hydrateTransactionsFromDb(
 			return { kind: "absent" };
 		}
 
-		const dbCached = await plaidSyncRepository.getCachedTransactions(
-			userId,
-			PLAID_SYNC_TRANSACTION_LIMIT,
-		);
+		const dbCached = await plaidSyncRepository.getCachedTransactions(userId);
 		plaidTransactionsCache.set(userId, dbCached);
 		return { kind: "data", value: dbCached };
 	} catch (error) {
@@ -155,10 +149,7 @@ async function ensureTransactionsSynced(
 		};
 
 		try {
-			const transactions = await fetchPlaidTransactions(
-				accessToken,
-				PLAID_SYNC_TRANSACTION_LIMIT,
-			);
+			const transactions = await fetchPlaidTransactions(accessToken);
 			plaidTransactionsCache.set(userId, transactions);
 		} catch (liveError) {
 			fallback.liveFetchError = liveError;
@@ -262,10 +253,7 @@ async function loadTransactionsForUser(
 	}
 
 	try {
-		const live = await fetchPlaidTransactions(
-			accessToken,
-			PLAID_SYNC_TRANSACTION_LIMIT,
-		);
+		const live = await fetchPlaidTransactions(accessToken);
 		plaidTransactionsCache.set(userId, live);
 		return live;
 	} catch (liveError) {

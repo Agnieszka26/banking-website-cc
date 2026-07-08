@@ -3,8 +3,8 @@ import { TransactionsPage } from "#/components/dashboard/transactions/Transactio
 import {
 	ACCOUNTS_CACHE_TTL_MS,
 	getTransactions,
-	type DashboardTransactionsPayload,
 } from "#/server/plaid";
+import type { DashboardTransactionsPayload } from "#/server/plaid/types";
 
 export const Route = createFileRoute("/$locale/dashboard/transactions")({
 	loader: async (): Promise<DashboardTransactionsPayload> => getTransactions(),
