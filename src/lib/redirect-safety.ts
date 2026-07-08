@@ -5,7 +5,9 @@ export type SafeRedirectTarget = {
 	hash?: string;
 };
 
-function parseSearchParams(searchParams: URLSearchParams): Record<string, string> {
+function parseSearchParams(
+	searchParams: URLSearchParams,
+): Record<string, string> {
 	const search: Record<string, string> = {};
 	for (const [key, value] of searchParams) {
 		search[key] = value;
@@ -32,10 +34,12 @@ function getFallbackRedirectTarget(fallback: string): SafeRedirectTarget {
 			typeof window !== "undefined"
 				? window.location.origin
 				: "http://localhost";
-		return toRedirectTarget(new URL(fallback, base)) ?? {
-			pathname: "/dashboard",
-			search: {},
-		};
+		return (
+			toRedirectTarget(new URL(fallback, base)) ?? {
+				pathname: "/dashboard",
+				search: {},
+			}
+		);
 	} catch {
 		return { pathname: "/dashboard", search: {} };
 	}
@@ -59,7 +63,9 @@ function isUnsafeRedirectInput(redirect: string): boolean {
 		return false;
 	}
 
-	return /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(redirect) || !redirect.startsWith("/");
+	return (
+		/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(redirect) || !redirect.startsWith("/")
+	);
 }
 
 /** Parses a redirect against a trusted origin; rejects cross-origin and non-http(s) URLs. */
@@ -99,9 +105,7 @@ export function getSafeRedirectTarget(
 	}
 
 	const origin =
-		typeof window === "undefined"
-			? "http://localhost"
-			: window.location.origin;
+		typeof window === "undefined" ? "http://localhost" : window.location.origin;
 
 	const url = parseSameOriginRedirectUrl(redirect, origin);
 	if (!url) {

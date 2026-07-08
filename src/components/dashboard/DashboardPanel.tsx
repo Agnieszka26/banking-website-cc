@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
+import type { ReactNode } from "react";
+import { useTranslation } from "#/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type DashboardPanelProps = {
@@ -16,7 +17,8 @@ export function DashboardPanel({
 	className,
 	showAllLink = false,
 }: DashboardPanelProps) {
-	// TODO: Add navigation or onClick handlers to interactive buttons. Add functionality to the "Zobacz wszystkie" link button.
+	const t = useTranslation();
+
 	return (
 		<section
 			className={cn(
@@ -31,7 +33,7 @@ export function DashboardPanel({
 						type="button"
 						className="flex items-center gap-0.5 text-sm font-medium text-bank-green hover:underline"
 					>
-						Zobacz wszystkie
+						{t("dashboard.panels.showAll")}
 						<ChevronRight className="size-4" />
 					</button>
 				)}

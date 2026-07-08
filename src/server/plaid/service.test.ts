@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+	mergeDashboardData,
+	toDashboardUser,
+} from "#/server/plaid/dashboard-mappers";
 import { getDateRange } from "#/server/plaid/format";
-import { mergeDashboardData, toDashboardUser } from "#/server/plaid/dashboard-mappers";
 import type {
 	DashboardOverview,
 	DashboardTransactionsPayload,

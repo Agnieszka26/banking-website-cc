@@ -9,32 +9,47 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
+import { Route as LocaleRouteRouteImport } from './routes/$locale/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NewsIndexRouteImport } from './routes/news/index'
-import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as LocaleIndexRouteImport } from './routes/$locale/index'
 import { Route as SignUpSplatRouteImport } from './routes/sign-up.$'
 import { Route as SignInSplatRouteImport } from './routes/sign-in.$'
 import { Route as NewsNewsIdRouteImport } from './routes/news/$newsId'
-import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
-import { Route as DashboardPaymentsRouteImport } from './routes/dashboard/payments'
-import { Route as DashboardLoansRouteImport } from './routes/dashboard/loans'
-import { Route as DashboardDepositsRouteImport } from './routes/dashboard/deposits'
-import { Route as DashboardCardsRouteImport } from './routes/dashboard/cards'
-import { Route as DashboardApplicationsRouteImport } from './routes/dashboard/applications'
-import { Route as DashboardAccountsRouteImport } from './routes/dashboard/accounts'
-import { Route as DashboardAccountsAccountIdRouteImport } from './routes/dashboard/accounts/$accountId'
+import { Route as DashboardSplatRouteImport } from './routes/dashboard.$'
+import { Route as LocaleContactRouteImport } from './routes/$locale/contact'
+import { Route as LocaleDashboardRouteRouteImport } from './routes/$locale/dashboard/route'
+import { Route as LocaleNewsIndexRouteImport } from './routes/$locale/news/index'
+import { Route as LocaleDashboardIndexRouteImport } from './routes/$locale/dashboard/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as LocaleSignUpSplatRouteImport } from './routes/$locale/sign-up.$'
+import { Route as LocaleSignInSplatRouteImport } from './routes/$locale/sign-in.$'
+import { Route as LocaleNewsNewsIdRouteImport } from './routes/$locale/news/$newsId'
+import { Route as LocaleDashboardTransfersRouteImport } from './routes/$locale/dashboard/transfers'
+import { Route as LocaleDashboardSettingsRouteImport } from './routes/$locale/dashboard/settings'
+import { Route as LocaleDashboardPaymentsRouteImport } from './routes/$locale/dashboard/payments'
+import { Route as LocaleDashboardLoansRouteImport } from './routes/$locale/dashboard/loans'
+import { Route as LocaleDashboardDepositsRouteImport } from './routes/$locale/dashboard/deposits'
+import { Route as LocaleDashboardCardsRouteImport } from './routes/$locale/dashboard/cards'
+import { Route as LocaleDashboardApplicationsRouteImport } from './routes/$locale/dashboard/applications'
+import { Route as LocaleDashboardAccountsRouteImport } from './routes/$locale/dashboard/accounts'
+import { Route as LocaleDashboardAccountsAccountIdRouteImport } from './routes/$locale/dashboard/accounts/$accountId'
 
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRouteRoute = DashboardRouteRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const LocaleRouteRoute = LocaleRouteRouteImport.update({
+  id: '/$locale',
+  path: '/$locale',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -47,10 +62,10 @@ const NewsIndexRoute = NewsIndexRouteImport.update({
   path: '/news/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardIndexRoute = DashboardIndexRouteImport.update({
+const LocaleIndexRoute = LocaleIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => DashboardRouteRoute,
+  getParentRoute: () => LocaleRouteRoute,
 } as any)
 const SignUpSplatRoute = SignUpSplatRouteImport.update({
   id: '/sign-up/$',
@@ -67,173 +82,279 @@ const NewsNewsIdRoute = NewsNewsIdRouteImport.update({
   path: '/news/$newsId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => DashboardRouteRoute,
+const DashboardSplatRoute = DashboardSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardPaymentsRoute = DashboardPaymentsRouteImport.update({
-  id: '/payments',
-  path: '/payments',
-  getParentRoute: () => DashboardRouteRoute,
+const LocaleContactRoute = LocaleContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => LocaleRouteRoute,
 } as any)
-const DashboardLoansRoute = DashboardLoansRouteImport.update({
-  id: '/loans',
-  path: '/loans',
-  getParentRoute: () => DashboardRouteRoute,
+const LocaleDashboardRouteRoute = LocaleDashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => LocaleRouteRoute,
 } as any)
-const DashboardDepositsRoute = DashboardDepositsRouteImport.update({
-  id: '/deposits',
-  path: '/deposits',
-  getParentRoute: () => DashboardRouteRoute,
+const LocaleNewsIndexRoute = LocaleNewsIndexRouteImport.update({
+  id: '/news/',
+  path: '/news/',
+  getParentRoute: () => LocaleRouteRoute,
 } as any)
-const DashboardCardsRoute = DashboardCardsRouteImport.update({
-  id: '/cards',
-  path: '/cards',
-  getParentRoute: () => DashboardRouteRoute,
+const LocaleDashboardIndexRoute = LocaleDashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LocaleDashboardRouteRoute,
 } as any)
-const DashboardApplicationsRoute = DashboardApplicationsRouteImport.update({
-  id: '/applications',
-  path: '/applications',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardAccountsRoute = DashboardAccountsRouteImport.update({
-  id: '/accounts',
-  path: '/accounts',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardAccountsAccountIdRoute =
-  DashboardAccountsAccountIdRouteImport.update({
-    id: '/$accountId',
-    path: '/$accountId',
-    getParentRoute: () => DashboardAccountsRoute,
-  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LocaleSignUpSplatRoute = LocaleSignUpSplatRouteImport.update({
+  id: '/sign-up/$',
+  path: '/sign-up/$',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleSignInSplatRoute = LocaleSignInSplatRouteImport.update({
+  id: '/sign-in/$',
+  path: '/sign-in/$',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleNewsNewsIdRoute = LocaleNewsNewsIdRouteImport.update({
+  id: '/news/$newsId',
+  path: '/news/$newsId',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleDashboardTransfersRoute =
+  LocaleDashboardTransfersRouteImport.update({
+    id: '/transfers',
+    path: '/transfers',
+    getParentRoute: () => LocaleDashboardRouteRoute,
+  } as any)
+const LocaleDashboardSettingsRoute = LocaleDashboardSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => LocaleDashboardRouteRoute,
+} as any)
+const LocaleDashboardPaymentsRoute = LocaleDashboardPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => LocaleDashboardRouteRoute,
+} as any)
+const LocaleDashboardLoansRoute = LocaleDashboardLoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
+  getParentRoute: () => LocaleDashboardRouteRoute,
+} as any)
+const LocaleDashboardDepositsRoute = LocaleDashboardDepositsRouteImport.update({
+  id: '/deposits',
+  path: '/deposits',
+  getParentRoute: () => LocaleDashboardRouteRoute,
+} as any)
+const LocaleDashboardCardsRoute = LocaleDashboardCardsRouteImport.update({
+  id: '/cards',
+  path: '/cards',
+  getParentRoute: () => LocaleDashboardRouteRoute,
+} as any)
+const LocaleDashboardApplicationsRoute =
+  LocaleDashboardApplicationsRouteImport.update({
+    id: '/applications',
+    path: '/applications',
+    getParentRoute: () => LocaleDashboardRouteRoute,
+  } as any)
+const LocaleDashboardAccountsRoute = LocaleDashboardAccountsRouteImport.update({
+  id: '/accounts',
+  path: '/accounts',
+  getParentRoute: () => LocaleDashboardRouteRoute,
+} as any)
+const LocaleDashboardAccountsAccountIdRoute =
+  LocaleDashboardAccountsAccountIdRouteImport.update({
+    id: '/$accountId',
+    path: '/$accountId',
+    getParentRoute: () => LocaleDashboardAccountsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/$locale': typeof LocaleRouteRouteWithChildren
   '/contact': typeof ContactRoute
-  '/dashboard/accounts': typeof DashboardAccountsRouteWithChildren
-  '/dashboard/applications': typeof DashboardApplicationsRoute
-  '/dashboard/cards': typeof DashboardCardsRoute
-  '/dashboard/deposits': typeof DashboardDepositsRoute
-  '/dashboard/loans': typeof DashboardLoansRoute
-  '/dashboard/payments': typeof DashboardPaymentsRoute
-  '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/$locale/dashboard': typeof LocaleDashboardRouteRouteWithChildren
+  '/$locale/contact': typeof LocaleContactRoute
+  '/dashboard/$': typeof DashboardSplatRoute
   '/news/$newsId': typeof NewsNewsIdRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
-  '/dashboard/': typeof DashboardIndexRoute
+  '/$locale/': typeof LocaleIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/$locale/dashboard/accounts': typeof LocaleDashboardAccountsRouteWithChildren
+  '/$locale/dashboard/applications': typeof LocaleDashboardApplicationsRoute
+  '/$locale/dashboard/cards': typeof LocaleDashboardCardsRoute
+  '/$locale/dashboard/deposits': typeof LocaleDashboardDepositsRoute
+  '/$locale/dashboard/loans': typeof LocaleDashboardLoansRoute
+  '/$locale/dashboard/payments': typeof LocaleDashboardPaymentsRoute
+  '/$locale/dashboard/settings': typeof LocaleDashboardSettingsRoute
+  '/$locale/dashboard/transfers': typeof LocaleDashboardTransfersRoute
+  '/$locale/news/$newsId': typeof LocaleNewsNewsIdRoute
+  '/$locale/sign-in/$': typeof LocaleSignInSplatRoute
+  '/$locale/sign-up/$': typeof LocaleSignUpSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/dashboard/accounts/$accountId': typeof DashboardAccountsAccountIdRoute
+  '/$locale/dashboard/': typeof LocaleDashboardIndexRoute
+  '/$locale/news/': typeof LocaleNewsIndexRoute
+  '/$locale/dashboard/accounts/$accountId': typeof LocaleDashboardAccountsAccountIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
-  '/dashboard/accounts': typeof DashboardAccountsRouteWithChildren
-  '/dashboard/applications': typeof DashboardApplicationsRoute
-  '/dashboard/cards': typeof DashboardCardsRoute
-  '/dashboard/deposits': typeof DashboardDepositsRoute
-  '/dashboard/loans': typeof DashboardLoansRoute
-  '/dashboard/payments': typeof DashboardPaymentsRoute
-  '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/$locale/contact': typeof LocaleContactRoute
+  '/dashboard/$': typeof DashboardSplatRoute
   '/news/$newsId': typeof NewsNewsIdRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
-  '/dashboard': typeof DashboardIndexRoute
+  '/$locale': typeof LocaleIndexRoute
   '/news': typeof NewsIndexRoute
+  '/$locale/dashboard/accounts': typeof LocaleDashboardAccountsRouteWithChildren
+  '/$locale/dashboard/applications': typeof LocaleDashboardApplicationsRoute
+  '/$locale/dashboard/cards': typeof LocaleDashboardCardsRoute
+  '/$locale/dashboard/deposits': typeof LocaleDashboardDepositsRoute
+  '/$locale/dashboard/loans': typeof LocaleDashboardLoansRoute
+  '/$locale/dashboard/payments': typeof LocaleDashboardPaymentsRoute
+  '/$locale/dashboard/settings': typeof LocaleDashboardSettingsRoute
+  '/$locale/dashboard/transfers': typeof LocaleDashboardTransfersRoute
+  '/$locale/news/$newsId': typeof LocaleNewsNewsIdRoute
+  '/$locale/sign-in/$': typeof LocaleSignInSplatRoute
+  '/$locale/sign-up/$': typeof LocaleSignUpSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/dashboard/accounts/$accountId': typeof DashboardAccountsAccountIdRoute
+  '/$locale/dashboard': typeof LocaleDashboardIndexRoute
+  '/$locale/news': typeof LocaleNewsIndexRoute
+  '/$locale/dashboard/accounts/$accountId': typeof LocaleDashboardAccountsAccountIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/$locale': typeof LocaleRouteRouteWithChildren
   '/contact': typeof ContactRoute
-  '/dashboard/accounts': typeof DashboardAccountsRouteWithChildren
-  '/dashboard/applications': typeof DashboardApplicationsRoute
-  '/dashboard/cards': typeof DashboardCardsRoute
-  '/dashboard/deposits': typeof DashboardDepositsRoute
-  '/dashboard/loans': typeof DashboardLoansRoute
-  '/dashboard/payments': typeof DashboardPaymentsRoute
-  '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/$locale/dashboard': typeof LocaleDashboardRouteRouteWithChildren
+  '/$locale/contact': typeof LocaleContactRoute
+  '/dashboard/$': typeof DashboardSplatRoute
   '/news/$newsId': typeof NewsNewsIdRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
-  '/dashboard/': typeof DashboardIndexRoute
+  '/$locale/': typeof LocaleIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/$locale/dashboard/accounts': typeof LocaleDashboardAccountsRouteWithChildren
+  '/$locale/dashboard/applications': typeof LocaleDashboardApplicationsRoute
+  '/$locale/dashboard/cards': typeof LocaleDashboardCardsRoute
+  '/$locale/dashboard/deposits': typeof LocaleDashboardDepositsRoute
+  '/$locale/dashboard/loans': typeof LocaleDashboardLoansRoute
+  '/$locale/dashboard/payments': typeof LocaleDashboardPaymentsRoute
+  '/$locale/dashboard/settings': typeof LocaleDashboardSettingsRoute
+  '/$locale/dashboard/transfers': typeof LocaleDashboardTransfersRoute
+  '/$locale/news/$newsId': typeof LocaleNewsNewsIdRoute
+  '/$locale/sign-in/$': typeof LocaleSignInSplatRoute
+  '/$locale/sign-up/$': typeof LocaleSignUpSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/dashboard/accounts/$accountId': typeof DashboardAccountsAccountIdRoute
+  '/$locale/dashboard/': typeof LocaleDashboardIndexRoute
+  '/$locale/news/': typeof LocaleNewsIndexRoute
+  '/$locale/dashboard/accounts/$accountId': typeof LocaleDashboardAccountsAccountIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
+    | '/$locale'
     | '/contact'
-    | '/dashboard/accounts'
-    | '/dashboard/applications'
-    | '/dashboard/cards'
-    | '/dashboard/deposits'
-    | '/dashboard/loans'
-    | '/dashboard/payments'
-    | '/dashboard/settings'
+    | '/dashboard'
+    | '/$locale/dashboard'
+    | '/$locale/contact'
+    | '/dashboard/$'
     | '/news/$newsId'
     | '/sign-in/$'
     | '/sign-up/$'
-    | '/dashboard/'
+    | '/$locale/'
     | '/news/'
+    | '/$locale/dashboard/accounts'
+    | '/$locale/dashboard/applications'
+    | '/$locale/dashboard/cards'
+    | '/$locale/dashboard/deposits'
+    | '/$locale/dashboard/loans'
+    | '/$locale/dashboard/payments'
+    | '/$locale/dashboard/settings'
+    | '/$locale/dashboard/transfers'
+    | '/$locale/news/$newsId'
+    | '/$locale/sign-in/$'
+    | '/$locale/sign-up/$'
     | '/api/auth/$'
-    | '/dashboard/accounts/$accountId'
+    | '/$locale/dashboard/'
+    | '/$locale/news/'
+    | '/$locale/dashboard/accounts/$accountId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/contact'
-    | '/dashboard/accounts'
-    | '/dashboard/applications'
-    | '/dashboard/cards'
-    | '/dashboard/deposits'
-    | '/dashboard/loans'
-    | '/dashboard/payments'
-    | '/dashboard/settings'
+    | '/dashboard'
+    | '/$locale/contact'
+    | '/dashboard/$'
     | '/news/$newsId'
     | '/sign-in/$'
     | '/sign-up/$'
-    | '/dashboard'
+    | '/$locale'
     | '/news'
+    | '/$locale/dashboard/accounts'
+    | '/$locale/dashboard/applications'
+    | '/$locale/dashboard/cards'
+    | '/$locale/dashboard/deposits'
+    | '/$locale/dashboard/loans'
+    | '/$locale/dashboard/payments'
+    | '/$locale/dashboard/settings'
+    | '/$locale/dashboard/transfers'
+    | '/$locale/news/$newsId'
+    | '/$locale/sign-in/$'
+    | '/$locale/sign-up/$'
     | '/api/auth/$'
-    | '/dashboard/accounts/$accountId'
+    | '/$locale/dashboard'
+    | '/$locale/news'
+    | '/$locale/dashboard/accounts/$accountId'
   id:
     | '__root__'
     | '/'
-    | '/dashboard'
+    | '/$locale'
     | '/contact'
-    | '/dashboard/accounts'
-    | '/dashboard/applications'
-    | '/dashboard/cards'
-    | '/dashboard/deposits'
-    | '/dashboard/loans'
-    | '/dashboard/payments'
-    | '/dashboard/settings'
+    | '/dashboard'
+    | '/$locale/dashboard'
+    | '/$locale/contact'
+    | '/dashboard/$'
     | '/news/$newsId'
     | '/sign-in/$'
     | '/sign-up/$'
-    | '/dashboard/'
+    | '/$locale/'
     | '/news/'
+    | '/$locale/dashboard/accounts'
+    | '/$locale/dashboard/applications'
+    | '/$locale/dashboard/cards'
+    | '/$locale/dashboard/deposits'
+    | '/$locale/dashboard/loans'
+    | '/$locale/dashboard/payments'
+    | '/$locale/dashboard/settings'
+    | '/$locale/dashboard/transfers'
+    | '/$locale/news/$newsId'
+    | '/$locale/sign-in/$'
+    | '/$locale/sign-up/$'
     | '/api/auth/$'
-    | '/dashboard/accounts/$accountId'
+    | '/$locale/dashboard/'
+    | '/$locale/news/'
+    | '/$locale/dashboard/accounts/$accountId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  LocaleRouteRoute: typeof LocaleRouteRouteWithChildren
   ContactRoute: typeof ContactRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   NewsNewsIdRoute: typeof NewsNewsIdRoute
   SignInSplatRoute: typeof SignInSplatRoute
   SignUpSplatRoute: typeof SignUpSplatRoute
@@ -243,6 +364,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -250,11 +378,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteRouteImport
+    '/$locale': {
+      id: '/$locale'
+      path: '/$locale'
+      fullPath: '/$locale'
+      preLoaderRoute: typeof LocaleRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -271,12 +399,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/': {
-      id: '/dashboard/'
+    '/$locale/': {
+      id: '/$locale/'
       path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof DashboardRouteRoute
+      fullPath: '/$locale/'
+      preLoaderRoute: typeof LocaleIndexRouteImport
+      parentRoute: typeof LocaleRouteRoute
     }
     '/sign-up/$': {
       id: '/sign-up/$'
@@ -299,61 +427,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsNewsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/settings': {
-      id: '/dashboard/settings'
-      path: '/settings'
-      fullPath: '/dashboard/settings'
-      preLoaderRoute: typeof DashboardSettingsRouteImport
-      parentRoute: typeof DashboardRouteRoute
+    '/dashboard/$': {
+      id: '/dashboard/$'
+      path: '/$'
+      fullPath: '/dashboard/$'
+      preLoaderRoute: typeof DashboardSplatRouteImport
+      parentRoute: typeof DashboardRoute
     }
-    '/dashboard/payments': {
-      id: '/dashboard/payments'
-      path: '/payments'
-      fullPath: '/dashboard/payments'
-      preLoaderRoute: typeof DashboardPaymentsRouteImport
-      parentRoute: typeof DashboardRouteRoute
+    '/$locale/contact': {
+      id: '/$locale/contact'
+      path: '/contact'
+      fullPath: '/$locale/contact'
+      preLoaderRoute: typeof LocaleContactRouteImport
+      parentRoute: typeof LocaleRouteRoute
     }
-    '/dashboard/loans': {
-      id: '/dashboard/loans'
-      path: '/loans'
-      fullPath: '/dashboard/loans'
-      preLoaderRoute: typeof DashboardLoansRouteImport
-      parentRoute: typeof DashboardRouteRoute
+    '/$locale/dashboard': {
+      id: '/$locale/dashboard'
+      path: '/dashboard'
+      fullPath: '/$locale/dashboard'
+      preLoaderRoute: typeof LocaleDashboardRouteRouteImport
+      parentRoute: typeof LocaleRouteRoute
     }
-    '/dashboard/deposits': {
-      id: '/dashboard/deposits'
-      path: '/deposits'
-      fullPath: '/dashboard/deposits'
-      preLoaderRoute: typeof DashboardDepositsRouteImport
-      parentRoute: typeof DashboardRouteRoute
+    '/$locale/news/': {
+      id: '/$locale/news/'
+      path: '/news'
+      fullPath: '/$locale/news/'
+      preLoaderRoute: typeof LocaleNewsIndexRouteImport
+      parentRoute: typeof LocaleRouteRoute
     }
-    '/dashboard/cards': {
-      id: '/dashboard/cards'
-      path: '/cards'
-      fullPath: '/dashboard/cards'
-      preLoaderRoute: typeof DashboardCardsRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/applications': {
-      id: '/dashboard/applications'
-      path: '/applications'
-      fullPath: '/dashboard/applications'
-      preLoaderRoute: typeof DashboardApplicationsRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/accounts': {
-      id: '/dashboard/accounts'
-      path: '/accounts'
-      fullPath: '/dashboard/accounts'
-      preLoaderRoute: typeof DashboardAccountsRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/accounts/$accountId': {
-      id: '/dashboard/accounts/$accountId'
-      path: '/$accountId'
-      fullPath: '/dashboard/accounts/$accountId'
-      preLoaderRoute: typeof DashboardAccountsAccountIdRouteImport
-      parentRoute: typeof DashboardAccountsRoute
+    '/$locale/dashboard/': {
+      id: '/$locale/dashboard/'
+      path: '/'
+      fullPath: '/$locale/dashboard/'
+      preLoaderRoute: typeof LocaleDashboardIndexRouteImport
+      parentRoute: typeof LocaleDashboardRouteRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -362,50 +469,176 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$locale/sign-up/$': {
+      id: '/$locale/sign-up/$'
+      path: '/sign-up/$'
+      fullPath: '/$locale/sign-up/$'
+      preLoaderRoute: typeof LocaleSignUpSplatRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/sign-in/$': {
+      id: '/$locale/sign-in/$'
+      path: '/sign-in/$'
+      fullPath: '/$locale/sign-in/$'
+      preLoaderRoute: typeof LocaleSignInSplatRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/news/$newsId': {
+      id: '/$locale/news/$newsId'
+      path: '/news/$newsId'
+      fullPath: '/$locale/news/$newsId'
+      preLoaderRoute: typeof LocaleNewsNewsIdRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/dashboard/transfers': {
+      id: '/$locale/dashboard/transfers'
+      path: '/transfers'
+      fullPath: '/$locale/dashboard/transfers'
+      preLoaderRoute: typeof LocaleDashboardTransfersRouteImport
+      parentRoute: typeof LocaleDashboardRouteRoute
+    }
+    '/$locale/dashboard/settings': {
+      id: '/$locale/dashboard/settings'
+      path: '/settings'
+      fullPath: '/$locale/dashboard/settings'
+      preLoaderRoute: typeof LocaleDashboardSettingsRouteImport
+      parentRoute: typeof LocaleDashboardRouteRoute
+    }
+    '/$locale/dashboard/payments': {
+      id: '/$locale/dashboard/payments'
+      path: '/payments'
+      fullPath: '/$locale/dashboard/payments'
+      preLoaderRoute: typeof LocaleDashboardPaymentsRouteImport
+      parentRoute: typeof LocaleDashboardRouteRoute
+    }
+    '/$locale/dashboard/loans': {
+      id: '/$locale/dashboard/loans'
+      path: '/loans'
+      fullPath: '/$locale/dashboard/loans'
+      preLoaderRoute: typeof LocaleDashboardLoansRouteImport
+      parentRoute: typeof LocaleDashboardRouteRoute
+    }
+    '/$locale/dashboard/deposits': {
+      id: '/$locale/dashboard/deposits'
+      path: '/deposits'
+      fullPath: '/$locale/dashboard/deposits'
+      preLoaderRoute: typeof LocaleDashboardDepositsRouteImport
+      parentRoute: typeof LocaleDashboardRouteRoute
+    }
+    '/$locale/dashboard/cards': {
+      id: '/$locale/dashboard/cards'
+      path: '/cards'
+      fullPath: '/$locale/dashboard/cards'
+      preLoaderRoute: typeof LocaleDashboardCardsRouteImport
+      parentRoute: typeof LocaleDashboardRouteRoute
+    }
+    '/$locale/dashboard/applications': {
+      id: '/$locale/dashboard/applications'
+      path: '/applications'
+      fullPath: '/$locale/dashboard/applications'
+      preLoaderRoute: typeof LocaleDashboardApplicationsRouteImport
+      parentRoute: typeof LocaleDashboardRouteRoute
+    }
+    '/$locale/dashboard/accounts': {
+      id: '/$locale/dashboard/accounts'
+      path: '/accounts'
+      fullPath: '/$locale/dashboard/accounts'
+      preLoaderRoute: typeof LocaleDashboardAccountsRouteImport
+      parentRoute: typeof LocaleDashboardRouteRoute
+    }
+    '/$locale/dashboard/accounts/$accountId': {
+      id: '/$locale/dashboard/accounts/$accountId'
+      path: '/$accountId'
+      fullPath: '/$locale/dashboard/accounts/$accountId'
+      preLoaderRoute: typeof LocaleDashboardAccountsAccountIdRouteImport
+      parentRoute: typeof LocaleDashboardAccountsRoute
+    }
   }
 }
 
-interface DashboardAccountsRouteChildren {
-  DashboardAccountsAccountIdRoute: typeof DashboardAccountsAccountIdRoute
+interface LocaleDashboardAccountsRouteChildren {
+  LocaleDashboardAccountsAccountIdRoute: typeof LocaleDashboardAccountsAccountIdRoute
 }
 
-const DashboardAccountsRouteChildren: DashboardAccountsRouteChildren = {
-  DashboardAccountsAccountIdRoute: DashboardAccountsAccountIdRoute,
+const LocaleDashboardAccountsRouteChildren: LocaleDashboardAccountsRouteChildren =
+  {
+    LocaleDashboardAccountsAccountIdRoute:
+      LocaleDashboardAccountsAccountIdRoute,
+  }
+
+const LocaleDashboardAccountsRouteWithChildren =
+  LocaleDashboardAccountsRoute._addFileChildren(
+    LocaleDashboardAccountsRouteChildren,
+  )
+
+interface LocaleDashboardRouteRouteChildren {
+  LocaleDashboardAccountsRoute: typeof LocaleDashboardAccountsRouteWithChildren
+  LocaleDashboardApplicationsRoute: typeof LocaleDashboardApplicationsRoute
+  LocaleDashboardCardsRoute: typeof LocaleDashboardCardsRoute
+  LocaleDashboardDepositsRoute: typeof LocaleDashboardDepositsRoute
+  LocaleDashboardLoansRoute: typeof LocaleDashboardLoansRoute
+  LocaleDashboardPaymentsRoute: typeof LocaleDashboardPaymentsRoute
+  LocaleDashboardSettingsRoute: typeof LocaleDashboardSettingsRoute
+  LocaleDashboardTransfersRoute: typeof LocaleDashboardTransfersRoute
+  LocaleDashboardIndexRoute: typeof LocaleDashboardIndexRoute
 }
 
-const DashboardAccountsRouteWithChildren =
-  DashboardAccountsRoute._addFileChildren(DashboardAccountsRouteChildren)
-
-interface DashboardRouteRouteChildren {
-  DashboardAccountsRoute: typeof DashboardAccountsRouteWithChildren
-  DashboardApplicationsRoute: typeof DashboardApplicationsRoute
-  DashboardCardsRoute: typeof DashboardCardsRoute
-  DashboardDepositsRoute: typeof DashboardDepositsRoute
-  DashboardLoansRoute: typeof DashboardLoansRoute
-  DashboardPaymentsRoute: typeof DashboardPaymentsRoute
-  DashboardSettingsRoute: typeof DashboardSettingsRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
+const LocaleDashboardRouteRouteChildren: LocaleDashboardRouteRouteChildren = {
+  LocaleDashboardAccountsRoute: LocaleDashboardAccountsRouteWithChildren,
+  LocaleDashboardApplicationsRoute: LocaleDashboardApplicationsRoute,
+  LocaleDashboardCardsRoute: LocaleDashboardCardsRoute,
+  LocaleDashboardDepositsRoute: LocaleDashboardDepositsRoute,
+  LocaleDashboardLoansRoute: LocaleDashboardLoansRoute,
+  LocaleDashboardPaymentsRoute: LocaleDashboardPaymentsRoute,
+  LocaleDashboardSettingsRoute: LocaleDashboardSettingsRoute,
+  LocaleDashboardTransfersRoute: LocaleDashboardTransfersRoute,
+  LocaleDashboardIndexRoute: LocaleDashboardIndexRoute,
 }
 
-const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
-  DashboardAccountsRoute: DashboardAccountsRouteWithChildren,
-  DashboardApplicationsRoute: DashboardApplicationsRoute,
-  DashboardCardsRoute: DashboardCardsRoute,
-  DashboardDepositsRoute: DashboardDepositsRoute,
-  DashboardLoansRoute: DashboardLoansRoute,
-  DashboardPaymentsRoute: DashboardPaymentsRoute,
-  DashboardSettingsRoute: DashboardSettingsRoute,
-  DashboardIndexRoute: DashboardIndexRoute,
+const LocaleDashboardRouteRouteWithChildren =
+  LocaleDashboardRouteRoute._addFileChildren(LocaleDashboardRouteRouteChildren)
+
+interface LocaleRouteRouteChildren {
+  LocaleDashboardRouteRoute: typeof LocaleDashboardRouteRouteWithChildren
+  LocaleContactRoute: typeof LocaleContactRoute
+  LocaleIndexRoute: typeof LocaleIndexRoute
+  LocaleNewsNewsIdRoute: typeof LocaleNewsNewsIdRoute
+  LocaleSignInSplatRoute: typeof LocaleSignInSplatRoute
+  LocaleSignUpSplatRoute: typeof LocaleSignUpSplatRoute
+  LocaleNewsIndexRoute: typeof LocaleNewsIndexRoute
 }
 
-const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
-  DashboardRouteRouteChildren,
+const LocaleRouteRouteChildren: LocaleRouteRouteChildren = {
+  LocaleDashboardRouteRoute: LocaleDashboardRouteRouteWithChildren,
+  LocaleContactRoute: LocaleContactRoute,
+  LocaleIndexRoute: LocaleIndexRoute,
+  LocaleNewsNewsIdRoute: LocaleNewsNewsIdRoute,
+  LocaleSignInSplatRoute: LocaleSignInSplatRoute,
+  LocaleSignUpSplatRoute: LocaleSignUpSplatRoute,
+  LocaleNewsIndexRoute: LocaleNewsIndexRoute,
+}
+
+const LocaleRouteRouteWithChildren = LocaleRouteRoute._addFileChildren(
+  LocaleRouteRouteChildren,
+)
+
+interface DashboardRouteChildren {
+  DashboardSplatRoute: typeof DashboardSplatRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardSplatRoute: DashboardSplatRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  LocaleRouteRoute: LocaleRouteRouteWithChildren,
   ContactRoute: ContactRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   NewsNewsIdRoute: NewsNewsIdRoute,
   SignInSplatRoute: SignInSplatRoute,
   SignUpSplatRoute: SignUpSplatRoute,

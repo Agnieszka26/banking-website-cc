@@ -3,9 +3,9 @@ import { CountryCode, Products } from "plaid";
 import { plaidLinkRepository } from "#/data/repositories";
 import { requireSession, requireUserId } from "#/lib/session.server";
 import { getPostHogClient } from "#/utils/posthog-server";
-import { mergeDashboardData, toDashboardUser } from "./dashboard-mappers";
 import { invalidatePlaidCache } from "./cache";
 import { plaidClient } from "./client";
+import { mergeDashboardData, toDashboardUser } from "./dashboard-mappers";
 import { parsePublicTokenInput } from "./schemas";
 import { loadDashboardOverview, loadDashboardTransactions } from "./service";
 import { syncUserPlaidData } from "./sync.service";
@@ -134,27 +134,7 @@ export const exchangePublicToken = createServerFn({ method: "POST" })
 		return { linked: true };
 	});
 
-/** Loads account balances and summary without fetching transactions. */
-export const getDashboardOverview = createServerFn({ method: "GET" }).handler(
-	async () => loadDashboardOverview(),
-);
-
-/** Loads recent transactions without fetching account balances. */
-export const getDashboardTransactions = createServerFn({
-	method: "GET",
-}).handler(async () => loadDashboardTransactions());
-
 /** Loads linked accounts, recent transactions, and summary for the dashboard. */
 export const getDashboardData = createServerFn({ method: "GET" }).handler(
 	async (): Promise<DashboardData> => loadDashboardDataResilient(),
-);
-
-/** Forces a Plaid → Postgres sync for the authenticated user (cron/webhook-ready entry point). */
-export const refreshPlaidSync = createServerFn({ method: "POST" }).handler(
-	async () => {
-		const userId = await requireUserId("unauthorized");
-		invalidatePlaidCache(userId);
-		await syncUserPlaidData(userId, "all");
-		return { synced: true };
-	},
 );

@@ -6,9 +6,6 @@ export type AuthSession = NonNullable<
 	Awaited<ReturnType<typeof auth.api.getSession>>
 >;
 
-export type { AuthenticatedUser } from "#/lib/session-user";
-export { toAuthenticatedUser } from "#/lib/session-user";
-
 /** Returns the current session from request cookies, or `null`. */
 export async function resolveSession(): Promise<AuthSession | null> {
 	const session = await auth.api.getSession({ headers: getRequestHeaders() });

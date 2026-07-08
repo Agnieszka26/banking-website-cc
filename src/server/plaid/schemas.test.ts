@@ -3,7 +3,9 @@ import { parsePublicTokenInput } from "#/server/plaid/schemas";
 
 describe("parsePublicTokenInput", () => {
 	it("returns a trimmed token for valid input", () => {
-		expect(parsePublicTokenInput({ publicToken: "  public-sandbox-token  " })).toEqual({
+		expect(
+			parsePublicTokenInput({ publicToken: "  public-sandbox-token  " }),
+		).toEqual({
 			publicToken: "public-sandbox-token",
 		});
 	});

@@ -59,8 +59,3 @@ export async function syncUserPlaidData(
 		throw error;
 	}
 }
-
-/** Clears cached Plaid rows after unlinking or token rotation. */
-export async function clearUserPlaidCache(userId: string): Promise<void> {
-	await plaidSyncRepository.clearCachedData(userId);
-}

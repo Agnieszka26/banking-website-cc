@@ -1,19 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { getPreferredLocale } from "#/lib/i18n/functions";
+import { buildLocalizedPathname } from "#/lib/i18n/paths";
 
 export const Route = createFileRoute("/contact")({
-	component: RouteComponent,
-	head: () => ({
-		meta: [
-			{
-				title: "Contact",
-				description: "Contact page",
-				keywords: "contact, page",
-				author: "Baking App",
-			},
-		],
-	}),
+	beforeLoad: async () => {
+		const locale = await getPreferredLocale();
+		throw redirect({ to: buildLocalizedPathname(locale, "/contact") });
+	},
 });
-
-function RouteComponent() {
-	return <div>Hello "/contact"!</div>;
-}

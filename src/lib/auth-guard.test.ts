@@ -1,4 +1,6 @@
+import { isRedirect } from "@tanstack/react-router";
 import { describe, expect, it } from "vitest";
+import { authenticateRouteUser } from "#/lib/auth-guard";
 import {
 	getSafeRedirectPath,
 	getSafeRedirectTarget,
@@ -39,7 +41,9 @@ describe("getSafeRedirectTarget (SSR)", () => {
 			pathname: "/dashboard",
 			search: {},
 		});
-		expect(getSafeRedirectTarget("data:text/html,<script>alert(1)</script>")).toEqual({
+		expect(
+			getSafeRedirectTarget("data:text/html,<script>alert(1)</script>"),
+		).toEqual({
 			pathname: "/dashboard",
 			search: {},
 		});
@@ -63,9 +67,7 @@ describe("getSafeRedirectTarget (client)", () => {
 	});
 
 	it("rejects external origins", () => {
-		expect(
-			getSafeRedirectTarget("https://evil.example/steal"),
-		).toEqual({
+		expect(getSafeRedirectTarget("https://evil.example/steal")).toEqual({
 			pathname: "/dashboard",
 			search: {},
 		});
@@ -74,8 +76,53 @@ describe("getSafeRedirectTarget (client)", () => {
 
 describe("getSafeRedirectPath", () => {
 	it("serializes pathname, search, and hash", () => {
-		expect(
-			getSafeRedirectPath("/reports?month=3#summary"),
-		).toBe("/reports?month=3#summary");
+		expect(getSafeRedirectPath("/reports?month=3#summary")).toBe(
+			"/reports?month=3#summary",
+		);
+	});
+});
+
+describe("authenticateRouteUser", () => {
+	it("returns the authenticated user when a session exists", () => {
+		const user = authenticateRouteUser(
+			{
+				user: {
+					id: "user-1",
+					name: "Jane Doe",
+					email: "jane@example.com",
+				},
+			},
+			{
+				href: "http://localhost/en/dashboard/settings",
+				pathname: "/en/dashboard/settings",
+			},
+		);
+
+		expect(user).toEqual({
+			id: "user-1",
+			name: "Jane Doe",
+			email: "jane@example.com",
+		});
+	});
+
+	it("redirects unauthenticated users to the localized sign-in route", () => {
+		try {
+			authenticateRouteUser(null, {
+				href: "http://localhost/fr/dashboard/settings",
+				pathname: "/fr/dashboard/settings",
+			});
+			expect.unreachable("Expected authenticateRouteUser to redirect");
+		} catch (error) {
+			expect(isRedirect(error)).toBe(true);
+			expect(error).toMatchObject({
+				options: {
+					to: "/$locale/sign-in/$",
+					params: { locale: "fr" },
+					search: {
+						redirect: "http://localhost/fr/dashboard/settings",
+					},
+				},
+			});
+		}
 	});
 });

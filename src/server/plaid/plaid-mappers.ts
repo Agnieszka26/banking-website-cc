@@ -43,7 +43,9 @@ export function mapPlaidAccount(account: AccountBase): DashboardAccount {
 }
 
 /** Maps a Plaid transaction payload to the dashboard DTO. */
-export function mapPlaidTransaction(transaction: Transaction): DashboardTransaction {
+export function mapPlaidTransaction(
+	transaction: Transaction,
+): DashboardTransaction {
 	return {
 		id: transaction.transaction_id,
 		date: transaction.date,
@@ -75,7 +77,9 @@ function toNumber(value: { toNumber(): number } | number): number {
 }
 
 /** Maps a cached DB account row to the dashboard DTO. */
-export function mapCachedAccount(account: CachedAccountRecord): DashboardAccount {
+export function mapCachedAccount(
+	account: CachedAccountRecord,
+): DashboardAccount {
 	return {
 		id: account.plaidAccountId,
 		name: account.name,

@@ -1,8 +1,9 @@
 import { usePostHog } from "@posthog/react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { authClient, loginWithIdentifier } from "#/lib/auth-client";
 import { getSafeRedirectTarget } from "#/lib/auth-guard";
+import { localizeRedirectTarget, useLocale, useTranslation } from "#/lib/i18n";
 
 export type LoginSource = "home" | "sign-in";
 
@@ -14,7 +15,10 @@ type UseLoginOptions = {
 /** Shared sign-in state, submit handler, and post-login redirect. */
 export function useLogin({ redirectTo, source }: UseLoginOptions) {
 	const navigate = useNavigate();
+	const router = useRouter();
 	const posthog = usePostHog();
+	const t = useTranslation();
+	const locale = useLocale();
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | null>(null);
@@ -32,7 +36,7 @@ export function useLogin({ redirectTo, source }: UseLoginOptions) {
 			});
 
 			if (signInError) {
-				setError(signInError.message ?? "Logowanie nie powiodło się");
+				setError(signInError.message ?? t("errors.loginFailed"));
 				return;
 			}
 
@@ -44,15 +48,19 @@ export function useLogin({ redirectTo, source }: UseLoginOptions) {
 				posthog.identify(userId, { source });
 			}
 
-			const { pathname, search, hash } = getSafeRedirectTarget(redirectTo);
+			const redirect = localizeRedirectTarget(
+				getSafeRedirectTarget(redirectTo),
+				locale,
+			);
+			await router.invalidate();
 			await navigate({
-				to: pathname,
-				search,
-				...(hash ? { hash } : {}),
+				to: redirect.pathname,
+				search: redirect.search,
+				...(redirect.hash ? { hash: redirect.hash } : {}),
 			});
 		} catch (err) {
 			setError(
-				err instanceof Error ? err.message : "Logowanie nie powiodło się",
+				err instanceof Error ? err.message : t("errors.loginFailed"),
 			);
 		} finally {
 			setIsSubmitting(false);

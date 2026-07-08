@@ -7,7 +7,7 @@ export const authClient = createAuthClient({
 	plugins: [usernameClient()],
 });
 
-export const { signIn, signUp, signOut, useSession } = authClient;
+export const { signUp, useSession } = authClient;
 
 /**
  * Identifier-based login: authenticates by username/identifier + password.
@@ -28,9 +28,7 @@ export function loginWithIdentifier(input: {
 	});
 }
 
-type LogoutResult =
-	| { ok: true }
-	| { ok: false; error: string };
+type LogoutResult = { ok: true } | { ok: false; error: string };
 
 /**
  * Ends the Better Auth session. Returns `{ ok: false }` when sign-out fails so

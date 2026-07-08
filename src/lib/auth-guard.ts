@@ -1,16 +1,12 @@
 import { redirect } from "@tanstack/react-router";
+import { resolveAppLocale } from "#/lib/i18n/paths";
 import {
-	toAuthenticatedUser,
 	type AuthenticatedUser,
 	type SessionUserSource,
+	toAuthenticatedUser,
 } from "#/lib/session-user";
 
-export type { AuthenticatedUser } from "#/lib/session-user";
-export {
-	getSafeRedirectPath,
-	getSafeRedirectTarget,
-	type SafeRedirectTarget,
-} from "#/lib/redirect-safety";
+export { getSafeRedirectTarget } from "#/lib/redirect-safety";
 
 type RouteSession = SessionUserSource | null;
 
@@ -20,11 +16,13 @@ type RouteSession = SessionUserSource | null;
  */
 export function authenticateRouteUser(
 	session: RouteSession,
-	location: { href: string },
+	location: { href: string; pathname: string },
 ): AuthenticatedUser {
 	if (!session) {
+		const locale = resolveAppLocale(location.pathname);
 		throw redirect({
-			to: "/sign-in/$",
+			to: "/$locale/sign-in/$",
+			params: { locale },
 			search: { redirect: location.href },
 		});
 	}

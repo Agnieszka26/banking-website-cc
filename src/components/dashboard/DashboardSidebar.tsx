@@ -1,5 +1,10 @@
 import { usePostHog } from "@posthog/react";
-import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
+import {
+	Link,
+	useNavigate,
+	useRouter,
+	useRouterState,
+} from "@tanstack/react-router";
 import {
 	CreditCard,
 	FileText,
@@ -15,28 +20,55 @@ import {
 	Wallet,
 } from "lucide-react";
 import { useState } from "react";
-import {
-	contactEmail,
-	contactPhone,
-	contactPhoneHref,
-} from "#/config/contact";
+import { contactEmail, contactPhone, contactPhoneHref } from "#/config/contact";
 import { logout } from "#/lib/auth-client";
+import {
+	stripLocaleFromPathname,
+	useLocalizedPath,
+	useTranslation,
+} from "#/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const navItems: Array<{
-	label: string;
+	labelKey: string;
 	to: string;
 	icon: typeof LayoutDashboard;
 	exact?: boolean;
 }> = [
-	{ label: "Pulpit", to: "/dashboard", icon: LayoutDashboard, exact: true },
-	{ label: "Rachunki", to: "/dashboard/accounts", icon: Wallet },
-	{ label: "Przelewy", to: "/dashboard/payments", icon: Landmark },
-	{ label: "Karty", to: "/dashboard/cards", icon: CreditCard },
-	{ label: "Lokaty", to: "/dashboard/deposits", icon: PiggyBank },
-	{ label: "Kredyty", to: "/dashboard/loans", icon: HandCoins },
-	{ label: "Wnioski i dyspozycje", to: "/dashboard/applications", icon: FileText },
-	{ label: "Ustawienia", to: "/dashboard/settings", icon: Settings },
+	{
+		labelKey: "dashboard.nav.overview",
+		to: "/dashboard",
+		icon: LayoutDashboard,
+		exact: true,
+	},
+	{ labelKey: "dashboard.nav.accounts", to: "/dashboard/accounts", icon: Wallet },
+	{
+		labelKey: "dashboard.nav.transfers",
+		to: "/dashboard/transfers",
+		icon: HandCoins,
+	},
+	{
+		labelKey: "dashboard.nav.payments",
+		to: "/dashboard/payments",
+		icon: Landmark,
+	},
+	{ labelKey: "dashboard.nav.cards", to: "/dashboard/cards", icon: CreditCard },
+	{
+		labelKey: "dashboard.nav.deposits",
+		to: "/dashboard/deposits",
+		icon: PiggyBank,
+	},
+	{ labelKey: "dashboard.nav.loans", to: "/dashboard/loans", icon: HandCoins },
+	{
+		labelKey: "dashboard.nav.applications",
+		to: "/dashboard/applications",
+		icon: FileText,
+	},
+	{
+		labelKey: "dashboard.nav.settings",
+		to: "/dashboard/settings",
+		icon: Settings,
+	},
 ];
 
 type DashboardSidebarProps = {
@@ -45,7 +77,10 @@ type DashboardSidebarProps = {
 
 /** Dashboard navigation sidebar with user info and sign-out. */
 export function DashboardSidebar({ userName }: DashboardSidebarProps) {
+	const t = useTranslation();
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
+	const pathWithoutLocale = stripLocaleFromPathname(pathname);
+	const localize = useLocalizedPath();
 	const navigate = useNavigate();
 	const router = useRouter();
 	const posthog = usePostHog();
@@ -69,7 +104,7 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 			await router.invalidate();
 		} catch (err) {
 			setError(
-				err instanceof Error ? err.message : "Wylogowanie nie powiodło się",
+				err instanceof Error ? err.message : t("errors.signOutFailed"),
 			);
 		} finally {
 			setIsSigningOut(false);
@@ -84,17 +119,17 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 		.join("");
 
 	return (
-		<aside className="flex w-56 shrink-0 flex-col border-r border-border bg-card lg:w-60">
-			<nav className="flex flex-1 flex-col gap-1 p-4">
-				{navItems.map(({ label, to, icon: Icon, exact }) => {
+		<aside className="sticky top-16 z-40 flex max-h-[calc(100dvh-4rem)] w-56 shrink-0 flex-col self-start overflow-y-auto overscroll-contain border-r border-border bg-card lg:top-24 lg:max-h-[calc(100dvh-6rem)] lg:w-60">
+			<nav className="flex shrink-0 flex-col gap-1 p-4">
+				{navItems.map(({ labelKey, to, icon: Icon, exact }) => {
 					const isActive = exact
-						? pathname === to || pathname === `${to}/`
-						: pathname.startsWith(to);
+						? pathWithoutLocale === to || pathWithoutLocale === `${to}/`
+						: pathWithoutLocale.startsWith(to);
 
 					return (
 						<Link
-							key={label}
-							to={to}
+							key={labelKey}
+							to={localize(to)}
 							className={cn(
 								"flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
 								isActive
@@ -108,7 +143,7 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 									isActive ? "text-white" : "text-bank-green",
 								)}
 							/>
-							<span className="leading-tight">{label}</span>
+							<span className="leading-tight">{t(labelKey)}</span>
 						</Link>
 					);
 				})}
@@ -130,7 +165,9 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 							className="flex items-center gap-1 text-xs text-muted-foreground hover:text-bank-green disabled:opacity-60"
 						>
 							<LogOut className="size-3" />
-							{isSigningOut ? "Wylogowywanie..." : "Wyloguj"}
+							{isSigningOut
+								? t("dashboard.sidebar.signingOut")
+								: t("dashboard.sidebar.signOut")}
 						</button>
 						{error && (
 							<p className="mt-1 text-xs text-red-600" role="alert">
@@ -143,7 +180,7 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 
 			<div className="m-4 mt-auto rounded-xl border border-border bg-muted/40 p-4">
 				<p className="text-sm font-semibold text-foreground">
-					Potrzebujesz pomocy?
+					{t("dashboard.sidebar.needHelp")}
 				</p>
 				<a
 					href={contactPhoneHref()}
@@ -157,7 +194,7 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 					className="mt-2 flex items-center gap-2 text-sm text-muted-foreground hover:text-bank-green hover:underline"
 				>
 					<Mail className="size-4 shrink-0" />
-					Napisz do nas
+					{t("dashboard.sidebar.writeToUs")}
 				</a>
 			</div>
 		</aside>

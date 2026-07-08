@@ -1,0 +1,206 @@
+{
+	"navigation": {
+		"home": "Home",
+		"news": "News",
+		"contact": "Contact",
+		"signIn": "Sign in",
+		"signUp": "Sign up",
+		"dashboard": "Dashboard",
+		"help": "Help",
+		"helpline": "Helpline: {{phone}}"
+	},
+	"buttons": {
+		"continue": "Continue",
+		"signIn": "Sign in",
+		"signUp": "Sign up",
+		"createAccount": "Create account",
+		"subscribe": "Subscribe",
+		"tryAgain": "Try again",
+		"backToHome": "Back to home",
+		"backToTop": "Back to top"
+	},
+	"greetings": {
+		"welcome": "Welcome",
+		"welcomeBack": "Welcome back, {{name}}",
+		"signedInLead": "You are signed in to your account.",
+		"loginTitle": "Sign in",
+		"signUpTitle": "Create an account",
+		"newsletterLead": "Get updates, tips, and security news — no spam."
+	},
+	"home": {
+		"signedInAs": "Signed in as",
+		"email": "Email",
+		"openDashboard": "Go to dashboard"
+	},
+	"errors": {
+		"signOutFailed": "Sign out failed",
+		"generic": "Something went wrong",
+		"notFoundTitle": "Page not found",
+		"notFoundDescription": "The address may be wrong or the page may have moved.",
+		"rootErrorTitle": "Something went wrong",
+		"rootErrorDescription": "We couldn't load this page. Try again or return to the home page.",
+		"loginFailed": "Sign in failed",
+		"signUpFailed": "Registration failed",
+		"invalidEmail": "Enter a valid email address.",
+		"emailRequired": "Enter your email address."
+	},
+	"loading": {
+		"default": "Loading…",
+		"authCheck": "Checking your session…",
+		"signingIn": "Signing in…",
+		"signingUp": "Creating account…"
+	},
+	"language": {
+		"label": "Language",
+		"select": "Choose language",
+		"short": "Lang"
+	},
+	"accessibility": {
+		"fontSize": "Font size",
+		"decreaseFont": "Decrease font size",
+		"increaseFont": "Increase font size",
+		"highContrast": "High contrast",
+		"openMenu": "Open menu",
+		"closeMenu": "Close menu"
+	},
+	"footer": {
+		"tagline": "Modern online banking — secure, transparent, and always within reach.",
+		"resources": "Resources",
+		"security": "Security",
+		"terms": "Terms",
+		"privacy": "Privacy policy",
+		"accessibilityStatement": "Accessibility statement",
+		"contact": "Contact",
+		"newsletter": "Newsletter",
+		"email": "Email",
+		"phone": "Phone",
+		"address": "Address",
+		"copyright": "© {{year}} {{company}}. All rights reserved.",
+		"subscribeSuccess": "Thank you! Check your inbox to confirm your subscription."
+	},
+	"form": {
+		"identifier": "Identifier",
+		"password": "Password",
+		"identifierPlaceholder": "Enter your identifier",
+		"emailPlaceholder": "you@email.com",
+		"loginHelp": "Login help",
+		"noAccount": "Don't have an account?",
+		"hasAccount": "Already have an account?",
+		"firstName": "First name",
+		"lastName": "Last name",
+		"passwordHint": "At least 8 characters"
+	},
+	"news": {
+		"title": "News",
+		"empty": "No news."
+	},
+	"dashboard": {
+		"defaultUser": "User",
+		"nav": {
+			"transfers": "Transfers",
+			"overview": "Dashboard",
+			"accounts": "Accounts",
+			"payments": "Payments",
+			"cards": "Cards",
+			"deposits": "Deposits",
+			"loans": "Loans",
+			"applications": "Applications & requests",
+			"settings": "Settings"
+		},
+		"sidebar": {
+			"signOut": "Sign out",
+			"signingOut": "Signing out…",
+			"needHelp": "Need help?",
+			"writeToUs": "Write to us"
+		},
+		"greeting": "Good morning, {{name}}",
+		"lastSignIn": "Last sign-in: {{date}}",
+		"panels": {
+			"myAccounts": "My accounts",
+			"quickTransfer": "Quick transfer",
+			"messages": "Messages",
+			"recentTransactions": "Recent transactions",
+			"mySummary": "My summary",
+			"shortcuts": "Shortcuts",
+			"showAll": "Show all"
+		},
+		"empty": {
+			"noAccounts": "No linked accounts.",
+			"noTransactions": "No transactions to display.",
+			"noAccountTransactions": "No transactions on this account.",
+			"connectForSummary": "Link a bank account to see your summary.",
+			"comingSoon": "Coming soon."
+		},
+		"transfer": {
+			"toOwnAccount": "To own account",
+			"toRecipient": "To recipient",
+			"taxes": "Tax / social security",
+			"execute": "Make a transfer",
+			"history": "Transfer history"
+		},
+		"transferForms": {
+			"ownTitle": "Own transfer",
+			"recipientTitle": "Transfer to recipient",
+			"taxTitle": "ZUS / Tax Office transfer",
+			"sourceAccount": "Source account",
+			"destinationAccount": "Destination account",
+			"amount": "Amount",
+			"transferTitle": "Transfer title",
+			"recipientName": "Recipient name",
+			"recipientAccountNumber": "Recipient account number",
+			"paymentType": "Payment type",
+			"paymentTypeZus": "ZUS",
+			"paymentTypeTaxOffice": "Tax office",
+			"accountNumber": "Account number",
+			"paymentId": "Payment ID",
+			"selectAccount": "Select account",
+			"selectPaymentType": "Select payment type",
+			"execute": "Execute transfer",
+			"makeTransfer": "Make a transfer",
+			"cancel": "Cancel",
+			"success": "Transfer submitted successfully.",
+			"errors": {
+				"required": "This field is required.",
+				"amountPositive": "Amount must be greater than 0.",
+				"sameAccounts": "Source and destination accounts must be different.",
+				"invalidAccountNumber": "Enter a valid 26-digit account number.",
+				"needTwoAccounts": "At least two linked accounts are required for an own-account transfer."
+			}
+		},
+		"messages": {
+			"securityNotice": "Security notice",
+			"transferConfirmation": "Transfer confirmation",
+			"newDepositOffer": "New deposit offer"
+		},
+		"shortcuts": {
+			"changeCardLimit": "Change card limit",
+			"blockCard": "Block card",
+			"openDeposit": "Open deposit",
+			"submitApplication": "Submit application"
+		},
+		"summary": {
+			"availableFunds": "Available funds",
+			"savings": "Savings",
+			"linkedAccounts": "Linked accounts",
+			"activeAccounts": "{{count}} active",
+			"viewFull": "View full summary"
+		},
+		"account": {
+			"backToDashboard": "Back to dashboard",
+			"recentTransactions": "Recent transactions"
+		},
+		"securityBanner": {
+			"headline": "Your security matters most to us.",
+			"body": "Never share login details by phone or email. Always verify the bank website address.",
+			"learnMore": "Learn more"
+		},
+		"connectBank": {
+			"title": "Connect bank account",
+			"description": "To view accounts and transactions, connect via the secure Plaid module. In the sandbox environment you can use Plaid test credentials.",
+			"connecting": "Connecting…",
+			"connectButton": "Connect account via Plaid",
+			"linkTokenError": "Could not prepare bank connection.",
+			"connectError": "Could not connect bank account."
+		}
+	}
+}

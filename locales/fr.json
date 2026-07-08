@@ -1,0 +1,206 @@
+{
+	"navigation": {
+		"home": "Accueil",
+		"news": "Actualités",
+		"contact": "Contact",
+		"signIn": "Se connecter",
+		"signUp": "Créer un compte",
+		"dashboard": "Tableau de bord",
+		"help": "Aide",
+		"helpline": "Assistance : {{phone}}"
+	},
+	"buttons": {
+		"continue": "Continuer",
+		"signIn": "Se connecter",
+		"signUp": "Créer un compte",
+		"createAccount": "Créer un compte",
+		"subscribe": "S'abonner",
+		"tryAgain": "Réessayer",
+		"backToHome": "Accueil",
+		"backToTop": "Retour en haut"
+	},
+	"greetings": {
+		"welcome": "Bienvenue",
+		"welcomeBack": "Bon retour, {{name}}",
+		"signedInLead": "Vous êtes connecté à votre compte.",
+		"loginTitle": "Connexion",
+		"signUpTitle": "Créer un compte",
+		"newsletterLead": "Recevez des actualités, des conseils et des informations de sécurité — sans spam."
+	},
+	"home": {
+		"signedInAs": "Connecté en tant que",
+		"email": "E-mail",
+		"openDashboard": "Accéder au tableau de bord"
+	},
+	"errors": {
+		"signOutFailed": "Échec de la déconnexion",
+		"generic": "Une erreur s'est produite",
+		"notFoundTitle": "Page introuvable",
+		"notFoundDescription": "L'adresse est peut-être incorrecte ou la page a été déplacée.",
+		"rootErrorTitle": "Une erreur s'est produite",
+		"rootErrorDescription": "Impossible de charger cette page. Réessayez ou retournez à l'accueil.",
+		"loginFailed": "Échec de la connexion",
+		"signUpFailed": "Échec de l'inscription",
+		"invalidEmail": "Saisissez une adresse e-mail valide.",
+		"emailRequired": "Saisissez votre adresse e-mail."
+	},
+	"loading": {
+		"default": "Chargement…",
+		"authCheck": "Vérification de la session…",
+		"signingIn": "Connexion…",
+		"signingUp": "Création du compte…"
+	},
+	"language": {
+		"label": "Langue",
+		"select": "Choisir la langue",
+		"short": "Langue"
+	},
+	"accessibility": {
+		"fontSize": "Taille du texte",
+		"decreaseFont": "Réduire la taille du texte",
+		"increaseFont": "Augmenter la taille du texte",
+		"highContrast": "Contraste élevé",
+		"openMenu": "Ouvrir le menu",
+		"closeMenu": "Fermer le menu"
+	},
+	"footer": {
+		"tagline": "Banque en ligne moderne — sécurisée, transparente et toujours à portée de main.",
+		"resources": "Ressources",
+		"security": "Sécurité",
+		"terms": "Conditions",
+		"privacy": "Politique de confidentialité",
+		"accessibilityStatement": "Déclaration d'accessibilité",
+		"contact": "Contact",
+		"newsletter": "Newsletter",
+		"email": "E-mail",
+		"phone": "Téléphone",
+		"address": "Adresse",
+		"copyright": "© {{year}} {{company}}. Tous droits réservés.",
+		"subscribeSuccess": "Merci ! Consultez votre boîte mail pour confirmer l'abonnement."
+	},
+	"form": {
+		"identifier": "Identifiant",
+		"password": "Mot de passe",
+		"identifierPlaceholder": "Saisissez votre identifiant",
+		"emailPlaceholder": "vous@email.fr",
+		"loginHelp": "Aide à la connexion",
+		"noAccount": "Vous n'avez pas de compte ?",
+		"hasAccount": "Vous avez déjà un compte ?",
+		"firstName": "Prénom",
+		"lastName": "Nom",
+		"passwordHint": "Au moins 8 caractères"
+	},
+	"news": {
+		"title": "Actualités",
+		"empty": "Aucune actualité."
+	},
+	"dashboard": {
+		"defaultUser": "Utilisateur",
+		"nav": {
+			"transfers": "Virements",
+			"overview": "Tableau de bord",
+			"accounts": "Comptes",
+			"payments": "Virements",
+			"cards": "Cartes",
+			"deposits": "Dépôts",
+			"loans": "Crédits",
+			"applications": "Demandes et instructions",
+			"settings": "Paramètres"
+		},
+		"sidebar": {
+			"signOut": "Se déconnecter",
+			"signingOut": "Déconnexion…",
+			"needHelp": "Besoin d'aide ?",
+			"writeToUs": "Écrivez-nous"
+		},
+		"greeting": "Bonjour, {{name}}",
+		"lastSignIn": "Dernière connexion : {{date}}",
+		"panels": {
+			"myAccounts": "Mes comptes",
+			"quickTransfer": "Virement rapide",
+			"messages": "Messages",
+			"recentTransactions": "Opérations récentes",
+			"mySummary": "Mon résumé",
+			"shortcuts": "Raccourcis",
+			"showAll": "Tout afficher"
+		},
+		"empty": {
+			"noAccounts": "Aucun compte connecté.",
+			"noTransactions": "Aucune transaction à afficher.",
+			"noAccountTransactions": "Aucune transaction sur ce compte.",
+			"connectForSummary": "Connectez un compte bancaire pour voir votre résumé.",
+			"comingSoon": "Bientôt disponible."
+		},
+		"transfer": {
+			"toOwnAccount": "Vers mon compte",
+			"toRecipient": "Vers un bénéficiaire",
+			"taxes": "Impôts / sécurité sociale",
+			"execute": "Effectuer un virement",
+			"history": "Historique des virements"
+		},
+		"transferForms": {
+			"ownTitle": "Virement interne",
+			"recipientTitle": "Virement vers un bénéficiaire",
+			"taxTitle": "Virement ZUS / administration fiscale",
+			"sourceAccount": "Compte source",
+			"destinationAccount": "Compte destinataire",
+			"amount": "Montant",
+			"transferTitle": "Libellé du virement",
+			"recipientName": "Nom du bénéficiaire",
+			"recipientAccountNumber": "Numéro de compte du bénéficiaire",
+			"paymentType": "Type de paiement",
+			"paymentTypeZus": "ZUS",
+			"paymentTypeTaxOffice": "Administration fiscale",
+			"accountNumber": "Numéro de compte",
+			"paymentId": "Identifiant de paiement",
+			"selectAccount": "Sélectionner un compte",
+			"selectPaymentType": "Sélectionner le type de paiement",
+			"execute": "Effectuer le virement",
+			"makeTransfer": "Effectuer le virement",
+			"cancel": "Annuler",
+			"success": "Virement envoyé avec succès.",
+			"errors": {
+				"required": "Ce champ est obligatoire.",
+				"amountPositive": "Le montant doit être supérieur à 0.",
+				"sameAccounts": "Les comptes source et destinataire doivent être différents.",
+				"invalidAccountNumber": "Saisissez un numéro de compte valide à 26 chiffres.",
+				"needTwoAccounts": "Un virement interne nécessite au moins deux comptes connectés."
+			}
+		},
+		"messages": {
+			"securityNotice": "Avis de sécurité",
+			"transferConfirmation": "Confirmation de virement",
+			"newDepositOffer": "Nouvelle offre de dépôt"
+		},
+		"shortcuts": {
+			"changeCardLimit": "Modifier la limite de carte",
+			"blockCard": "Bloquer la carte",
+			"openDeposit": "Ouvrir un dépôt",
+			"submitApplication": "Soumettre une demande"
+		},
+		"summary": {
+			"availableFunds": "Fonds disponibles",
+			"savings": "Épargne",
+			"linkedAccounts": "Comptes connectés",
+			"activeAccounts": "Comptes actifs : {{count}}",
+			"viewFull": "Voir le résumé complet"
+		},
+		"account": {
+			"backToDashboard": "Retour au tableau de bord",
+			"recentTransactions": "Opérations récentes"
+		},
+		"securityBanner": {
+			"headline": "Votre sécurité est notre priorité.",
+			"body": "Ne communiquez jamais vos identifiants par téléphone ou e-mail. Vérifiez toujours l'adresse du site de la banque.",
+			"learnMore": "En savoir plus"
+		},
+		"connectBank": {
+			"title": "Connecter un compte bancaire",
+			"description": "Pour afficher vos comptes et transactions, connectez-vous via le module sécurisé Plaid. En environnement sandbox, vous pouvez utiliser les identifiants de test Plaid.",
+			"connecting": "Connexion…",
+			"connectButton": "Connecter via Plaid",
+			"linkTokenError": "Impossible de préparer la connexion bancaire.",
+			"connectError": "Impossible de connecter le compte bancaire."
+		}
+	}
+}

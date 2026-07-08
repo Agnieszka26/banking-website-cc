@@ -16,7 +16,9 @@ export type DashboardSessionSource = {
 };
 
 /** Maps a Better Auth session to dashboard user display fields. */
-export function toDashboardUser(session: DashboardSessionSource): DashboardUser {
+export function toDashboardUser(
+	session: DashboardSessionSource,
+): DashboardUser {
 	const fullName = session.user.name || session.user.username || "Użytkowniku";
 	const [firstName, ...rest] = fullName.split(" ");
 	const signedInAt = session.session.createdAt;

@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "fallow": {
+      "source": "fallow-rs/fallow-skills",
+      "sourceType": "github",
+      "skillPath": "fallow/skills/fallow/SKILL.md",
+      "computedHash": "738070f213509e9539ef266b7fabf574751b8e2129bd7050f203fa757523649e"
+    },
     "tanstack-query-best-practices": {
       "source": "deckardger/tanstack-agent-skills",
       "sourceType": "github",

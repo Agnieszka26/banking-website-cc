@@ -6,8 +6,11 @@ import {
 	mapPlaidAccount,
 	mapPlaidTransaction,
 } from "#/server/plaid/plaid-mappers";
-import type { DashboardAccount, DashboardTransaction } from "#/server/plaid/types";
 import type { SyncableTransaction } from "#/server/plaid/sync-types";
+import type {
+	DashboardAccount,
+	DashboardTransaction,
+} from "#/server/plaid/types";
 
 function toSyncableTransaction(transaction: Transaction): SyncableTransaction {
 	const mapped = mapPlaidTransaction(transaction);
