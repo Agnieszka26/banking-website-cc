@@ -1,4 +1,6 @@
 import { type FormEvent, useState } from "react";
+import { TransferAmountField } from "#/components/dashboard/transfers/TransferAmountField";
+import { TransferFormActions } from "#/components/dashboard/transfers/TransferFormActions";
 import type {
 	TaxPaymentType,
 	TransferFormProps,
@@ -10,7 +12,6 @@ import {
 	parsePositiveAmount,
 } from "#/components/dashboard/transfers/validation";
 import { useTranslation } from "#/lib/i18n";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -153,27 +154,12 @@ export function TaxTransferForm({ onCancel, onSuccess }: TransferFormProps) {
 				)}
 			</div>
 
-			<div className="space-y-2">
-				<Label htmlFor="tax-transfer-amount">
-					{t("dashboard.transferForms.amount")}
-				</Label>
-				<Input
-					id="tax-transfer-amount"
-					type="number"
-					min="0"
-					step="0.01"
-					inputMode="decimal"
-					value={amount}
-					onChange={(event) => setAmount(event.target.value)}
-					aria-invalid={Boolean(errors.amount)}
-					className={cn("h-10", errors.amount && "border-destructive")}
-				/>
-				{errors.amount && (
-					<p className="text-xs text-destructive" role="alert">
-						{errors.amount}
-					</p>
-				)}
-			</div>
+			<TransferAmountField
+				id="tax-transfer-amount"
+				value={amount}
+				onChange={setAmount}
+				error={errors.amount}
+			/>
 
 			<div className="space-y-2">
 				<Label htmlFor="tax-transfer-payment-id">
@@ -194,18 +180,11 @@ export function TaxTransferForm({ onCancel, onSuccess }: TransferFormProps) {
 				)}
 			</div>
 
-			<div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-				<Button type="button" variant="outline" onClick={onCancel}>
-					{t("dashboard.transferForms.cancel")}
-				</Button>
-				<Button
-					type="submit"
-					disabled={isSubmitting}
-					className="bg-bank-green text-white hover:bg-bank-green/90"
-				>
-					{t("dashboard.transferForms.makeTransfer")}
-				</Button>
-			</div>
+			<TransferFormActions
+				onCancel={onCancel}
+				isSubmitting={isSubmitting}
+				submitLabel={t("dashboard.transferForms.makeTransfer")}
+			/>
 		</form>
 	);
 }

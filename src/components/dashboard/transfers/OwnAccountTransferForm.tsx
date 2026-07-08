@@ -1,15 +1,14 @@
 import { type FormEvent, useState } from "react";
 import { AccountSelectField } from "#/components/dashboard/transfers/AccountSelectField";
+import { TransferAmountField } from "#/components/dashboard/transfers/TransferAmountField";
+import { TransferFormActions } from "#/components/dashboard/transfers/TransferFormActions";
+import { TransferTitleField } from "#/components/dashboard/transfers/TransferTitleField";
 import type { TransferFormProps } from "#/components/dashboard/transfers/types";
 import {
 	isNonEmpty,
 	parsePositiveAmount,
 } from "#/components/dashboard/transfers/validation";
 import { useTranslation } from "#/lib/i18n";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 
 type FieldErrors = {
 	sourceAccountId?: string;
@@ -36,9 +35,7 @@ export function OwnAccountTransferForm({
 		const nextErrors: FieldErrors = {};
 
 		if (!isNonEmpty(sourceAccountId)) {
-			nextErrors.sourceAccountId = t(
-				"dashboard.transferForms.errors.required",
-			);
+			nextErrors.sourceAccountId = t("dashboard.transferForms.errors.required");
 		}
 
 		if (!isNonEmpty(destinationAccountId)) {
@@ -128,59 +125,25 @@ export function OwnAccountTransferForm({
 				error={errors.destinationAccountId}
 			/>
 
-			<div className="space-y-2">
-				<Label htmlFor="own-transfer-amount">
-					{t("dashboard.transferForms.amount")}
-				</Label>
-				<Input
-					id="own-transfer-amount"
-					type="number"
-					min="0"
-					step="0.01"
-					inputMode="decimal"
-					value={amount}
-					onChange={(event) => setAmount(event.target.value)}
-					aria-invalid={Boolean(errors.amount)}
-					className={cn("h-10", errors.amount && "border-destructive")}
-				/>
-				{errors.amount && (
-					<p className="text-xs text-destructive" role="alert">
-						{errors.amount}
-					</p>
-				)}
-			</div>
+			<TransferAmountField
+				id="own-transfer-amount"
+				value={amount}
+				onChange={setAmount}
+				error={errors.amount}
+			/>
 
-			<div className="space-y-2">
-				<Label htmlFor="own-transfer-title">
-					{t("dashboard.transferForms.transferTitle")}
-				</Label>
-				<Input
-					id="own-transfer-title"
-					type="text"
-					value={title}
-					onChange={(event) => setTitle(event.target.value)}
-					aria-invalid={Boolean(errors.title)}
-					className={cn("h-10", errors.title && "border-destructive")}
-				/>
-				{errors.title && (
-					<p className="text-xs text-destructive" role="alert">
-						{errors.title}
-					</p>
-				)}
-			</div>
+			<TransferTitleField
+				id="own-transfer-title"
+				value={title}
+				onChange={setTitle}
+				error={errors.title}
+			/>
 
-			<div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-				<Button type="button" variant="outline" onClick={onCancel}>
-					{t("dashboard.transferForms.cancel")}
-				</Button>
-				<Button
-					type="submit"
-					disabled={isSubmitting}
-					className="bg-bank-green text-white hover:bg-bank-green/90"
-				>
-					{t("dashboard.transferForms.execute")}
-				</Button>
-			</div>
+			<TransferFormActions
+				onCancel={onCancel}
+				isSubmitting={isSubmitting}
+				submitLabel={t("dashboard.transferForms.execute")}
+			/>
 		</form>
 	);
 }
