@@ -92,7 +92,7 @@ function DashboardHome() {
 								return (
 									<li key={account.id}>
 										<Link
-											to={localize(`/dashboard/accounts/${account.id}`)}
+											to={localize(`/dashboard/accounts/${encodeURIComponent(account.id)}`)}
 											className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-muted/60"
 										>
 											<div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-bank-green-light">
@@ -140,7 +140,7 @@ function DashboardHome() {
 									className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-muted/60"
 									onClick={() =>
 										posthog.capture("dashboard_message_opened", {
-											message_title: t(message.titleKey),
+											message_title: message.titleKey,
 										})
 									}
 								>
@@ -262,7 +262,7 @@ function DashboardHome() {
 									className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-muted/60"
 									onClick={() =>
 										posthog.capture("dashboard_shortcut_clicked", {
-											shortcut_label: t(shortcut.labelKey),
+											shortcut_label: shortcut.labelKey,
 										})
 									}
 								>

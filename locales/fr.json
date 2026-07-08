@@ -90,6 +90,10 @@
 		"lastName": "Nom",
 		"passwordHint": "Au moins 8 caractères"
 	},
+	"news": {
+		"title": "Actualités",
+		"empty": "Aucune actualité."
+	},
 	"dashboard": {
 		"defaultUser": "Utilisateur",
 		"nav": {
@@ -178,7 +182,7 @@
 			"availableFunds": "Fonds disponibles",
 			"savings": "Épargne",
 			"linkedAccounts": "Comptes connectés",
-			"activeAccounts": "{{count}} actifs",
+			"activeAccounts": "Comptes actifs : {{count}}",
 			"viewFull": "Voir le résumé complet"
 		},
 		"account": {

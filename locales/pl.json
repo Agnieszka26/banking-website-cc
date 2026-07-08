@@ -90,13 +90,17 @@
 		"lastName": "Nazwisko",
 		"passwordHint": "Minimum 8 znaków"
 	},
+	"news": {
+		"title": "Aktualności",
+		"empty": "Brak aktualności."
+	},
 	"dashboard": {
 		"defaultUser": "Użytkownik",
 		"nav": {
 			"transfers": "Przelewy",
 			"overview": "Pulpit",
 			"accounts": "Rachunki",
-			"payments": "Przelewy",
+			"payments": "Płatności",
 			"cards": "Karty",
 			"deposits": "Lokaty",
 			"loans": "Kredyty",

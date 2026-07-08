@@ -1,18 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight, Megaphone } from "lucide-react";
-import { useLocalizedPath } from "#/lib/i18n";
+import { useLocale, useLocalizedPath, useTranslation } from "#/lib/i18n";
 import { getNews } from "#/server/news/functions";
 import { Card, CardContent } from "@/components/ui/card";
+import type { NewsItem } from "#/server/news/types";
 
 export const Route = createFileRoute("/$locale/news/")({
 	loader: () => getNews(),
 	component: RouteComponent,
 });
 
-function formatPlDate(value: string): string {
+function formatDate(value: string, locale: string): string {
 	const date = new Date(value);
 	if (Number.isNaN(date.getTime())) return "";
-	return date.toLocaleDateString("pl-PL", {
+	return date.toLocaleDateString(locale, {
 		day: "2-digit",
 		month: "2-digit",
 		year: "numeric",
@@ -22,23 +23,26 @@ function formatPlDate(value: string): string {
 function RouteComponent() {
 	const news = Route.useLoaderData();
 	const localize = useLocalizedPath();
+	const t = useTranslation();
+	const locale = useLocale();
+
 
 	return (
 		<div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
 			<header className="mb-6 flex items-center gap-2 sm:mb-8">
 				<Megaphone className="h-6 w-6 shrink-0 text-primary" />
 				<h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-					Aktualności
+				{t("news.title")}
 				</h1>
 			</header>
 
 			{news.length === 0 ? (
 				<p className="text-sm text-muted-foreground">
-					Brak aktualnych komunikatów.
+					{t("news.empty")}
 				</p>
 			) : (
 				<ul className="space-y-3 sm:space-y-4">
-					{news.map((item) => (
+					{news.map((item: NewsItem) => (
 						<li key={item.id}>
 							<Link
 								to={localize(`/news/${item.id}`)}
@@ -48,7 +52,7 @@ function RouteComponent() {
 									<CardContent className="flex items-start gap-4 p-4 sm:p-5">
 										<div className="min-w-0 flex-1 space-y-1">
 											<div className="flex items-center gap-2 text-xs text-muted-foreground">
-												<span>{formatPlDate(item.created_at)}</span>
+												<span>{formatDate(item.created_at, locale)}</span>
 												{item.category && (
 													<>
 														<span aria-hidden>·</span>

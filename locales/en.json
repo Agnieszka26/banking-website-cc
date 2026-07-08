@@ -90,6 +90,10 @@
 		"lastName": "Last name",
 		"passwordHint": "At least 8 characters"
 	},
+	"news": {
+		"title": "News",
+		"empty": "No news."
+	},
 	"dashboard": {
 		"defaultUser": "User",
 		"nav": {

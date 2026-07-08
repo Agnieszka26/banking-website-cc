@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useTranslation } from "#/lib/i18n";
 
 export const Route = createFileRoute("/$locale/contact")({
 	component: RouteComponent,
@@ -15,5 +16,6 @@ export const Route = createFileRoute("/$locale/contact")({
 });
 
 function RouteComponent() {
-	return <div>Hello "/contact"!</div>;
+	const  t  = useTranslation();
+	return <div>{t("contact.placeholder")}</div>;
 }

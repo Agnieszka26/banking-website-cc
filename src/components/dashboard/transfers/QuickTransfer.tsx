@@ -31,6 +31,8 @@ type QuickTransferProps = {
 export function QuickTransfer({ accounts }: QuickTransferProps) {
 	const t = useTranslation();
 	const posthog = usePostHog();
+
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [activeTransfer, setActiveTransfer] = useState<TransferType | null>(
 		null,
 	);
@@ -40,9 +42,9 @@ export function QuickTransfer({ accounts }: QuickTransferProps) {
 		setActiveTransfer(null);
 	}, []);
 
-	const handleTileClick = (type: TransferType, labelKey: string) => {
+	const handleTileClick = (type: TransferType) => {
 		posthog.capture("transfer_type_selected", {
-			transfer_type: t(labelKey),
+			transfer_type: type,
 		});
 		setActiveTransfer(type);
 	};
@@ -51,9 +53,10 @@ export function QuickTransfer({ accounts }: QuickTransferProps) {
 		const result = await submitTransfer(payload);
 
 		if (!result.ok) {
+			setErrorMessage(t("dashboard.transferForms.errors.submissionFailed"));
 			return;
 		}
-
+		setErrorMessage(null);
 		posthog.capture("transfer_submitted", {
 			transfer_type: payload.type,
 			reference_id: result.referenceId,
@@ -80,7 +83,7 @@ export function QuickTransfer({ accounts }: QuickTransferProps) {
 						key={action.type}
 						type="button"
 						className="flex flex-col items-center gap-2 rounded-lg border border-border bg-muted/30 px-2 py-4 text-center transition-colors hover:border-bank-green/30 hover:bg-bank-green-light"
-						onClick={() => handleTileClick(action.type, action.labelKey)}
+						onClick={() => handleTileClick(action.type)}
 					>
 						<div className="flex size-10 items-center justify-center rounded-lg bg-card">
 							<action.icon className="size-5 text-bank-green" />

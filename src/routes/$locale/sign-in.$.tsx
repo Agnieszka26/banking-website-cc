@@ -8,10 +8,9 @@ export const Route = createFileRoute("/$locale/sign-in/$")({
 
 function RouteComponent() {
 	const location = useLocation();
-	const redirectTo =
-		typeof (location.search as Record<string, unknown>).redirect === "string"
-			? ((location.search as Record<string, unknown>).redirect as string)
-			: undefined;
+	const search = location.search as Record<string, unknown>;
+	const redirectTo = typeof search.redirect === "string" ? search.redirect : undefined;
+
 
 	return (
 		<AuthLayout id="sign-in">
