@@ -83,6 +83,16 @@ export function OwnAccountTransferForm({
 			return;
 		}
 
+		const sourceAccount = accounts.find(
+			(account) => account.id === sourceAccountId,
+		);
+		if (!sourceAccount) {
+			setErrors({
+				sourceAccountId: t("dashboard.transferForms.errors.required"),
+			});
+			return;
+		}
+
 		setIsSubmitting(true);
 		try {
 			await onSuccess({
@@ -90,6 +100,7 @@ export function OwnAccountTransferForm({
 				sourceAccountId,
 				destinationAccountId,
 				amount: parsedAmount,
+				currency: sourceAccount.currency,
 				title: title.trim(),
 			});
 		} finally {

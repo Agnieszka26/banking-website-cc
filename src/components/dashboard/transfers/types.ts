@@ -16,6 +16,7 @@ export type OwnAccountTransferPayload = {
 	sourceAccountId: string;
 	destinationAccountId: string;
 	amount: number;
+	currency: string;
 	title: string;
 };
 

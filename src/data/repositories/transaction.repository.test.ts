@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import "dotenv/config";
 import { transactionRepository } from "#/data/repositories/transaction.repository";
+import { fromMinorBigInt } from "#/lib/money";
 
 const connectionString = process.env.DATABASE_URL_RLS;
 const describeIfRlsDb = connectionString ? describe : describe.skip;
@@ -24,7 +25,7 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 				userId: ownerUserId,
 				name: "Owner Checking",
 				currency: "PLN",
-				balanceMinor: 50_000,
+				balanceMinor: 50_000n,
 			},
 		});
 		ownerAccountId = ownerAccount.id;
@@ -34,7 +35,7 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 				userId: otherUserId,
 				name: "Other Checking",
 				currency: "PLN",
-				balanceMinor: 50_000,
+				balanceMinor: 50_000n,
 			},
 		});
 		otherAccountId = otherAccount.id;
@@ -42,7 +43,7 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 		await prisma.ledgerTransaction.create({
 			data: {
 				accountId: ownerAccountId,
-				amountMinor: 2500,
+				amountMinor: 2500n,
 				currency: "PLN",
 				direction: "debit",
 				type: "payment",
@@ -54,7 +55,7 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 		await prisma.ledgerTransaction.create({
 			data: {
 				accountId: otherAccountId,
-				amountMinor: 9900,
+				amountMinor: 9900n,
 				currency: "PLN",
 				direction: "credit",
 				type: "deposit",
@@ -110,6 +111,7 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 			where: { id: ownerAccountId },
 			select: { balanceMinor: true },
 		});
+		const beforeBalance = fromMinorBigInt(before.balanceMinor);
 
 		const created = await transactionRepository.createTransaction({
 			userId: ownerUserId,
@@ -131,7 +133,8 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 			where: { id: ownerAccountId },
 			select: { balanceMinor: true },
 		});
-		expect(afterDebit.balanceMinor).toBe(before.balanceMinor - debitAmount);
+		const afterDebitBalance = fromMinorBigInt(afterDebit.balanceMinor);
+		expect(afterDebitBalance).toBe(beforeBalance - debitAmount);
 
 		await expect(
 			transactionRepository.createTransaction({
@@ -151,7 +154,7 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 			accountId: otherAccountId,
 		});
 
-		const overdraftAmount = afterDebit.balanceMinor + 1;
+		const overdraftAmount = afterDebitBalance + 1;
 		await expect(
 			transactionRepository.createTransaction({
 				userId: ownerUserId,
@@ -169,13 +172,15 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 			code: "INSUFFICIENT_FUNDS",
 			accountId: ownerAccountId,
 			amountMinor: overdraftAmount,
-			balanceMinor: afterDebit.balanceMinor,
+			balanceMinor: afterDebitBalance,
 		});
 
 		const afterOverdraft = await prisma.ledgerAccount.findUniqueOrThrow({
 			where: { id: ownerAccountId },
 			select: { balanceMinor: true },
 		});
-		expect(afterOverdraft.balanceMinor).toBe(afterDebit.balanceMinor);
+		expect(fromMinorBigInt(afterOverdraft.balanceMinor)).toBe(
+			afterDebitBalance,
+		);
 	});
 });

@@ -20,6 +20,9 @@ const ALLOWED_CREDIT_TYPES = new Set<TransactionType>([
 	"refund",
 ]);
 
+/** Client-create debits must use an allowed outflow classification. */
+const ALLOWED_DEBIT_TYPES = new Set<TransactionType>(["payment", "adjustment"]);
+
 /**
  * Transaction types that must only be created
  * through dedicated server-side workflows.
@@ -28,7 +31,10 @@ const ALLOWED_CREDIT_TYPES = new Set<TransactionType>([
  * - transfer: requires paired ledger entries + transferId
  * - import: requires controlled ingestion flow
  */
-const DISALLOWED_CLIENT_TYPES = new Set<TransactionType>(["import", "transfer"]);
+const DISALLOWED_CLIENT_TYPES = new Set<TransactionType>([
+	"import",
+	"transfer",
+]);
 
 function utcBookingDateToday(): Date {
 	const now = new Date();
@@ -113,6 +119,7 @@ export async function listTransactions(
 			operation: "list",
 			errorCategory: "DATABASE_ERROR",
 			reason: "list_query_failed",
+			message: error instanceof Error ? error.message : String(error),
 		});
 		throw new AppError("INTERNAL_ERROR", "An unexpected error occurred.");
 	}
@@ -133,6 +140,7 @@ export async function createTransaction(
 				operation: "create",
 				errorCategory: "VALIDATION_ERROR",
 				reason: "disallowed_type",
+				message: "Transaction type is not allowed for client creation.",
 			});
 			throw new AppError("VALIDATION_ERROR", "Request body failed validation.");
 		}
@@ -144,6 +152,19 @@ export async function createTransaction(
 				operation: "create",
 				errorCategory: "VALIDATION_ERROR",
 				reason: "credit_flow_not_allowed",
+				message: "Credit transaction type is not allowed for client creation.",
+			});
+			throw new AppError("VALIDATION_ERROR", "Request body failed validation.");
+		}
+
+		if (input.direction === "debit" && !ALLOWED_DEBIT_TYPES.has(input.type)) {
+			log("warn", "transaction.validation_failed", {
+				userId,
+				accountId: input.accountId,
+				operation: "create",
+				errorCategory: "VALIDATION_ERROR",
+				reason: "debit_flow_not_allowed",
+				message: "Debit transaction type is not allowed for client creation.",
 			});
 			throw new AppError("VALIDATION_ERROR", "Request body failed validation.");
 		}
@@ -170,6 +191,7 @@ export async function createTransaction(
 				operation: "create",
 				errorCategory: "VALIDATION_ERROR",
 				reason: "currency_mismatch",
+				message: "Account currency does not match transaction currency.",
 			});
 			throw new AppError("VALIDATION_ERROR", "Request body failed validation.");
 		}

@@ -158,8 +158,7 @@ const currencyCode = z
   .string()
   .length(3)
   .regex(/^[A-Z]{3}$/, "Expected ISO 4217 currency code");
-const positiveMinorUnits = z.number().max(Number.MAX_SAFE_INTEGER).positive();
-
+const positiveMinorUnits = z.number().int().max(Number.MAX_SAFE_INTEGER).positive();
 export const ApiErrorCodeSchema = z.enum([
   "INSUFFICIENT_FUNDS",
   "ACCOUNT_NOT_FOUND",
@@ -194,7 +193,7 @@ export const AccountDtoSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   currency: currencyCode,
-  balanceMinor: z.number().max(Number.MAX_SAFE_INTEGER).positive(),
+  balanceMinor: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
 });
 
 export const TransactionDtoSchema = z.object({

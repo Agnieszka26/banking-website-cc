@@ -15,6 +15,9 @@ import type {
 	TransferDto,
 } from "#/shared/types";
 
+/** Own-account transfers always post debit + credit legs. */
+const COMPLETE_TRANSFER_TX_COUNT = 2;
+
 /**
  * Lists application-ledger accounts for the authenticated user.
  * Used by own-account transfer UI (not Plaid cache accounts).
@@ -56,6 +59,12 @@ export async function createOwnAccountTransfer(
 			);
 		}
 
+		if (source.id === destination.id) {
+			throw new AppError(
+				"VALIDATION_ERROR",
+				"Source and destination accounts must be different.",
+			);
+		}
 		if (
 			source.currency !== input.currency ||
 			destination.currency !== input.currency
@@ -87,7 +96,10 @@ export async function createOwnAccountTransfer(
 			input,
 		});
 
-		if (duplicate && duplicate.transactionIds.length >= 2) {
+		if (
+			duplicate &&
+			duplicate.transactionIds.length >= COMPLETE_TRANSFER_TX_COUNT
+		) {
 			log("info", "transfer.create.success", {
 				userId,
 				transferId: duplicate.id,

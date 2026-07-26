@@ -1,4 +1,5 @@
 import "@tanstack/react-start/server-only";
+import { fromMinorBigInt } from "#/lib/money";
 import { withUserRlsContext } from "#/lib/prisma-rls";
 
 export type LedgerAccountRecord = {
@@ -31,13 +32,20 @@ export const ledgerAccountRepository = {
 				},
 			});
 
-			return row ?? null;
+			if (!row) {
+				return null;
+			}
+
+			return {
+				...row,
+				balanceMinor: fromMinorBigInt(row.balanceMinor),
+			};
 		});
 	},
 
 	async listOwned(userId: string): Promise<LedgerAccountRecord[]> {
 		return withUserRlsContext(userId, async (tx) => {
-			return tx.ledgerAccount.findMany({
+			const rows = await tx.ledgerAccount.findMany({
 				where: { userId },
 				select: {
 					id: true,
@@ -48,6 +56,11 @@ export const ledgerAccountRepository = {
 				},
 				orderBy: { name: "asc" },
 			});
+
+			return rows.map((row) => ({
+				...row,
+				balanceMinor: fromMinorBigInt(row.balanceMinor),
+			}));
 		});
 	},
 };

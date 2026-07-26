@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import "dotenv/config";
 import { transferRepository } from "#/data/repositories/transfer.repository";
+import { fromMinorBigInt } from "#/lib/money";
 
 const connectionString = process.env.DATABASE_URL_RLS;
 const describeIfRlsDb = connectionString ? describe : describe.skip;
@@ -25,7 +26,7 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 				userId: ownerUserId,
 				name: "Source",
 				currency: "PLN",
-				balanceMinor: 50_000,
+				balanceMinor: 50_000n,
 			},
 		});
 		sourceAccountId = source.id;
@@ -35,7 +36,7 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 				userId: ownerUserId,
 				name: "Destination",
 				currency: "PLN",
-				balanceMinor: 10_000,
+				balanceMinor: 10_000n,
 			},
 		});
 		destinationAccountId = destination.id;
@@ -45,7 +46,7 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 				userId: otherUserId,
 				name: "Other",
 				currency: "PLN",
-				balanceMinor: 50_000,
+				balanceMinor: 50_000n,
 			},
 		});
 		otherAccountId = other.id;
@@ -97,8 +98,8 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 			where: { id: destinationAccountId },
 		});
 
-		expect(source.balanceMinor).toBe(47_500);
-		expect(destination.balanceMinor).toBe(12_500);
+		expect(fromMinorBigInt(source.balanceMinor)).toBe(47_500);
+		expect(fromMinorBigInt(destination.balanceMinor)).toBe(12_500);
 
 		const legs = await prisma.ledgerTransaction.findMany({
 			where: { transferId: created.id },
@@ -122,11 +123,42 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 		).rejects.toMatchObject({ code: "ACCOUNT_NOT_FOUND" });
 	});
 
-	it("rejects overdraft with INSUFFICIENT_FUNDS and leaves balances unchanged", async () => {
+	it("rejects identical source and destination before any writes", async () => {
 		const { prisma } = await import("#/lib/prisma");
-		const beforeSource = await prisma.ledgerAccount.findUniqueOrThrow({
-			where: { id: sourceAccountId },
-			select: { balanceMinor: true },
+		const beforeTransfers = await prisma.ledgerTransfer.count({
+			where: { userId: ownerUserId },
+		});
+		const beforeLegs = await prisma.ledgerTransaction.count({
+			where: { accountId: sourceAccountId },
+		});
+
+		await expect(
+			transferRepository.createTransfer({
+				userId: ownerUserId,
+				input: {
+					sourceAccountId,
+					destinationAccountId: sourceAccountId,
+					amountMinor: 1000,
+					currency: "PLN",
+					title: "Same account",
+				},
+			}),
+		).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
+
+		const afterTransfers = await prisma.ledgerTransfer.count({
+			where: { userId: ownerUserId },
+		});
+		const afterLegs = await prisma.ledgerTransaction.count({
+			where: { accountId: sourceAccountId },
+		});
+		expect(afterTransfers).toBe(beforeTransfers);
+		expect(afterLegs).toBe(beforeLegs);
+	});
+
+	it("rejects currency mismatch before any writes", async () => {
+		const { prisma } = await import("#/lib/prisma");
+		const beforeTransfers = await prisma.ledgerTransfer.count({
+			where: { userId: ownerUserId },
 		});
 
 		await expect(
@@ -135,7 +167,34 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 				input: {
 					sourceAccountId,
 					destinationAccountId,
-					amountMinor: beforeSource.balanceMinor + 1,
+					amountMinor: 1000,
+					currency: "EUR",
+					title: "FX not allowed",
+				},
+			}),
+		).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
+
+		const afterTransfers = await prisma.ledgerTransfer.count({
+			where: { userId: ownerUserId },
+		});
+		expect(afterTransfers).toBe(beforeTransfers);
+	});
+
+	it("rejects overdraft with INSUFFICIENT_FUNDS and leaves balances unchanged", async () => {
+		const { prisma } = await import("#/lib/prisma");
+		const beforeSource = await prisma.ledgerAccount.findUniqueOrThrow({
+			where: { id: sourceAccountId },
+			select: { balanceMinor: true },
+		});
+		const beforeBalance = fromMinorBigInt(beforeSource.balanceMinor);
+
+		await expect(
+			transferRepository.createTransfer({
+				userId: ownerUserId,
+				input: {
+					sourceAccountId,
+					destinationAccountId,
+					amountMinor: beforeBalance + 1,
 					currency: "PLN",
 					title: "Overdraft",
 				},
@@ -146,6 +205,6 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 			where: { id: sourceAccountId },
 			select: { balanceMinor: true },
 		});
-		expect(afterSource.balanceMinor).toBe(beforeSource.balanceMinor);
+		expect(fromMinorBigInt(afterSource.balanceMinor)).toBe(beforeBalance);
 	});
 });

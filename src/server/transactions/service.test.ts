@@ -158,6 +158,23 @@ describe("transaction service auth and ownership", () => {
 		});
 	});
 
+	it("returns typed VALIDATION_ERROR for disallowed debit flows", async () => {
+		requireUserIdMock.mockResolvedValue("user-a");
+
+		await expect(
+			createTransaction({
+				accountId: "acct-1",
+				amountMinor: 100,
+				currency: "PLN",
+				direction: "debit",
+				type: "refund",
+				title: "Invalid debit refund",
+			}),
+		).rejects.toMatchObject({
+			code: "VALIDATION_ERROR",
+		});
+	});
+
 	it("returns typed INSUFFICIENT_FUNDS for overdrawn debits", async () => {
 		requireUserIdMock.mockResolvedValue("user-a");
 		findOwnedByIdMock.mockResolvedValue({

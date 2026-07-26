@@ -50,6 +50,7 @@ describe("submitTransfer", () => {
 			sourceAccountId: "src",
 			destinationAccountId: "dst",
 			amount: 100,
+			currency: "PLN",
 			title: "Move",
 		};
 
@@ -85,6 +86,7 @@ describe("submitTransfer", () => {
 			sourceAccountId: "src",
 			destinationAccountId: "dst",
 			amount: 10,
+			currency: "EUR",
 			title: "Move",
 		});
 
@@ -97,7 +99,7 @@ describe("submitTransfer", () => {
 				sourceAccountId: "src",
 				destinationAccountId: "dst",
 				amountMinor: 1000,
-				currency: "PLN",
+				currency: "EUR",
 				title: "Move",
 			},
 		});

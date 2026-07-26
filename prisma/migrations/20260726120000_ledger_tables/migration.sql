@@ -57,8 +57,11 @@ CREATE POLICY ledger_accounts_service_role ON public.ledger_accounts
   WITH CHECK (true);
 
 DROP POLICY IF EXISTS ledger_transactions_own_data ON public.ledger_transactions;
-CREATE POLICY ledger_transactions_own_data ON public.ledger_transactions
-  FOR ALL
+DROP POLICY IF EXISTS ledger_transactions_own_select ON public.ledger_transactions;
+DROP POLICY IF EXISTS ledger_transactions_own_insert ON public.ledger_transactions;
+
+CREATE POLICY ledger_transactions_own_select ON public.ledger_transactions
+  FOR SELECT
   TO authenticated
   USING (
     EXISTS (
@@ -67,7 +70,11 @@ CREATE POLICY ledger_transactions_own_data ON public.ledger_transactions
       WHERE a.id = ledger_transactions.account_id
         AND a.user_id = current_app_user_id()
     )
-  )
+  );
+
+CREATE POLICY ledger_transactions_own_insert ON public.ledger_transactions
+  FOR INSERT
+  TO authenticated
   WITH CHECK (
     EXISTS (
       SELECT 1
@@ -78,13 +85,22 @@ CREATE POLICY ledger_transactions_own_data ON public.ledger_transactions
   );
 
 DROP POLICY IF EXISTS ledger_transactions_service_role ON public.ledger_transactions;
-CREATE POLICY ledger_transactions_service_role ON public.ledger_transactions
-  FOR ALL
+DROP POLICY IF EXISTS ledger_transactions_service_select ON public.ledger_transactions;
+DROP POLICY IF EXISTS ledger_transactions_service_insert ON public.ledger_transactions;
+
+CREATE POLICY ledger_transactions_service_select ON public.ledger_transactions
+  FOR SELECT
   TO service_role
-  USING (true)
+  USING (true);
+
+CREATE POLICY ledger_transactions_service_insert ON public.ledger_transactions
+  FOR INSERT
+  TO service_role
   WITH CHECK (true);
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.ledger_accounts TO banking_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.ledger_transactions TO banking_app;
+REVOKE UPDATE, DELETE ON public.ledger_transactions FROM banking_app;
+GRANT SELECT, INSERT ON public.ledger_transactions TO banking_app;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.ledger_accounts TO banking_app_runtime;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.ledger_transactions TO banking_app_runtime;
+REVOKE UPDATE, DELETE ON public.ledger_transactions FROM banking_app_runtime;
+GRANT SELECT, INSERT ON public.ledger_transactions TO banking_app_runtime;

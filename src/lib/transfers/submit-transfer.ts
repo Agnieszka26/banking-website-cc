@@ -52,7 +52,7 @@ export async function submitTransfer(
 				sourceAccountId: payload.sourceAccountId,
 				destinationAccountId: payload.destinationAccountId,
 				amountMinor,
-				currency: "PLN",
+				currency: payload.currency,
 				title: payload.title,
 			},
 		});

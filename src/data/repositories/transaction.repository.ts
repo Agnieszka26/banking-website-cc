@@ -1,5 +1,6 @@
 import "@tanstack/react-start/server-only";
 import { AccountNotFoundError, InsufficientFundsError } from "#/lib/errors";
+import { fromMinorBigInt, toMinorBigInt } from "#/lib/money";
 import { withUserRlsContext } from "#/lib/prisma-rls";
 import type {
 	CreateTransactionRequestParsed,
@@ -30,6 +31,26 @@ export type ListLedgerTransactionsResult = {
 	total: number;
 };
 
+function toTransactionRecord(row: {
+	id: string;
+	accountId: string;
+	amountMinor: bigint;
+	currency: string;
+	direction: string;
+	type: string;
+	title: string;
+	counterpartyName: string | null;
+	counterpartyAccountNumber: string | null;
+	transferId: string | null;
+	bookingDate: Date;
+	createdAt: Date;
+}): LedgerTransactionRecord {
+	return {
+		...row,
+		amountMinor: fromMinorBigInt(row.amountMinor),
+	};
+}
+
 /**
  * RLS-scoped access to `ledger_transactions`.
  *
@@ -57,7 +78,7 @@ export const transactionRepository = {
 				...(accountId
 					? { accountId, account: { userId } }
 					: { account: { userId } }),
-				...(type ? { type } : {}),
+				...(type ? { direction: type } : {}),
 				...(dateFrom || dateTo
 					? {
 							bookingDate: {
@@ -80,20 +101,24 @@ export const transactionRepository = {
 				tx.ledgerTransaction.count({ where }),
 			]);
 
-			return { items, total };
+			return {
+				items: items.map(toTransactionRecord),
+				total,
+			};
 		});
 	},
 
 	/**
 	 * Creates an append-only ledger post and updates the account balance
-	 * inside one RLS transaction. Caller must already verify ownership,
-	 * currency match, and insufficient-funds rules.
+	 * inside one RLS transaction. Debits use a conditional balance guard so
+	 * concurrent writers cannot overdraw; credits increment unconditionally.
 	 */
 	async createTransaction(params: {
 		userId: string;
 		input: CreateLedgerTransactionInput;
 	}): Promise<LedgerTransactionRecord> {
 		const { userId, input } = params;
+		const amountMinor = toMinorBigInt(input.amountMinor);
 
 		return withUserRlsContext(userId, async (tx) => {
 			const account = await tx.ledgerAccount.findFirst({
@@ -105,21 +130,10 @@ export const transactionRepository = {
 				throw new AccountNotFoundError(input.accountId);
 			}
 
-			const balanceDelta =
-				input.direction === "credit" ? input.amountMinor : -input.amountMinor;
-
-			if (account.balanceMinor + balanceDelta < 0) {
-				throw new InsufficientFundsError({
-					accountId: input.accountId,
-					amountMinor: input.amountMinor,
-					balanceMinor: account.balanceMinor,
-				});
-			}
-
 			const created = await tx.ledgerTransaction.create({
 				data: {
 					accountId: input.accountId,
-					amountMinor: input.amountMinor,
+					amountMinor,
 					currency: input.currency,
 					direction: input.direction,
 					type: input.type,
@@ -130,16 +144,30 @@ export const transactionRepository = {
 				},
 			});
 
-			// Atomic: Postgres locks the row and applies the delta to the
-			// committed value, so concurrent posts cannot lose an update.
-			// A concurrent debit that drives the balance negative violates
-			// `ledger_accounts_balance_minor_non_negative` and aborts the tx.
-			await tx.ledgerAccount.update({
-				where: { id: account.id },
-				data: { balanceMinor: { increment: balanceDelta } },
-			});
+			if (input.direction === "debit") {
+				const debited = await tx.ledgerAccount.updateMany({
+					where: {
+						id: account.id,
+						balanceMinor: { gte: amountMinor },
+					},
+					data: { balanceMinor: { decrement: amountMinor } },
+				});
 
-			return created;
+				if (debited.count === 0) {
+					throw new InsufficientFundsError({
+						accountId: input.accountId,
+						amountMinor: input.amountMinor,
+						balanceMinor: fromMinorBigInt(account.balanceMinor),
+					});
+				}
+			} else {
+				await tx.ledgerAccount.update({
+					where: { id: account.id },
+					data: { balanceMinor: { increment: amountMinor } },
+				});
+			}
+
+			return toTransactionRecord(created);
 		});
 	},
 };
