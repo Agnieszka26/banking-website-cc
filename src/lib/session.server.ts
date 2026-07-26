@@ -1,6 +1,7 @@
 import "@tanstack/react-start/server-only";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { auth } from "#/lib/auth";
+import { AppError } from "#/lib/errors";
 
 export type AuthSession = NonNullable<
 	Awaited<ReturnType<typeof auth.api.getSession>>
@@ -16,7 +17,10 @@ export type RequireSessionMode = "throw" | "unauthorized";
 
 /**
  * Returns the current session or rejects unauthenticated requests.
- * Use `unauthorized` for server functions that should respond with HTTP 401.
+ *
+ * - `throw` (default): typed {@link AppError} with code `UNAUTHORIZED`
+ * - `unauthorized`: HTTP 401 {@link Response} with the API error envelope
+ *   (used by existing createServerFn handlers that expect a Response)
  */
 export async function requireSession(
 	mode: RequireSessionMode = "throw",
@@ -24,17 +28,21 @@ export async function requireSession(
 	const session = await resolveSession();
 
 	if (!session) {
+		const error = new AppError("UNAUTHORIZED", "Authentication required.");
 		if (mode === "unauthorized") {
-			throw new Response("Unauthorized", { status: 401 });
+			throw error.toResponse();
 		}
 
-		throw new Error("Unauthorized");
+		throw error;
 	}
 
 	return session;
 }
 
-/** Returns the authenticated user's id or rejects unauthenticated requests. */
+/**
+ * Returns the authenticated user's id or rejects unauthenticated requests.
+ * Must only be called from server code.
+ */
 export async function requireUserId(
 	mode: RequireSessionMode = "throw",
 ): Promise<string> {
