@@ -65,16 +65,17 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 	});
 
 	afterAll(async () => {
-		if (!ownerAccountId && !otherAccountId) {
+		const accountIds = [ownerAccountId, otherAccountId].filter(Boolean);
+		if (accountIds.length === 0) {
 			return;
 		}
 
 		const { prisma } = await import("#/lib/prisma");
 		await prisma.ledgerTransaction.deleteMany({
-			where: { accountId: { in: [ownerAccountId, otherAccountId] } },
+			where: { accountId: { in: accountIds } },
 		});
 		await prisma.ledgerAccount.deleteMany({
-			where: { id: { in: [ownerAccountId, otherAccountId] } },
+			where: { id: { in: accountIds } },
 		});
 	});
 
@@ -102,11 +103,19 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 	});
 
 	it("creates a transaction only for an owned account", async () => {
+		const { prisma } = await import("#/lib/prisma");
+		const debitAmount = 1000;
+
+		const before = await prisma.ledgerAccount.findUniqueOrThrow({
+			where: { id: ownerAccountId },
+			select: { balanceMinor: true },
+		});
+
 		const created = await transactionRepository.createTransaction({
 			userId: ownerUserId,
 			input: {
 				accountId: ownerAccountId,
-				amountMinor: 1000,
+				amountMinor: debitAmount,
 				currency: "PLN",
 				direction: "debit",
 				type: "payment",
@@ -116,14 +125,20 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 		});
 
 		expect(created.accountId).toBe(ownerAccountId);
-		expect(created.amountMinor).toBe(1000);
+		expect(created.amountMinor).toBe(debitAmount);
+
+		const afterDebit = await prisma.ledgerAccount.findUniqueOrThrow({
+			where: { id: ownerAccountId },
+			select: { balanceMinor: true },
+		});
+		expect(afterDebit.balanceMinor).toBe(before.balanceMinor - debitAmount);
 
 		await expect(
 			transactionRepository.createTransaction({
 				userId: ownerUserId,
 				input: {
 					accountId: otherAccountId,
-					amountMinor: 1000,
+					amountMinor: debitAmount,
 					currency: "PLN",
 					direction: "debit",
 					type: "payment",
@@ -131,6 +146,36 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 					bookingDate: new Date("2026-07-26T00:00:00.000Z"),
 				},
 			}),
-		).rejects.toThrow("ACCOUNT_NOT_FOUND");
+		).rejects.toMatchObject({
+			code: "ACCOUNT_NOT_FOUND",
+			accountId: otherAccountId,
+		});
+
+		const overdraftAmount = afterDebit.balanceMinor + 1;
+		await expect(
+			transactionRepository.createTransaction({
+				userId: ownerUserId,
+				input: {
+					accountId: ownerAccountId,
+					amountMinor: overdraftAmount,
+					currency: "PLN",
+					direction: "debit",
+					type: "payment",
+					title: "Overdraft attempt",
+					bookingDate: new Date("2026-07-26T00:00:00.000Z"),
+				},
+			}),
+		).rejects.toMatchObject({
+			code: "INSUFFICIENT_FUNDS",
+			accountId: ownerAccountId,
+			amountMinor: overdraftAmount,
+			balanceMinor: afterDebit.balanceMinor,
+		});
+
+		const afterOverdraft = await prisma.ledgerAccount.findUniqueOrThrow({
+			where: { id: ownerAccountId },
+			select: { balanceMinor: true },
+		});
+		expect(afterOverdraft.balanceMinor).toBe(afterDebit.balanceMinor);
 	});
 });

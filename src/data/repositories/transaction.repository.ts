@@ -1,4 +1,5 @@
 import "@tanstack/react-start/server-only";
+import { AccountNotFoundError, InsufficientFundsError } from "#/lib/errors";
 import { withUserRlsContext } from "#/lib/prisma-rls";
 import type {
 	CreateTransactionRequestParsed,
@@ -56,7 +57,7 @@ export const transactionRepository = {
 				...(accountId
 					? { accountId, account: { userId } }
 					: { account: { userId } }),
-				...(type ? { direction: type } : {}),
+				...(type ? { type } : {}),
 				...(dateFrom || dateTo
 					? {
 							bookingDate: {
@@ -101,15 +102,18 @@ export const transactionRepository = {
 			});
 
 			if (!account) {
-				throw new Error("ACCOUNT_NOT_FOUND");
+				throw new AccountNotFoundError(input.accountId);
 			}
 
 			const balanceDelta =
 				input.direction === "credit" ? input.amountMinor : -input.amountMinor;
-			const nextBalance = account.balanceMinor + balanceDelta;
 
-			if (nextBalance < 0) {
-				throw new Error("INSUFFICIENT_FUNDS");
+			if (account.balanceMinor + balanceDelta < 0) {
+				throw new InsufficientFundsError({
+					accountId: input.accountId,
+					amountMinor: input.amountMinor,
+					balanceMinor: account.balanceMinor,
+				});
 			}
 
 			const created = await tx.ledgerTransaction.create({
@@ -126,9 +130,13 @@ export const transactionRepository = {
 				},
 			});
 
+			// Atomic: Postgres locks the row and applies the delta to the
+			// committed value, so concurrent posts cannot lose an update.
+			// A concurrent debit that drives the balance negative violates
+			// `ledger_accounts_balance_minor_non_negative` and aborts the tx.
 			await tx.ledgerAccount.update({
 				where: { id: account.id },
-				data: { balanceMinor: nextBalance },
+				data: { balanceMinor: { increment: balanceDelta } },
 			});
 
 			return created;

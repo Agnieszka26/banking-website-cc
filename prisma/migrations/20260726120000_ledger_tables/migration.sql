@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS public.ledger_accounts (
   user_id text NOT NULL,
   name text NOT NULL,
   currency char(3) NOT NULL,
-  balance_minor integer NOT NULL,
+  balance_minor bigint NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT ledger_accounts_balance_minor_non_negative CHECK (balance_minor >= 0)
@@ -18,7 +18,7 @@ CREATE INDEX IF NOT EXISTS ledger_accounts_user_id_idx
 CREATE TABLE IF NOT EXISTS public.ledger_transactions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id uuid NOT NULL REFERENCES public.ledger_accounts(id) ON DELETE RESTRICT,
-  amount_minor integer NOT NULL,
+  amount_minor bigint NOT NULL,
   currency char(3) NOT NULL,
   direction text NOT NULL,
   type text NOT NULL,
@@ -40,7 +40,8 @@ CREATE INDEX IF NOT EXISTS ledger_transactions_transfer_id_idx
 
 ALTER TABLE public.ledger_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ledger_transactions ENABLE ROW LEVEL SECURITY;
-
+ALTER TABLE public.ledger_accounts FORCE ROW LEVEL SECURITY;
+ALTER TABLE public.ledger_transactions FORCE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS ledger_accounts_own_data ON public.ledger_accounts;
 CREATE POLICY ledger_accounts_own_data ON public.ledger_accounts
   FOR ALL

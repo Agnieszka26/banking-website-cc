@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { AppError, toAppError, toErrorResponse } from "#/lib/errors";
+import {
+	AccountNotFoundError,
+	AppError,
+	InsufficientFundsError,
+	toAppError,
+	toErrorResponse,
+} from "#/lib/errors";
 
 describe("AppError", () => {
 	it("exposes typed UNAUTHORIZED with HTTP 401", () => {
@@ -13,6 +19,27 @@ describe("AppError", () => {
 		expect(new AppError("VALIDATION_ERROR", "Bad").httpStatus).toBe(400);
 		expect(new AppError("ACCOUNT_NOT_FOUND", "Missing").httpStatus).toBe(404);
 		expect(new AppError("INTERNAL_ERROR", "Boom").httpStatus).toBe(500);
+	});
+
+	it("AccountNotFoundError and InsufficientFundsError carry context", () => {
+		const missing = new AccountNotFoundError("acct-1");
+		expect(missing).toBeInstanceOf(AppError);
+		expect(missing.code).toBe("ACCOUNT_NOT_FOUND");
+		expect(missing.accountId).toBe("acct-1");
+		expect(missing.context).toEqual({ accountId: "acct-1" });
+
+		const funds = new InsufficientFundsError({
+			accountId: "acct-1",
+			amountMinor: 100,
+			balanceMinor: 50,
+		});
+		expect(funds).toBeInstanceOf(AppError);
+		expect(funds.code).toBe("INSUFFICIENT_FUNDS");
+		expect(funds.context).toEqual({
+			accountId: "acct-1",
+			amountMinor: 100,
+			balanceMinor: 50,
+		});
 	});
 
 	it("serializes the API error envelope", async () => {

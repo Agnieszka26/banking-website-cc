@@ -211,29 +211,6 @@ export async function createTransaction(
 			throw error;
 		}
 
-		if (error instanceof Error && error.message === "INSUFFICIENT_FUNDS") {
-			log("warn", "transaction.create_failed", {
-				userId,
-				accountId: input.accountId,
-				operation: "create",
-				errorCategory: "INSUFFICIENT_FUNDS",
-			});
-			throw new AppError(
-				"INSUFFICIENT_FUNDS",
-				"Account balance is insufficient for this debit.",
-			);
-		}
-
-		if (error instanceof Error && error.message === "ACCOUNT_NOT_FOUND") {
-			log("warn", "transaction.forbidden", {
-				userId,
-				accountId: input.accountId,
-				operation: "create",
-				errorCategory: "ACCOUNT_NOT_FOUND",
-			});
-			throw new AppError("ACCOUNT_NOT_FOUND", "Account was not found.");
-		}
-
 		log("error", "transaction.create_failed", {
 			userId,
 			accountId: input.accountId,

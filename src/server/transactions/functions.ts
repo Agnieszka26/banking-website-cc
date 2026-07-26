@@ -12,6 +12,7 @@ import type {
 	ListTransactionsResponse,
 } from "#/shared/types";
 import { createTransaction, listTransactions } from "./service";
+import { setResponseStatus } from "@tanstack/react-start/server";
 
 function logUnauthorized(operation: "list" | "create"): void {
 	log("warn", "transaction.unauthorized", {
@@ -78,6 +79,7 @@ export const createLedgerTransaction = createServerFn({ method: "POST" })
 	.handler(async ({ data }): Promise<CreateTransactionResponse> => {
 		try {
 			const result = await createTransaction(data);
+			setResponseStatus(201);
 			return { data: result };
 		} catch (error) {
 			if (isAppError(error) && error.code === "UNAUTHORIZED") {
