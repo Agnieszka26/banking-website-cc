@@ -18,11 +18,17 @@ const ALLOWED_CREDIT_TYPES = new Set<TransactionType>([
 	"deposit",
 	"income",
 	"refund",
-	"transfer",
 ]);
 
-/** Client-create must not invent import/adjustment credits or arbitrary imports. */
-const DISALLOWED_CLIENT_TYPES = new Set<TransactionType>(["import"]);
+/**
+ * Transaction types that must only be created
+ * through dedicated server-side workflows.
+ *
+ * Examples:
+ * - transfer: requires paired ledger entries + transferId
+ * - import: requires controlled ingestion flow
+ */
+const DISALLOWED_CLIENT_TYPES = new Set<TransactionType>(["import", "transfer"]);
 
 function utcBookingDateToday(): Date {
 	const now = new Date();
@@ -102,7 +108,7 @@ export async function listTransactions(
 			throw error;
 		}
 
-		log("error", "transaction.create_failed", {
+		log("error", "transaction.list_failed", {
 			userId,
 			operation: "list",
 			errorCategory: "DATABASE_ERROR",
@@ -111,7 +117,6 @@ export async function listTransactions(
 		throw new AppError("INTERNAL_ERROR", "An unexpected error occurred.");
 	}
 }
-
 /**
  * Create one append-only ledger transaction for the authenticated user.
  */

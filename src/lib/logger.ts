@@ -14,9 +14,9 @@ export function log(
 	fields: LogFields = {},
 ): void {
 	const entry = {
+		...fields,
 		level,
 		event,
-		...fields,
 		ts: new Date().toISOString(),
 	};
 
