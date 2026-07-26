@@ -138,10 +138,27 @@ Canonical definitions live in `src/shared/schemas.ts`. Summary below for the con
 ```ts
 import { z } from "zod";
 
-const isoDateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+/** True when `YYYY-MM-DD` is a real UTC calendar date (rejects Feb 31, month 13, etc.). */
+function isValidCalendarDate(value: string): boolean {
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
+
+const isoDateString = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD")
+  .refine(isValidCalendarDate, { message: "Invalid calendar date" });
 const isoDateTimeString = z.string().datetime();
-const currencyCode = z.string().length(3).regex(/^[A-Z]{3}$/);
-const positiveMinorUnits = z.number().int().positive();
+const currencyCode = z
+  .string()
+  .length(3)
+  .regex(/^[A-Z]{3}$/, "Expected ISO 4217 currency code");
+const positiveMinorUnits = z.number().max(Number.MAX_SAFE_INTEGER).positive();
 
 export const ApiErrorCodeSchema = z.enum([
   "INSUFFICIENT_FUNDS",
@@ -177,7 +194,7 @@ export const AccountDtoSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   currency: currencyCode,
-  balanceMinor: z.number().int(),
+  balanceMinor: z.number().max(Number.MAX_SAFE_INTEGER).positive(),
 });
 
 export const TransactionDtoSchema = z.object({
@@ -206,15 +223,29 @@ export const CreateTransactionRequestSchema = z.object({
   counterpartyAccountNumber: z.string().min(1).max(34).optional(),
 });
 
-export const ListTransactionsQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
-  accountId: z.string().min(1).optional(),
-  /** Filter by direction (`debit` | `credit`) — not by TransactionType. */
-  type: TransactionDirectionSchema.optional(),
-  dateFrom: isoDateString.optional(),
-  dateTo: isoDateString.optional(),
-});
+export const ListTransactionsQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(20),
+    accountId: z.string().min(1).optional(),
+    /** Filter by ledger direction (`debit` | `credit`). */
+    type: TransactionDirectionSchema.optional(),
+    dateFrom: isoDateString.optional(),
+    dateTo: isoDateString.optional(),
+  })
+  .superRefine((query, ctx) => {
+    if (
+      query.dateFrom !== undefined &&
+      query.dateTo !== undefined &&
+      query.dateFrom > query.dateTo
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "dateFrom must be on or before dateTo",
+        path: ["dateFrom"],
+      });
+    }
+  });
 
 export const PaginationMetaSchema = z.object({
   page: z.number().int().min(1),
@@ -223,13 +254,18 @@ export const PaginationMetaSchema = z.object({
   totalPages: z.number().int().min(0),
 });
 
-export const CreateTransferRequestSchema = z.object({
-  sourceAccountId: z.string().min(1),
-  destinationAccountId: z.string().min(1),
-  amountMinor: positiveMinorUnits,
-  currency: currencyCode.default("PLN"),
-  title: z.string().min(1).max(140),
-});
+export const CreateTransferRequestSchema = z
+  .object({
+    sourceAccountId: z.string().min(1),
+    destinationAccountId: z.string().min(1),
+    amountMinor: positiveMinorUnits,
+    currency: currencyCode.default("PLN"),
+    title: z.string().min(1).max(140),
+  })
+  .refine((value) => value.sourceAccountId !== value.destinationAccountId, {
+    message: "sourceAccountId and destinationAccountId must differ",
+    path: ["destinationAccountId"],
+  });
 
 export const TransferDtoSchema = z.object({
   id: z.string().uuid(),
@@ -243,19 +279,22 @@ export const TransferDtoSchema = z.object({
 });
 ```
 
+Transfer create writes (`CreateTransferRequest` → `TransferDto`) are **atomic** (one DB transaction for the transfer + every ledger leg; full rollback on failure) and support **retry via server-side dedup** without idempotency keys — see §6.1. The same rules apply to shared `createServerFn` transfer handlers.
+
 ### Field notes
 
 | Field | Meaning |
 | --- | --- |
 | `accountId` | Internal ledger account id |
 | `amountMinor` | Positive integer minor units (grosze/cents); never signed |
-| `balanceMinor` | Integer minor units on `AccountDto` (may be zero; signed only if overdraft is modeled later — currently ledger int) |
+| `balanceMinor` | Positive minor units on `AccountDto` (safe-integer bounded; same numeric style as `amountMinor`) |
 | `direction: "debit"` | Funds leave the account |
 | `direction: "credit"` | Funds enter the account |
 | `type` (body / DTO) | Business classification (`TransactionType`) |
 | `type` (list query) | Filter by **direction** (`debit` \| `credit`) — naming inherited for the query string; not `TransactionType` |
 | `transferId` | Set when the post is one leg of a multi-leg transfer; otherwise `null` |
-| `dateFrom` / `dateTo` | Inclusive filters on `bookingDate` (`YYYY-MM-DD`) |
+| `dateFrom` / `dateTo` | Inclusive filters on `bookingDate` (`YYYY-MM-DD` calendar dates); when both are set, `dateFrom` must be ≤ `dateTo` (`ListTransactionsQuerySchema` `superRefine`) |
+| `sourceAccountId` / `destinationAccountId` | Must differ (`CreateTransferRequestSchema` `refine`) |
 
 Credits on `POST /api/transactions` are only accepted through **allowed business flows** (for example deposit, income, refund, transfer receive). The backend enforces this; clients must not treat arbitrary credit as a general balance increase API.
 
@@ -410,9 +449,10 @@ Cookie: <better-auth-session>
 1. Resolve user from Better Auth session → `user.id`.
 2. Validate body with `CreateTransactionRequestSchema`.
 3. Verify `accountId` is an internal ledger account owned by that user; otherwise `ACCOUNT_NOT_FOUND`.
-4. For `debit`, enforce ledger `balanceMinor`; otherwise `INSUFFICIENT_FUNDS`.
-5. Persist an append-only ledger row; return `TransactionDto` in `{ "data": ... }`.
-6. Emit basic application logging for create attempts (success and domain failures); do not log full counterparty account numbers unmasked.
+4. Require request `currency` to match the owned account’s `currency`; on mismatch return the standard domain-error envelope with `VALIDATION_ERROR` (same conventions as other semantic request/account consistency failures). This check runs **before** balance validation or persistence.
+5. For `debit`, enforce ledger `balanceMinor`; otherwise `INSUFFICIENT_FUNDS`.
+6. Persist an append-only ledger row; return `TransactionDto` in `{ "data": ... }`.
+7. Emit basic application logging for create attempts (success and domain failures); do not log full counterparty account numbers unmasked.
 
 ### 5.2 `GET /api/transactions`
 
@@ -556,11 +596,13 @@ When `accountId` is provided and is not an internal ledger account owned by the 
 
 Own-account (and other multi-leg) money movement is a **separate business operation**. A transfer creates multiple ledger transactions that share a `transferId`.
 
+The atomicity and retry rules in §6.1 apply to **`POST /api/transfers`** and to any other multi-leg transfer write path that uses `CreateTransferRequest` / `TransferDto` (including TanStack `createServerFn` handlers that share those symbols).
+
 | Method | Path | Purpose |
 | --- | --- | --- |
 | `POST` | `/api/transfers` | Create a transfer (debit source + credit destination) |
 
-Shapes: `CreateTransferRequest`, `TransferDto` in `src/shared`.
+Shapes: `CreateTransferRequest`, `TransferDto` in `src/shared` (see JSDoc on those symbols for persistence/retry invariants).
 
 ### 6.1 `POST /api/transfers`
 
@@ -606,11 +648,39 @@ Cookie: <better-auth-session>
 
 The two (or more) ledger posts referenced by `transactionIds` use the same `transferId` equal to this transfer’s `id`, with `type: "transfer"`, opposite `direction` values, and matching `amountMinor`.
 
+This contract does **not** define FX conversion. Request `currency` must match **both** the source and destination accounts’ `currency` (accounts must therefore share a currency).
+
+#### Atomicity
+
+Creating a transfer and **every** ledger leg (and related balance updates) **must** run inside **one** database transaction. On any failure after writes begin, the server **rolls back all** of those writes — clients never observe a partial multi-leg transfer.
+
+#### Retry and deduplication (no idempotency keys)
+
+Idempotency-Key headers are **out of scope** (see §8). Safe retry for this operation is defined as follows:
+
+| Client situation | Expected behavior |
+| --- | --- |
+| Domain / auth failure (`VALIDATION_ERROR`, `ACCOUNT_NOT_FOUND`, `INSUFFICIENT_FUNDS`, `UNAUTHORIZED`, `FORBIDDEN`) | **Do not retry** the same request unchanged |
+| Unknown outcome (network drop, timeout, `5xx` / `INTERNAL_ERROR`) | Client **may retry** the same `CreateTransferRequest` |
+| Retry after a prior success (same user + equivalent body within the server dedup window) | Server **must not** create a second transfer; return the existing `TransferDto` in `{ "data": ... }` |
+
+Server-side deduplication fingerprint (per authenticated user): `sourceAccountId`, `destinationAccountId`, `amountMinor`, `currency`, and `title`. The dedup window length is implementation-defined but must be long enough to cover typical client retries after an unknown outcome. After the window, an identical body is treated as a new intentional transfer.
+
+#### Server behavior (contract-level)
+
+1. Resolve user from Better Auth session → `user.id`.
+2. Validate body with `CreateTransferRequestSchema`.
+3. Verify `sourceAccountId` and `destinationAccountId` are internal ledger accounts owned by that user; otherwise `ACCOUNT_NOT_FOUND`.
+4. Require request `currency` to match both accounts’ `currency`; on mismatch return the standard domain-error envelope with `VALIDATION_ERROR` (same conventions as transaction currency consistency). This check runs **before** balance validation or persistence.
+5. Enforce source ledger `balanceMinor` for the debit leg; otherwise `INSUFFICIENT_FUNDS`.
+6. If a completed transfer matches the dedup fingerprint within the window, return that existing `TransferDto` (no new writes).
+7. Otherwise, in **one** database transaction, persist the transfer and every ledger leg (and balance updates); on any failure, roll back all writes. Return `TransferDto` in `{ "data": ... }`.
+
 #### Errors
 
 Same envelope and codes as transactions, including:
 
-- `VALIDATION_ERROR` — e.g. same source and destination account
+- `VALIDATION_ERROR` — e.g. same source and destination account, or currency mismatch (request vs source/destination account; no FX)
 - `ACCOUNT_NOT_FOUND` — source or destination not found for user
 - `INSUFFICIENT_FUNDS` — source ledger balance too low for the debit leg
 - `UNAUTHORIZED` / `FORBIDDEN` / `INTERNAL_ERROR`
@@ -652,7 +722,7 @@ These decisions are **accepted** (see `.cursor/docs/ARCHITECTURE_DECISIONS.md`):
 - Exposing Plaid account/transaction ids on ledger DTOs
 - News CMS endpoints
 - Better Auth sign-in/sign-up payloads (`/api/auth/*`)
-- Idempotency keys (may be added in a future revision)
+- Idempotency keys (may be added in a future revision; transfer create uses server-side dedup in §6.1 instead)
 - Async settlement states (`pending` / `posted`) — posts in this version are created as posted ledger entries
 - Merged Plaid + ledger list endpoints (UI may compose later via application DTOs only)
 

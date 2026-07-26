@@ -73,7 +73,13 @@ export type AccountDto = Readonly<z.infer<typeof AccountDtoSchema>>;
 /** Public ledger transaction DTO — API fields only. */
 export type TransactionDto = Readonly<z.infer<typeof TransactionDtoSchema>>;
 
-export type CreateTransactionRequest = z.infer<
+/** Create-transaction body callers may send (defaults like `currency` optional). */
+export type CreateTransactionRequest = z.input<
+	typeof CreateTransactionRequestSchema
+>;
+
+/** Create-transaction body after Zod parse (defaults applied). */
+export type CreateTransactionRequestParsed = z.output<
 	typeof CreateTransactionRequestSchema
 >;
 
@@ -82,11 +88,16 @@ export type CreateTransactionResponse = z.infer<
 >;
 
 /**
- * GET /api/transactions query.
+ * GET /api/transactions query callers may send (`page` / `limit` optional).
  * Note: `type` filters by {@link TransactionDirection} (`debit` | `credit`),
  * not by {@link TransactionType}.
  */
-export type ListTransactionsQuery = z.infer<typeof ListTransactionsQuerySchema>;
+export type ListTransactionsQuery = z.input<typeof ListTransactionsQuerySchema>;
+
+/** List query after Zod parse (defaults applied; date order refined). */
+export type ListTransactionsQueryParsed = z.output<
+	typeof ListTransactionsQuerySchema
+>;
 
 export type PaginationMeta = Readonly<z.infer<typeof PaginationMetaSchema>>;
 
@@ -100,10 +111,21 @@ export type ListTransactionsResponse = z.infer<
 
 // ---------------------------------------------------------------------------
 // Transfer (multi-leg business operation)
+// Atomicity + retry/dedup: docs/API_CONTRACTS.md §6.1 (also createServerFn).
 // ---------------------------------------------------------------------------
 
-export type CreateTransferRequest = z.infer<typeof CreateTransferRequestSchema>;
+/**
+ * Transfer create body callers may send (defaults like `currency` optional).
+ * See `CreateTransferRequestSchema` JSDoc for write/retry rules.
+ */
+export type CreateTransferRequest = z.input<typeof CreateTransferRequestSchema>;
 
+/** Transfer create body after Zod parse (defaults applied; accounts differ). */
+export type CreateTransferRequestParsed = z.output<
+	typeof CreateTransferRequestSchema
+>;
+
+/** Transfer create result — all `transactionIds` committed atomically with `id`. */
 export type TransferDto = Readonly<z.infer<typeof TransferDtoSchema>>;
 
 export type CreateTransferResponse = z.infer<
