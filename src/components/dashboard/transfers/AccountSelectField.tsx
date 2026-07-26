@@ -1,4 +1,4 @@
-import type { DashboardAccount } from "#/server/plaid";
+import type { TransferAccountOption } from "#/components/dashboard/transfers/types";
 import { Label } from "@/components/ui/label";
 import {
 	Select,
@@ -14,13 +14,14 @@ type AccountSelectFieldProps = {
 	label: string;
 	value: string;
 	placeholder: string;
-	accounts: DashboardAccount[];
+	accounts: TransferAccountOption[];
 	onChange: (value: string) => void;
 	error?: string;
 };
 
-function formatAccountOption(account: DashboardAccount): string {
-	return `${account.name} • **** ${account.mask}`;
+function formatAccountOption(account: TransferAccountOption): string {
+	const major = (account.balanceMinor / 100).toFixed(2);
+	return `${account.name} • ${major} ${account.currency}`;
 }
 
 export function AccountSelectField({
@@ -35,7 +36,10 @@ export function AccountSelectField({
 	return (
 		<div className="space-y-2">
 			<Label htmlFor={id}>{label}</Label>
-			<Select value={value || null} onValueChange={(next) => onChange(next ?? "")}>
+			<Select
+				value={value || null}
+				onValueChange={(next) => onChange(next ?? "")}
+			>
 				<SelectTrigger
 					id={id}
 					className={cn("w-full", error && "border-destructive")}

@@ -3,7 +3,7 @@ import { AccountSelectField } from "#/components/dashboard/transfers/AccountSele
 import { TransferAmountField } from "#/components/dashboard/transfers/TransferAmountField";
 import { TransferFormActions } from "#/components/dashboard/transfers/TransferFormActions";
 import { TransferTitleField } from "#/components/dashboard/transfers/TransferTitleField";
-import type { TransferFormProps } from "#/components/dashboard/transfers/types";
+import type { OwnAccountTransferFormProps } from "#/components/dashboard/transfers/types";
 import {
 	isNonEmpty,
 	parsePositiveAmount,
@@ -22,7 +22,7 @@ export function OwnAccountTransferForm({
 	accounts,
 	onCancel,
 	onSuccess,
-}: TransferFormProps) {
+}: OwnAccountTransferFormProps) {
 	const t = useTranslation();
 	const [sourceAccountId, setSourceAccountId] = useState("");
 	const [destinationAccountId, setDestinationAccountId] = useState("");

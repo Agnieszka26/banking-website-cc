@@ -159,12 +159,18 @@
 			"makeTransfer": "Wykonaj przelew",
 			"cancel": "Anuluj",
 			"success": "Przelew został złożony pomyślnie.",
+			"loadingAccounts": "Ładowanie rachunków…",
 			"errors": {
 				"required": "To pole jest wymagane.",
 				"amountPositive": "Kwota musi być większa od 0.",
 				"sameAccounts": "Rachunek źródłowy i docelowy nie mogą być takie same.",
 				"invalidAccountNumber": "Podaj prawidłowy 26-cyfrowy numer rachunku.",
-				"needTwoAccounts": "Przelew własny wymaga co najmniej dwóch połączonych rachunków."
+				"needTwoAccounts": "Przelew własny wymaga co najmniej dwóch rachunków księgowych.",
+				"submissionFailed": "Nie udało się wykonać przelewu. Spróbuj ponownie.",
+				"insufficientFunds": "Niewystarczające środki na rachunku źródłowym.",
+				"unauthorized": "Zaloguj się ponownie, aby kontynuować.",
+				"invalidAccount": "Jeden z wybranych rachunków nie został znaleziony.",
+				"validation": "Sprawdź dane przelewu i spróbuj ponownie."
 			}
 		},
 		"messages": {

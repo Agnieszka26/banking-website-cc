@@ -33,7 +33,11 @@ const currencyCode = z
 	.length(3)
 	.regex(/^[A-Z]{3}$/, "Expected ISO 4217 currency code");
 
-const positiveMinorUnits = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
+const positiveMinorUnits = z
+	.number()
+	.int()
+	.positive()
+	.max(Number.MAX_SAFE_INTEGER);
 
 // ---------------------------------------------------------------------------
 // API envelope & errors
@@ -93,7 +97,7 @@ export const AccountDtoSchema = z.object({
 	id: z.string().min(1),
 	name: z.string().min(1),
 	currency: currencyCode,
-	balanceMinor: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+	balanceMinor: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
 });
 
 // ---------------------------------------------------------------------------

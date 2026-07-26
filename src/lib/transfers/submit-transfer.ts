@@ -1,25 +1,70 @@
 import type { TransferPayload } from "#/components/dashboard/transfers/types";
+import type {
+	CreateTransferResult,
+	TransferErrorCode,
+} from "#/server/transfers/functions";
+import { createTransfer } from "#/server/transfers/functions";
+import type { TransferDto } from "#/shared/types";
+
+export type { CreateTransferResult, TransferErrorCode };
 
 export type SubmitTransferResult =
-	| { ok: true; referenceId: string }
-	| { ok: false; error: string };
+	| { ok: true; data: TransferDto }
+	| { ok: false; error: { code: TransferErrorCode; message?: string } };
+
+/** Converts major-unit form amounts to integer minor units. */
+export function toAmountMinor(amount: number): number {
+	return Math.round(amount * 100);
+}
 
 /**
- * Mock transfer submission — replace with a server function / API call.
- * @example
- * // Later: return createServerFn(...).handler(async ({ data }) => { ... })
+ * Submits a transfer through the real server boundary.
+ * Only own-account transfers are supported by the ledger transfer API.
  */
 export async function submitTransfer(
 	payload: TransferPayload,
 ): Promise<SubmitTransferResult> {
-	await new Promise((resolve) => setTimeout(resolve, 400));
-
-	if (import.meta.env.DEV) {
-		console.info("[transfer:mock]", payload);
+	if (payload.type !== "own") {
+		return {
+			ok: false,
+			error: {
+				code: "VALIDATION_ERROR",
+				message:
+					"Only own-account transfers are supported by the ledger transfer API.",
+			},
+		};
 	}
 
-	return {
-		ok: true,
-		referenceId: `TR-${Date.now()}`,
-	};
+	const amountMinor = toAmountMinor(payload.amount);
+	if (!Number.isSafeInteger(amountMinor) || amountMinor <= 0) {
+		return {
+			ok: false,
+			error: {
+				code: "VALIDATION_ERROR",
+				message: "Amount must be a positive value.",
+			},
+		};
+	}
+
+	try {
+		const result: CreateTransferResult = await createTransfer({
+			data: {
+				sourceAccountId: payload.sourceAccountId,
+				destinationAccountId: payload.destinationAccountId,
+				amountMinor,
+				currency: "PLN",
+				title: payload.title,
+			},
+		});
+
+		return result;
+	} catch {
+		return {
+			ok: false,
+			error: {
+				code: "INTERNAL_ERROR",
+				message: "An unexpected error occurred.",
+			},
+		};
+	}
 }

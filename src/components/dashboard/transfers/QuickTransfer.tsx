@@ -1,32 +1,64 @@
 import { usePostHog } from "@posthog/react";
 import { Building2, User, Wallet } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { OwnAccountTransferForm } from "#/components/dashboard/transfers/OwnAccountTransferForm";
 import { RecipientTransferForm } from "#/components/dashboard/transfers/RecipientTransferForm";
 import { TaxTransferForm } from "#/components/dashboard/transfers/TaxTransferForm";
 import { TransferModal } from "#/components/dashboard/transfers/TransferModal";
 import { TransferSuccessToast } from "#/components/dashboard/transfers/TransferSuccessToast";
 import type {
+	TransferAccountOption,
 	TransferPayload,
 	TransferType,
 } from "#/components/dashboard/transfers/types";
 import { useTranslation } from "#/lib/i18n";
-import { submitTransfer } from "#/lib/transfers/submit-transfer";
+import {
+	submitTransfer,
+	type TransferErrorCode,
+} from "#/lib/transfers/submit-transfer";
 import type { DashboardAccount } from "#/server/plaid";
+import { listLedgerAccounts } from "#/server/transfers/functions";
 
 const transferActions = [
-	{ type: "own" as const, labelKey: "dashboard.transfer.toOwnAccount", icon: Wallet },
+	{
+		type: "own" as const,
+		labelKey: "dashboard.transfer.toOwnAccount",
+		icon: Wallet,
+	},
 	{
 		type: "recipient" as const,
 		labelKey: "dashboard.transfer.toRecipient",
 		icon: User,
 	},
-	{ type: "tax" as const, labelKey: "dashboard.transfer.taxes", icon: Building2 },
+	{
+		type: "tax" as const,
+		labelKey: "dashboard.transfer.taxes",
+		icon: Building2,
+	},
 ] as const;
 
 type QuickTransferProps = {
 	accounts: DashboardAccount[];
 };
+
+function errorMessageForCode(
+	t: (key: string) => string,
+	code: TransferErrorCode,
+): string {
+	switch (code) {
+		case "INSUFFICIENT_FUNDS":
+			return t("dashboard.transferForms.errors.insufficientFunds");
+		case "UNAUTHORIZED":
+			return t("dashboard.transferForms.errors.unauthorized");
+		case "ACCOUNT_NOT_FOUND":
+		case "FORBIDDEN":
+			return t("dashboard.transferForms.errors.invalidAccount");
+		case "VALIDATION_ERROR":
+			return t("dashboard.transferForms.errors.validation");
+		default:
+			return t("dashboard.transferForms.errors.submissionFailed");
+	}
+}
 
 export function QuickTransfer({ accounts }: QuickTransferProps) {
 	const t = useTranslation();
@@ -37,15 +69,52 @@ export function QuickTransfer({ accounts }: QuickTransferProps) {
 		null,
 	);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+	const [ledgerAccounts, setLedgerAccounts] = useState<TransferAccountOption[]>(
+		[],
+	);
+	const [ledgerAccountsLoading, setLedgerAccountsLoading] = useState(false);
 
 	const closeModal = useCallback(() => {
 		setActiveTransfer(null);
+		setErrorMessage(null);
 	}, []);
+
+	useEffect(() => {
+		if (activeTransfer !== "own") {
+			return;
+		}
+
+		let cancelled = false;
+		setLedgerAccountsLoading(true);
+
+		listLedgerAccounts()
+			.then((rows) => {
+				if (!cancelled) {
+					setLedgerAccounts(rows);
+				}
+			})
+			.catch(() => {
+				if (!cancelled) {
+					setLedgerAccounts([]);
+					setErrorMessage(t("dashboard.transferForms.errors.submissionFailed"));
+				}
+			})
+			.finally(() => {
+				if (!cancelled) {
+					setLedgerAccountsLoading(false);
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [activeTransfer, t]);
 
 	const handleTileClick = (type: TransferType) => {
 		posthog.capture("transfer_type_selected", {
 			transfer_type: type,
 		});
+		setErrorMessage(null);
 		setActiveTransfer(type);
 	};
 
@@ -53,13 +122,14 @@ export function QuickTransfer({ accounts }: QuickTransferProps) {
 		const result = await submitTransfer(payload);
 
 		if (!result.ok) {
-			setErrorMessage(t("dashboard.transferForms.errors.submissionFailed"));
+			setErrorMessage(errorMessageForCode(t, result.error.code));
 			return;
 		}
+
 		setErrorMessage(null);
 		posthog.capture("transfer_submitted", {
 			transfer_type: payload.type,
-			reference_id: result.referenceId,
+			reference_id: result.data.id,
 		});
 
 		closeModal();
@@ -100,13 +170,24 @@ export function QuickTransfer({ accounts }: QuickTransferProps) {
 				title={modalTitle}
 				onClose={closeModal}
 			>
-				{activeTransfer === "own" && (
-					<OwnAccountTransferForm
-						accounts={accounts}
-						onCancel={closeModal}
-						onSuccess={handleSubmit}
-					/>
+				{errorMessage && (
+					<p className="mb-3 text-sm text-destructive" role="alert">
+						{errorMessage}
+					</p>
 				)}
+
+				{activeTransfer === "own" &&
+					(ledgerAccountsLoading ? (
+						<p className="text-sm text-muted-foreground">
+							{t("dashboard.transferForms.loadingAccounts")}
+						</p>
+					) : (
+						<OwnAccountTransferForm
+							accounts={ledgerAccounts}
+							onCancel={closeModal}
+							onSuccess={handleSubmit}
+						/>
+					))}
 				{activeTransfer === "recipient" && (
 					<RecipientTransferForm
 						accounts={accounts}

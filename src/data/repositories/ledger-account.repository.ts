@@ -34,4 +34,20 @@ export const ledgerAccountRepository = {
 			return row ?? null;
 		});
 	},
+
+	async listOwned(userId: string): Promise<LedgerAccountRecord[]> {
+		return withUserRlsContext(userId, async (tx) => {
+			return tx.ledgerAccount.findMany({
+				where: { userId },
+				select: {
+					id: true,
+					userId: true,
+					name: true,
+					currency: true,
+					balanceMinor: true,
+				},
+				orderBy: { name: "asc" },
+			});
+		});
+	},
 };

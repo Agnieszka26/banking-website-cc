@@ -159,12 +159,18 @@
 			"makeTransfer": "Effectuer le virement",
 			"cancel": "Annuler",
 			"success": "Virement envoyé avec succès.",
+			"loadingAccounts": "Chargement des comptes…",
 			"errors": {
 				"required": "Ce champ est obligatoire.",
 				"amountPositive": "Le montant doit être supérieur à 0.",
 				"sameAccounts": "Les comptes source et destinataire doivent être différents.",
 				"invalidAccountNumber": "Saisissez un numéro de compte valide à 26 chiffres.",
-				"needTwoAccounts": "Un virement interne nécessite au moins deux comptes connectés."
+				"needTwoAccounts": "Un virement interne nécessite au moins deux comptes du grand livre.",
+				"submissionFailed": "Le virement n'a pas pu être effectué. Veuillez réessayer.",
+				"insufficientFunds": "Fonds insuffisants sur le compte source.",
+				"unauthorized": "Veuillez vous reconnecter pour continuer.",
+				"invalidAccount": "L'un des comptes sélectionnés est introuvable.",
+				"validation": "Vérifiez les détails du virement et réessayez."
 			}
 		},
 		"messages": {

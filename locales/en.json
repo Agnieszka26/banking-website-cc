@@ -159,12 +159,18 @@
 			"makeTransfer": "Make a transfer",
 			"cancel": "Cancel",
 			"success": "Transfer submitted successfully.",
+			"loadingAccounts": "Loading accounts…",
 			"errors": {
 				"required": "This field is required.",
 				"amountPositive": "Amount must be greater than 0.",
 				"sameAccounts": "Source and destination accounts must be different.",
 				"invalidAccountNumber": "Enter a valid 26-digit account number.",
-				"needTwoAccounts": "At least two linked accounts are required for an own-account transfer."
+				"needTwoAccounts": "At least two ledger accounts are required for an own-account transfer.",
+				"submissionFailed": "Transfer could not be completed. Please try again.",
+				"insufficientFunds": "Insufficient funds on the source account.",
+				"unauthorized": "Please sign in again to continue.",
+				"invalidAccount": "One of the selected accounts was not found.",
+				"validation": "Please check the transfer details and try again."
 			}
 		},
 		"messages": {
