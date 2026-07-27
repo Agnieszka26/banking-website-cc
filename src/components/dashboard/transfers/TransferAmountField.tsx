@@ -8,6 +8,7 @@ type TransferAmountFieldProps = {
 	value: string;
 	onChange: (value: string) => void;
 	error?: string;
+	disabled?: boolean;
 };
 
 /** Transfer amount input with validation styling. */
@@ -16,6 +17,7 @@ export function TransferAmountField({
 	value,
 	onChange,
 	error,
+	disabled = false,
 }: TransferAmountFieldProps) {
 	const t = useTranslation();
 
@@ -30,6 +32,7 @@ export function TransferAmountField({
 				inputMode="decimal"
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
+				disabled={disabled}
 				aria-invalid={Boolean(error)}
 				className={cn("h-10", error && "border-destructive")}
 			/>

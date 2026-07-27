@@ -157,6 +157,7 @@
 			"selectPaymentType": "Sélectionner le type de paiement",
 			"execute": "Effectuer le virement",
 			"makeTransfer": "Effectuer le virement",
+			"submitting": "Envoi du virement…",
 			"cancel": "Annuler",
 			"success": "Virement envoyé avec succès.",
 			"loadingAccounts": "Chargement des comptes…",

@@ -69,6 +69,10 @@ export function TaxTransferForm({ onCancel, onSuccess }: TransferFormProps) {
 
 	const handleSubmit = async (event: FormEvent) => {
 		event.preventDefault();
+		if (isSubmitting) {
+			return;
+		}
+
 		const nextErrors = validate();
 		setErrors(nextErrors);
 
@@ -96,7 +100,7 @@ export function TaxTransferForm({ onCancel, onSuccess }: TransferFormProps) {
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
+		<form onSubmit={handleSubmit} className="space-y-4" aria-busy={isSubmitting}>
 			<div className="space-y-2">
 				<Label htmlFor="tax-transfer-type">
 					{t("dashboard.transferForms.paymentType")}
@@ -106,6 +110,7 @@ export function TaxTransferForm({ onCancel, onSuccess }: TransferFormProps) {
 					onValueChange={(value) =>
 						setPaymentType((value as TaxPaymentType | null) ?? "")
 					}
+					disabled={isSubmitting}
 				>
 					<SelectTrigger
 						id="tax-transfer-type"
@@ -144,6 +149,7 @@ export function TaxTransferForm({ onCancel, onSuccess }: TransferFormProps) {
 					autoComplete="off"
 					value={accountNumber}
 					onChange={(event) => setAccountNumber(event.target.value)}
+					disabled={isSubmitting}
 					aria-invalid={Boolean(errors.accountNumber)}
 					className={cn("h-10", errors.accountNumber && "border-destructive")}
 				/>
@@ -159,6 +165,7 @@ export function TaxTransferForm({ onCancel, onSuccess }: TransferFormProps) {
 				value={amount}
 				onChange={setAmount}
 				error={errors.amount}
+				disabled={isSubmitting}
 			/>
 
 			<div className="space-y-2">
@@ -170,6 +177,7 @@ export function TaxTransferForm({ onCancel, onSuccess }: TransferFormProps) {
 					type="text"
 					value={paymentId}
 					onChange={(event) => setPaymentId(event.target.value)}
+					disabled={isSubmitting}
 					aria-invalid={Boolean(errors.paymentId)}
 					className={cn("h-10", errors.paymentId && "border-destructive")}
 				/>

@@ -17,6 +17,7 @@ type AccountSelectFieldProps = {
 	accounts: TransferAccountOption[];
 	onChange: (value: string) => void;
 	error?: string;
+	disabled?: boolean;
 };
 
 function formatAccountOption(account: TransferAccountOption): string {
@@ -32,6 +33,7 @@ export function AccountSelectField({
 	accounts,
 	onChange,
 	error,
+	disabled = false,
 }: AccountSelectFieldProps) {
 	return (
 		<div className="space-y-2">
@@ -39,6 +41,7 @@ export function AccountSelectField({
 			<Select
 				value={value || null}
 				onValueChange={(next) => onChange(next ?? "")}
+				disabled={disabled}
 			>
 				<SelectTrigger
 					id={id}

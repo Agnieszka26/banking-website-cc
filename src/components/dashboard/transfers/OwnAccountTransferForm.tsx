@@ -71,6 +71,10 @@ export function OwnAccountTransferForm({
 
 	const handleSubmit = async (event: FormEvent) => {
 		event.preventDefault();
+		if (isSubmitting) {
+			return;
+		}
+
 		const nextErrors = validate();
 		setErrors(nextErrors);
 
@@ -109,7 +113,7 @@ export function OwnAccountTransferForm({
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
+		<form onSubmit={handleSubmit} className="space-y-4" aria-busy={isSubmitting}>
 			{errors.form && (
 				<p className="text-sm text-destructive" role="alert">
 					{errors.form}
@@ -124,6 +128,7 @@ export function OwnAccountTransferForm({
 				accounts={accounts}
 				onChange={setSourceAccountId}
 				error={errors.sourceAccountId}
+				disabled={isSubmitting}
 			/>
 
 			<AccountSelectField
@@ -134,6 +139,7 @@ export function OwnAccountTransferForm({
 				accounts={accounts}
 				onChange={setDestinationAccountId}
 				error={errors.destinationAccountId}
+				disabled={isSubmitting}
 			/>
 
 			<TransferAmountField
@@ -141,6 +147,7 @@ export function OwnAccountTransferForm({
 				value={amount}
 				onChange={setAmount}
 				error={errors.amount}
+				disabled={isSubmitting}
 			/>
 
 			<TransferTitleField
@@ -148,6 +155,7 @@ export function OwnAccountTransferForm({
 				value={title}
 				onChange={setTitle}
 				error={errors.title}
+				disabled={isSubmitting}
 			/>
 
 			<TransferFormActions

@@ -157,6 +157,7 @@
 			"selectPaymentType": "Wybierz rodzaj płatności",
 			"execute": "Wykonaj przelew",
 			"makeTransfer": "Wykonaj przelew",
+			"submitting": "Wysyłanie przelewu…",
 			"cancel": "Anuluj",
 			"success": "Przelew został złożony pomyślnie.",
 			"loadingAccounts": "Ładowanie rachunków…",

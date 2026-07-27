@@ -17,15 +17,23 @@ export function TransferFormActions({
 
 	return (
 		<div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-			<Button type="button" variant="outline" onClick={onCancel}>
+			<Button
+				type="button"
+				variant="outline"
+				onClick={onCancel}
+				disabled={isSubmitting}
+			>
 				{t("dashboard.transferForms.cancel")}
 			</Button>
 			<Button
 				type="submit"
 				disabled={isSubmitting}
+				aria-busy={isSubmitting}
 				className="bg-bank-green text-white hover:bg-bank-green/90"
 			>
-				{submitLabel}
+				{isSubmitting
+					? t("dashboard.transferForms.submitting")
+					: submitLabel}
 			</Button>
 		</div>
 	);

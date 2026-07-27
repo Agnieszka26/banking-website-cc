@@ -12,10 +12,8 @@ import type {
 	TransferType,
 } from "#/components/dashboard/transfers/types";
 import { useTranslation } from "#/lib/i18n";
-import {
-	submitTransfer,
-	type TransferErrorCode,
-} from "#/lib/transfers/submit-transfer";
+import { submitTransfer } from "#/lib/transfers/submit-transfer";
+import { transferErrorMessage } from "#/lib/transfers/transfer-error-message";
 import type { DashboardAccount } from "#/server/plaid";
 import { listLedgerAccounts } from "#/server/transfers/functions";
 
@@ -40,25 +38,6 @@ const transferActions = [
 type QuickTransferProps = {
 	accounts: DashboardAccount[];
 };
-
-function errorMessageForCode(
-	t: (key: string) => string,
-	code: TransferErrorCode,
-): string {
-	switch (code) {
-		case "INSUFFICIENT_FUNDS":
-			return t("dashboard.transferForms.errors.insufficientFunds");
-		case "UNAUTHORIZED":
-			return t("dashboard.transferForms.errors.unauthorized");
-		case "ACCOUNT_NOT_FOUND":
-		case "FORBIDDEN":
-			return t("dashboard.transferForms.errors.invalidAccount");
-		case "VALIDATION_ERROR":
-			return t("dashboard.transferForms.errors.validation");
-		default:
-			return t("dashboard.transferForms.errors.submissionFailed");
-	}
-}
 
 export function QuickTransfer({ accounts }: QuickTransferProps) {
 	const t = useTranslation();
@@ -119,14 +98,14 @@ export function QuickTransfer({ accounts }: QuickTransferProps) {
 	};
 
 	const handleSubmit = async (payload: TransferPayload) => {
+		setErrorMessage(null);
 		const result = await submitTransfer(payload);
 
 		if (!result.ok) {
-			setErrorMessage(errorMessageForCode(t, result.error.code));
+			setErrorMessage(transferErrorMessage(t, result.error.code));
 			return;
 		}
 
-		setErrorMessage(null);
 		posthog.capture("transfer_submitted", {
 			transfer_type: payload.type,
 			reference_id: result.data.id,

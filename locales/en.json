@@ -157,6 +157,7 @@
 			"selectPaymentType": "Select payment type",
 			"execute": "Execute transfer",
 			"makeTransfer": "Make a transfer",
+			"submitting": "Submitting transfer…",
 			"cancel": "Cancel",
 			"success": "Transfer submitted successfully.",
 			"loadingAccounts": "Loading accounts…",

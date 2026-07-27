@@ -63,6 +63,10 @@ export function RecipientTransferForm({
 
 	const handleSubmit = async (event: FormEvent) => {
 		event.preventDefault();
+		if (isSubmitting) {
+			return;
+		}
+
 		const nextErrors = validate();
 		setErrors(nextErrors);
 
@@ -90,7 +94,7 @@ export function RecipientTransferForm({
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
+		<form onSubmit={handleSubmit} className="space-y-4" aria-busy={isSubmitting}>
 			<div className="space-y-2">
 				<Label htmlFor="recipient-transfer-name">
 					{t("dashboard.transferForms.recipientName")}
@@ -100,6 +104,7 @@ export function RecipientTransferForm({
 					type="text"
 					value={recipientName}
 					onChange={(event) => setRecipientName(event.target.value)}
+					disabled={isSubmitting}
 					aria-invalid={Boolean(errors.recipientName)}
 					className={cn("h-10", errors.recipientName && "border-destructive")}
 				/>
@@ -122,6 +127,7 @@ export function RecipientTransferForm({
 					placeholder="26 1234 5678 9012 3456 7890 1234"
 					value={recipientAccountNumber}
 					onChange={(event) => setRecipientAccountNumber(event.target.value)}
+					disabled={isSubmitting}
 					aria-invalid={Boolean(errors.recipientAccountNumber)}
 					className={cn(
 						"h-10",
@@ -140,6 +146,7 @@ export function RecipientTransferForm({
 				value={amount}
 				onChange={setAmount}
 				error={errors.amount}
+				disabled={isSubmitting}
 			/>
 
 			<TransferTitleField
@@ -147,6 +154,7 @@ export function RecipientTransferForm({
 				value={title}
 				onChange={setTitle}
 				error={errors.title}
+				disabled={isSubmitting}
 			/>
 
 			<TransferFormActions
