@@ -114,8 +114,16 @@ export function QuickTransfer({ accounts }: QuickTransferProps) {
 			reference_id: result.data.id,
 		});
 
-		// Wait for server success, then refresh loaders (no optimistic balances).
-		await refreshCachesAfterTransfer(router);
+		// Best-effort: transfer already committed; refresh must not block success UI.
+		try {
+			await refreshCachesAfterTransfer(router);
+		} catch {
+			posthog.capture("transfer_cache_refresh_failed", {
+				transfer_type: payload.type,
+				reference_id: result.data.id,
+			});
+		}
+
 		// Drop in-memory ledger options so the next open refetches balances.
 		setLedgerAccounts([]);
 
