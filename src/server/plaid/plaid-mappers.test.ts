@@ -81,9 +81,48 @@ describe("buildAccountSummary", () => {
 				},
 			]),
 		).toEqual({
-			totalAvailable: 150,
-			savings: 50,
-			currency: "PLN",
+			byCurrency: [
+				{ currency: "PLN", totalAvailable: 150, savings: 50 },
+			],
+		});
+	});
+
+	it("keeps totals separate per currency instead of summing across them", () => {
+		expect(
+			buildAccountSummary([
+				{
+					id: "pln",
+					name: "Main",
+					mask: "1111",
+					balance: 1000,
+					currency: "PLN",
+					type: "checking",
+					source: "internal",
+				},
+				{
+					id: "usd",
+					name: "USD Checking",
+					mask: "2222",
+					balance: 200,
+					currency: "USD",
+					type: "checking",
+					source: "plaid",
+				},
+				{
+					id: "usd-sav",
+					name: "USD Savings",
+					mask: "3333",
+					balance: 50,
+					currency: "USD",
+					type: "savings",
+					source: "plaid",
+				},
+			]),
+		).toEqual({
+			byCurrency: [
+				{ currency: "PLN", totalAvailable: 1000, savings: 0 },
+				{ currency: "USD", totalAvailable: 250, savings: 50 },
+			],
 		});
 	});
 

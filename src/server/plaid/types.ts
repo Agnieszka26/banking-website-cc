@@ -19,10 +19,15 @@ export type DashboardTransaction = {
 	currency: string;
 };
 
-export type DashboardSummary = {
+/** Per-currency dashboard totals — never mix units across currencies. */
+export type DashboardCurrencyTotal = {
+	currency: string;
 	totalAvailable: number;
 	savings: number;
-	currency: string;
+};
+
+export type DashboardSummary = {
+	byCurrency: DashboardCurrencyTotal[];
 };
 
 export type DashboardUser = {

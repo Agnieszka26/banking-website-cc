@@ -5,7 +5,7 @@ import type { LedgerAccountRecord } from "#/data/repositories/ledger-account.rep
 
 /**
  * Ensures the user has an internal ledger account (IBAN + initial deposit).
- * Called from Better Auth signup hooks and as a backfill on first dashboard access.
+ * Idempotent: safe to call from signup hooks and session repair.
  */
 export async function provisionInternalAccountForUser(
 	userId: string,

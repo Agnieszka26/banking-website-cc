@@ -9,7 +9,6 @@ import {
 import { isValidPolishIban, normalizePolishIban } from "#/lib/iban";
 import { log } from "#/lib/logger";
 import { requireUserId } from "#/lib/session.server";
-import { provisionInternalAccountForUser } from "#/server/accounts/provision";
 import { toTransferDto } from "#/server/transfers/mappers";
 import type {
 	AccountDto,
@@ -35,13 +34,12 @@ function toAccountDto(row: {
 
 /**
  * Lists application-ledger accounts for the authenticated user.
- * Ensures the user has been provisioned (backfill for pre-decision users).
+ * Session gate repairs provisioning for legacy / incomplete users.
  */
 export async function listLedgerAccountsForUser(): Promise<AccountDto[]> {
 	const userId = await requireUserId();
 
 	try {
-		await provisionInternalAccountForUser(userId);
 		const rows = await ledgerAccountRepository.listOwned(userId);
 		return rows.map(toAccountDto);
 	} catch (error) {

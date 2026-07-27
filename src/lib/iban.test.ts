@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-	computeIbanCheckDigits,
 	generatePolishIban,
 	isValidPolishIban,
 	normalizePolishIban,
@@ -18,9 +17,8 @@ describe("iban", () => {
 
 	it("generates valid Polish IBANs with check digits", () => {
 		const iban = generatePolishIban("0000000000000042");
-		expect(iban).toMatch(/^PL\d{26}$/);
+		expect(iban).toBe("PL64109010140000000000000042");
 		expect(isValidPolishIban(iban)).toBe(true);
-		expect(computeIbanCheckDigits("PL", iban.slice(4))).toBe(iban.slice(2, 4));
 	});
 
 	it("rejects IBANs with invalid check digits", () => {

@@ -3,7 +3,6 @@ import { ledgerAccountRepository } from "#/data/repositories/ledger-account.repo
 import { plaidLinkRepository, plaidSyncRepository } from "#/data/repositories";
 import { requireSession } from "#/lib/session.server";
 import { mapLedgerAccountToDashboard } from "#/server/accounts/mappers";
-import { provisionInternalAccountForUser } from "#/server/accounts/provision";
 import { plaidAccountsCache, plaidTransactionsCache } from "./cache";
 import { toDashboardUser } from "./dashboard-mappers";
 import { fetchPlaidAccounts, fetchPlaidTransactions } from "./plaid-api";
@@ -280,7 +279,6 @@ export async function loadDashboardOverview(): Promise<DashboardOverview> {
 	const userId = session.user.id;
 	const user = toDashboardUser(session);
 
-	await provisionInternalAccountForUser(userId);
 	const ledgerRows = await ledgerAccountRepository.listOwned(userId);
 	const internalAccounts = ledgerRows.map(mapLedgerAccountToDashboard);
 

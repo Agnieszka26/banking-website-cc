@@ -207,12 +207,9 @@ async function executeTransferInTx(
 		return { transfer: duplicate, deduplicated: true };
 	}
 
+	const now = new Date();
 	const bookingDate = new Date(
-		Date.UTC(
-			new Date().getUTCFullYear(),
-			new Date().getUTCMonth(),
-			new Date().getUTCDate(),
-		),
+		Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
 	);
 
 	const transfer = await tx.ledgerTransfer.create({

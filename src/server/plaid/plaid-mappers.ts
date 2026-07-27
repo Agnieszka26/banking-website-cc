@@ -105,7 +105,7 @@ export function mapCachedTransaction(
 	};
 }
 
-/** Builds dashboard summary totals from account balances. */
+/** Builds dashboard summary totals grouped by currency (no cross-currency sum). */
 export function buildAccountSummary(
 	accounts: DashboardAccount[],
 ): DashboardSummary | null {
@@ -113,21 +113,25 @@ export function buildAccountSummary(
 		return null;
 	}
 
-	const cashLikeAccounts = accounts.filter((account) =>
-		isCashLikeAccount(account.type),
-	);
-
-	const totalAvailable = cashLikeAccounts.reduce(
-		(sum, account) => sum + account.balance,
-		0,
-	);
-	const savings = accounts
-		.filter((account) => SAVINGS_ACCOUNT_TYPES.has(account.type))
-		.reduce((sum, account) => sum + account.balance, 0);
+	const currencies = [
+		...new Set(accounts.map((account) => account.currency)),
+	].sort((left, right) => left.localeCompare(right));
 
 	return {
-		totalAvailable,
-		savings,
-		currency: accounts[0]?.currency ?? "PLN",
+		byCurrency: currencies.map((currency) => {
+			const inCurrency = accounts.filter(
+				(account) => account.currency === currency,
+			);
+
+			const totalAvailable = inCurrency
+				.filter((account) => isCashLikeAccount(account.type))
+				.reduce((sum, account) => sum + account.balance, 0);
+
+			const savings = inCurrency
+				.filter((account) => SAVINGS_ACCOUNT_TYPES.has(account.type))
+				.reduce((sum, account) => sum + account.balance, 0);
+
+			return { currency, totalAvailable, savings };
+		}),
 	};
 }

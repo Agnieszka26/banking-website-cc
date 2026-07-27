@@ -37,7 +37,8 @@ createServerFn
 3. Postgres policies on `ledger_accounts` / `ledger_transactions` filter by `current_app_user_id()`.
 4. Repository queries also include explicit `userId` joins/filters as defense-in-depth.
 
-No unrestricted admin client is used for user-facing ledger reads/writes. Owner/`DATABASE_URL` Prisma is reserved for auth admin and test seeding.
+No unrestricted admin client is used for ordinary user-facing ledger reads/writes. Owner/`DATABASE_URL` Prisma is reserved for auth admin, test seeding, and the narrowly scoped cross-user transfer settlement path after source ownership has been verified.
+
 
 ## Repository responsibility
 
@@ -64,7 +65,7 @@ Architecture decision: the application ledger is the source of truth; Plaid is a
 
 Own-account transfers run under `withUserRlsContext` (both accounts owned by the session user).
 
-Recipient transfers resolve `destinationIban` via owner Prisma, then settle with owner Prisma when the destination belongs to another user. The service always verifies source ownership under RLS first. Clients never supply ledger posts or balances.
+Recipient transfers resolve `destinationIban` via owner Prisma, then settle with owner Prisma when the destination belongs to another user. This is the sole user-facing owner-Prisma exception and occurs within the atomic transfer workflow after source ownership validation.The service always verifies source ownership under RLS first. Clients never supply ledger posts or balances.
 
 ## Logging
 

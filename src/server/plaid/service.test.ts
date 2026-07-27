@@ -47,9 +47,7 @@ describe("mergeDashboardData", () => {
 				},
 			],
 			summary: {
-				totalAvailable: 100,
-				savings: 0,
-				currency: "PLN",
+				byCurrency: [{ currency: "PLN", totalAvailable: 100, savings: 0 }],
 			},
 		};
 		const transactions: DashboardTransactionsPayload = {

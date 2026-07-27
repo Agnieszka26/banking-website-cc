@@ -162,7 +162,7 @@ Account
 
 ## Implementation notes (2026-07-27)
 
-- Signup (`better-auth` `databaseHooks.user.create.after`) provisions one internal `ledger_accounts` row with a generated Polish IBAN and a ledger `deposit` of **1000 PLN** (`Initial account balance`).
+- Signup (`better-auth` `databaseHooks.user.create.after`) best-effort provisions one internal `ledger_accounts` row with a generated Polish IBAN and a ledger `deposit` of **1000 PLN** (`Initial account balance`). User + ledger are not one atomic TX via Better Auth; `requireSession` idempotently repairs incomplete users (or blocks) before session use.
 - Dashboard loads internal ledger accounts first; Plaid remains an optional external import.
 - Internal transfers support own-account (`destinationAccountId`) and recipient-by-IBAN (`destinationIban`). Cross-user credits use the owner DB role after service-layer source ownership checks (RLS cannot credit another user’s account).
 - `balance_minor` remains a denormalized cache updated atomically with ledger posts (ledger posts are the audit source of truth).

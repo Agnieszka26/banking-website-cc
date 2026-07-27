@@ -62,6 +62,7 @@ function DashboardHome() {
 	const data: DashboardData = Route.useLoaderData();
 	const posthog = usePostHog();
 	const localize = useLocalizedPath();
+	const summary = data.summary;
 
 	return (
 		<div className="mx-auto max-w-7xl space-y-6">
@@ -209,28 +210,37 @@ function DashboardHome() {
 				</DashboardPanel>
 
 				<DashboardPanel title={t("dashboard.panels.mySummary")}>
-					{data.summary ? (
+					{summary ? (
 						<>
 							<dl className="space-y-4">
-								<div className="flex items-center justify-between gap-4">
-									<dt className="text-sm text-muted-foreground">
-										{t("dashboard.summary.availableFunds")}
-									</dt>
-									<dd className="text-sm font-semibold text-bank-green">
-										{formatMoney(
-											data.summary.totalAvailable,
-											data.summary.currency,
-										)}
-									</dd>
-								</div>
-								<div className="flex items-center justify-between gap-4">
-									<dt className="text-sm text-muted-foreground">
-										{t("dashboard.summary.savings")}
-									</dt>
-									<dd className="text-sm font-semibold">
-										{formatMoney(data.summary.savings, data.summary.currency)}
-									</dd>
-								</div>
+								{summary.byCurrency.map((totals) => (
+									<div key={totals.currency} className="space-y-3">
+										{summary.byCurrency.length > 1 ? (
+											<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+												{totals.currency}
+											</p>
+										) : null}
+										<div className="flex items-center justify-between gap-4">
+											<dt className="text-sm text-muted-foreground">
+												{t("dashboard.summary.availableFunds")}
+											</dt>
+											<dd className="text-sm font-semibold text-bank-green">
+												{formatMoney(
+													totals.totalAvailable,
+													totals.currency,
+												)}
+											</dd>
+										</div>
+										<div className="flex items-center justify-between gap-4">
+											<dt className="text-sm text-muted-foreground">
+												{t("dashboard.summary.savings")}
+											</dt>
+											<dd className="text-sm font-semibold">
+												{formatMoney(totals.savings, totals.currency)}
+											</dd>
+										</div>
+									</div>
+								))}
 								<div className="flex items-center justify-between gap-4">
 									<dt className="text-sm text-muted-foreground">
 										{t("dashboard.summary.linkedAccounts")}

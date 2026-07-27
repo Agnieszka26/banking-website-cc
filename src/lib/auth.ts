@@ -23,6 +23,12 @@ export const auth = betterAuth({
 	databaseHooks: {
 		user: {
 			create: {
+				/**
+				 * Best-effort ledger bootstrap after Better Auth commits the user.
+				 * User + ledger cannot share one app-owned transaction here; do not
+				 * rethrow (that cannot roll back the user and breaks signup).
+				 * Incomplete users are repaired or blocked in `requireSession`.
+				 */
 				after: async (user) => {
 					try {
 						await provisionInternalAccountForUser(user.id);
@@ -34,8 +40,6 @@ export const auth = betterAuth({
 							message:
 								error instanceof Error ? error.message : "Unknown error",
 						});
-						// Re-throw so signup does not succeed without an internal account.
-						throw error;
 					}
 				},
 			},

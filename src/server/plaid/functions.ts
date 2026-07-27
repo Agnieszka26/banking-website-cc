@@ -4,7 +4,6 @@ import { ledgerAccountRepository } from "#/data/repositories/ledger-account.repo
 import { plaidLinkRepository } from "#/data/repositories";
 import { requireSession, requireUserId } from "#/lib/session.server";
 import { mapLedgerAccountToDashboard } from "#/server/accounts/mappers";
-import { provisionInternalAccountForUser } from "#/server/accounts/provision";
 import { getPostHogClient } from "#/utils/posthog-server";
 import { invalidatePlaidCache } from "./cache";
 import { plaidClient } from "./client";
@@ -27,7 +26,6 @@ async function buildFallbackOverview(): Promise<DashboardOverview> {
 	const session = await requireSession("unauthorized");
 	const userId = session.user.id;
 
-	await provisionInternalAccountForUser(userId);
 	const accounts = (await ledgerAccountRepository.listOwned(userId)).map(
 		mapLedgerAccountToDashboard,
 	);
