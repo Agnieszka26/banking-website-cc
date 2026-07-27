@@ -22,8 +22,19 @@ export type LedgerTransferRecord = {
 
 export type CreateTransferInput = CreateTransferRequestParsed;
 
+export type CreateTransferOutcome = {
+	transfer: LedgerTransferRecord;
+	/** True when an existing complete transfer was returned for retry dedup. */
+	deduplicated: boolean;
+};
+
 /** Dedup window for safe client retries after unknown outcomes (API_CONTRACTS §6.1). */
 export const TRANSFER_DEDUP_WINDOW_MS = 5 * 60 * 1000;
+
+/** Own-account transfers always post debit + credit legs when complete. */
+const COMPLETE_TRANSFER_TX_COUNT = 2;
+
+type RlsTx = Parameters<Parameters<typeof withUserRlsContext>[1]>[0];
 
 function toTransferRecord(
 	row: {
@@ -46,58 +57,78 @@ function toTransferRecord(
 }
 
 /**
+ * Duplicate fingerprint lookup using an existing RLS transaction client.
+ * Rules match API_CONTRACTS §6.1 (user + accounts + amount + currency + title).
+ */
+async function findRecentDuplicateWithTx(
+	tx: RlsTx,
+	params: {
+		userId: string;
+		input: CreateTransferInput;
+		withinMs?: number;
+	},
+): Promise<LedgerTransferRecord | null> {
+	const { userId, input, withinMs = TRANSFER_DEDUP_WINDOW_MS } = params;
+	const since = new Date(Date.now() - withinMs);
+	const amountMinor = toMinorBigInt(input.amountMinor);
+
+	const existing = await tx.ledgerTransfer.findFirst({
+		where: {
+			userId,
+			sourceAccountId: input.sourceAccountId,
+			destinationAccountId: input.destinationAccountId,
+			amountMinor,
+			currency: input.currency,
+			title: input.title,
+			createdAt: { gte: since },
+		},
+		orderBy: { createdAt: "desc" },
+	});
+
+	if (!existing) {
+		return null;
+	}
+
+	const legs = await tx.ledgerTransaction.findMany({
+		where: { transferId: existing.id },
+		select: { id: true },
+		orderBy: { createdAt: "asc" },
+	});
+
+	return toTransferRecord(
+		existing,
+		legs.map((leg) => leg.id),
+	);
+}
+
+/**
  * RLS-scoped access for own-account transfers.
  * All multi-leg writes run in one `withUserRlsContext` DB transaction.
  */
 export const transferRepository = {
+	/**
+	 * Standalone duplicate lookup (own transaction). Prefer createTransfer,
+	 * which runs this check inside the create transaction after account locks.
+	 */
 	async findRecentDuplicate(params: {
 		userId: string;
 		input: CreateTransferInput;
 		withinMs?: number;
 	}): Promise<LedgerTransferRecord | null> {
-		const { userId, input, withinMs = TRANSFER_DEDUP_WINDOW_MS } = params;
-		const since = new Date(Date.now() - withinMs);
-		const amountMinor = toMinorBigInt(input.amountMinor);
-
-		return withUserRlsContext(userId, async (tx) => {
-			const existing = await tx.ledgerTransfer.findFirst({
-				where: {
-					userId,
-					sourceAccountId: input.sourceAccountId,
-					destinationAccountId: input.destinationAccountId,
-					amountMinor,
-					currency: input.currency,
-					title: input.title,
-					createdAt: { gte: since },
-				},
-				orderBy: { createdAt: "desc" },
-			});
-
-			if (!existing) {
-				return null;
-			}
-
-			const legs = await tx.ledgerTransaction.findMany({
-				where: { transferId: existing.id },
-				select: { id: true },
-				orderBy: { createdAt: "asc" },
-			});
-
-			return toTransferRecord(
-				existing,
-				legs.map((leg) => leg.id),
-			);
-		});
+		return withUserRlsContext(params.userId, async (tx) =>
+			findRecentDuplicateWithTx(tx, params),
+		);
 	},
 
 	/**
 	 * Atomically creates transfer row, debit/credit ledger legs, and balance updates.
+	 * Duplicate detection runs inside the same transaction after account locks.
 	 * Caller must already validate ownership, currency match, and funds.
 	 */
 	async createTransfer(params: {
 		userId: string;
 		input: CreateTransferInput;
-	}): Promise<LedgerTransferRecord> {
+	}): Promise<CreateTransferOutcome> {
 		const { userId, input } = params;
 		const amountMinor = toMinorBigInt(input.amountMinor);
 
@@ -151,6 +182,15 @@ export const transferRepository = {
 					"VALIDATION_ERROR",
 					"Request body failed validation.",
 				);
+			}
+
+			// Dedup after locks so concurrent identical requests serialize here.
+			const duplicate = await findRecentDuplicateWithTx(tx, { userId, input });
+			if (
+				duplicate &&
+				duplicate.transactionIds.length >= COMPLETE_TRANSFER_TX_COUNT
+			) {
+				return { transfer: duplicate, deduplicated: true };
 			}
 
 			const bookingDate = new Date(
@@ -215,7 +255,10 @@ export const transferRepository = {
 				data: { balanceMinor: { increment: amountMinor } },
 			});
 
-			return toTransferRecord(transfer, [debit.id, credit.id]);
+			return {
+				transfer: toTransferRecord(transfer, [debit.id, credit.id]),
+				deduplicated: false,
+			};
 		});
 	},
 };

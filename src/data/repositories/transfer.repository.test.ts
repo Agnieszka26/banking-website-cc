@@ -89,7 +89,8 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 			},
 		});
 
-		expect(created.transactionIds).toHaveLength(2);
+		expect(created.deduplicated).toBe(false);
+		expect(created.transfer.transactionIds).toHaveLength(2);
 
 		const source = await prisma.ledgerAccount.findUniqueOrThrow({
 			where: { id: sourceAccountId },
@@ -102,10 +103,58 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 		expect(fromMinorBigInt(destination.balanceMinor)).toBe(12_500);
 
 		const legs = await prisma.ledgerTransaction.findMany({
-			where: { transferId: created.id },
+			where: { transferId: created.transfer.id },
 		});
 		expect(legs).toHaveLength(2);
 		expect(legs.every((leg) => leg.type === "transfer")).toBe(true);
+	});
+
+	it("returns an existing recent duplicate instead of creating a second transfer", async () => {
+		const { prisma } = await import("#/lib/prisma");
+		const input = {
+			sourceAccountId,
+			destinationAccountId,
+			amountMinor: 1500,
+			currency: "PLN",
+			title: "Dedup transfer",
+		};
+
+		const first = await transferRepository.createTransfer({
+			userId: ownerUserId,
+			input,
+		});
+		expect(first.deduplicated).toBe(false);
+
+		const beforeCount = await prisma.ledgerTransfer.count({
+			where: { userId: ownerUserId, title: input.title },
+		});
+		const beforeSource = await prisma.ledgerAccount.findUniqueOrThrow({
+			where: { id: sourceAccountId },
+			select: { balanceMinor: true },
+		});
+
+		const second = await transferRepository.createTransfer({
+			userId: ownerUserId,
+			input,
+		});
+
+		expect(second.deduplicated).toBe(true);
+		expect(second.transfer.id).toBe(first.transfer.id);
+		expect(second.transfer.transactionIds).toEqual(
+			first.transfer.transactionIds,
+		);
+
+		const afterCount = await prisma.ledgerTransfer.count({
+			where: { userId: ownerUserId, title: input.title },
+		});
+		const afterSource = await prisma.ledgerAccount.findUniqueOrThrow({
+			where: { id: sourceAccountId },
+			select: { balanceMinor: true },
+		});
+		expect(afterCount).toBe(beforeCount);
+		expect(fromMinorBigInt(afterSource.balanceMinor)).toBe(
+			fromMinorBigInt(beforeSource.balanceMinor),
+		);
 	});
 
 	it("rejects transfer from another user's account", async () => {
