@@ -13,8 +13,12 @@ import type {
 	TransferType,
 } from "#/components/dashboard/transfers/types";
 import { useTranslation } from "#/lib/i18n";
+import { log } from "#/lib/logger";
 import { refreshCachesAfterTransfer } from "#/lib/transfers/refresh-caches-after-transfer";
-import { submitTransfer, type SubmitTransferResult } from "#/lib/transfers/submit-transfer";
+import {
+	type SubmitTransferResult,
+	submitTransfer,
+} from "#/lib/transfers/submit-transfer";
 import { transferErrorMessage } from "#/lib/transfers/transfer-error-message";
 import type { DashboardAccount } from "#/server/plaid";
 import { listLedgerAccounts } from "#/server/transfers/functions";
@@ -111,14 +115,22 @@ export function QuickTransfer({ accounts }: QuickTransferProps) {
 		let result: SubmitTransferResult;
 		try {
 			result = await submitTransfer(payload);
-		} catch {
+		} catch (error) {
+			const message =
+				error instanceof Error
+					? error.message
+					: "Unexpected transfer submit failure";
+			const stack = error instanceof Error ? error.stack : undefined;
+			log("error", "transfer.submit.unexpected", {
+				transferType: payload.type,
+				message,
+				stack: stack ?? null,
+			});
 			posthog.capture("transfer_failed", {
 				transfer_type: payload.type,
 				error_code: "INTERNAL_ERROR",
 			});
-			setErrorMessage(
-				t("dashboard.transferForms.errors.submissionFailed"),
-			);
+			setErrorMessage(t("dashboard.transferForms.errors.submissionFailed"));
 			return;
 		}
 
