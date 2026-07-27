@@ -187,6 +187,15 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 			select: { balanceMinor: true },
 		});
 		const beforeBalance = fromMinorBigInt(beforeSource.balanceMinor);
+		const beforeTransfers = await prisma.ledgerTransfer.count({
+			where: { userId: ownerUserId, title: "Overdraft" },
+		});
+		const beforeLegs = await prisma.ledgerTransaction.count({
+			where: {
+				accountId: { in: [sourceAccountId, destinationAccountId] },
+				title: "Overdraft",
+			},
+		});
 
 		await expect(
 			transferRepository.createTransfer({
@@ -206,5 +215,17 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 			select: { balanceMinor: true },
 		});
 		expect(fromMinorBigInt(afterSource.balanceMinor)).toBe(beforeBalance);
+
+		const afterTransfers = await prisma.ledgerTransfer.count({
+			where: { userId: ownerUserId, title: "Overdraft" },
+		});
+		const afterLegs = await prisma.ledgerTransaction.count({
+			where: {
+				accountId: { in: [sourceAccountId, destinationAccountId] },
+				title: "Overdraft",
+			},
+		});
+		expect(afterTransfers).toBe(beforeTransfers);
+		expect(afterLegs).toBe(beforeLegs);
 	});
 });

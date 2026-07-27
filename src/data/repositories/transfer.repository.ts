@@ -106,16 +106,36 @@ export const transferRepository = {
 		}
 
 		return withUserRlsContext(userId, async (tx) => {
-			const [source, destination] = await Promise.all([
-				tx.ledgerAccount.findFirst({
-					where: { id: input.sourceAccountId, userId },
-					select: { id: true, balanceMinor: true, currency: true },
-				}),
-				tx.ledgerAccount.findFirst({
-					where: { id: input.destinationAccountId, userId },
-					select: { id: true, balanceMinor: true, currency: true },
-				}),
-			]);
+			// Lock both accounts in deterministic id order to avoid deadlocks
+			// when reciprocal transfers (A→B and B→A) run concurrently.
+			const orderedAccountIds = [
+				input.sourceAccountId,
+				input.destinationAccountId,
+			].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
+
+			type LockedAccountRow = {
+				id: string;
+				balance_minor: bigint;
+				currency: string;
+			};
+
+			const lockedById = new Map<string, LockedAccountRow>();
+			for (const accountId of orderedAccountIds) {
+				const rows = await tx.$queryRaw<LockedAccountRow[]>`
+					SELECT id, balance_minor, currency
+					FROM public.ledger_accounts
+					WHERE id = ${accountId}::uuid
+						AND user_id = ${userId}
+					FOR UPDATE
+				`;
+				const row = rows[0];
+				if (row) {
+					lockedById.set(row.id, row);
+				}
+			}
+
+			const source = lockedById.get(input.sourceAccountId);
+			const destination = lockedById.get(input.destinationAccountId);
 
 			if (!source || !destination) {
 				throw new AccountNotFoundError(
@@ -186,7 +206,7 @@ export const transferRepository = {
 				throw new InsufficientFundsError({
 					accountId: source.id,
 					amountMinor: input.amountMinor,
-					balanceMinor: fromMinorBigInt(source.balanceMinor),
+					balanceMinor: fromMinorBigInt(source.balance_minor),
 				});
 			}
 

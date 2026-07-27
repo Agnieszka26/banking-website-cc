@@ -10,6 +10,9 @@ CREATE TABLE IF NOT EXISTS public.ledger_transfers (
   title text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT ledger_transfers_amount_minor_positive CHECK (amount_minor > 0),
+  CONSTRAINT ledger_transfers_amount_minor_safe CHECK (
+    amount_minor <= 9007199254740991
+  ),
   CONSTRAINT ledger_transfers_accounts_differ CHECK (source_account_id <> destination_account_id)
 );
 
@@ -78,6 +81,8 @@ CREATE POLICY ledger_transfers_own_data ON public.ledger_transfers
     )
   );
 
+GRANT SELECT, INSERT ON public.ledger_transfers TO banking_app;
+GRANT SELECT, INSERT ON public.ledger_transfers TO banking_app_runtime;
 DROP POLICY IF EXISTS ledger_transfers_service_role ON public.ledger_transfers;
 CREATE POLICY ledger_transfers_service_role ON public.ledger_transfers
   FOR ALL
