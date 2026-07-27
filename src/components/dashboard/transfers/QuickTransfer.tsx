@@ -102,16 +102,25 @@ export function QuickTransfer({ accounts }: QuickTransferProps) {
 
 	const handleSubmit = async (payload: TransferPayload) => {
 		setErrorMessage(null);
+
+		// Product analytics only — no amounts, accounts, IDs, or balances.
+		posthog.capture("transfer_submitted", {
+			transfer_type: payload.type,
+		});
+
 		const result = await submitTransfer(payload);
 
 		if (!result.ok) {
+			posthog.capture("transfer_failed", {
+				transfer_type: payload.type,
+				error_code: result.error.code,
+			});
 			setErrorMessage(transferErrorMessage(t, result.error.code));
 			return;
 		}
 
-		posthog.capture("transfer_submitted", {
+		posthog.capture("transfer_succeeded", {
 			transfer_type: payload.type,
-			reference_id: result.data.id,
 		});
 
 		// Best-effort: transfer already committed; refresh must not block success UI.
@@ -120,7 +129,6 @@ export function QuickTransfer({ accounts }: QuickTransferProps) {
 		} catch {
 			posthog.capture("transfer_cache_refresh_failed", {
 				transfer_type: payload.type,
-				reference_id: result.data.id,
 			});
 		}
 

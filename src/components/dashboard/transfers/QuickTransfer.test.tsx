@@ -21,13 +21,14 @@ const t = (key: string, values?: Record<string, string | number>) =>
 const invalidate = vi.fn().mockResolvedValue(undefined);
 const submitTransferMock = vi.fn();
 const listLedgerAccountsMock = vi.fn();
+const posthogCapture = vi.fn();
 
 vi.mock("#/lib/i18n", () => ({
 	useTranslation: () => t,
 }));
 
 vi.mock("@posthog/react", () => ({
-	usePostHog: () => ({ capture: vi.fn() }),
+	usePostHog: () => ({ capture: posthogCapture }),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -141,6 +142,17 @@ describe("QuickTransfer API error and success UI", () => {
 		expect(
 			screen.queryByText(t("dashboard.transferForms.success")),
 		).toBeNull();
+		expect(posthogCapture).toHaveBeenCalledWith("transfer_submitted", {
+			transfer_type: "own",
+		});
+		expect(posthogCapture).toHaveBeenCalledWith("transfer_failed", {
+			transfer_type: "own",
+			error_code: "INSUFFICIENT_FUNDS",
+		});
+		expect(posthogCapture).not.toHaveBeenCalledWith(
+			"transfer_succeeded",
+			expect.anything(),
+		);
 	});
 
 	it("renders generic submission failure for INTERNAL_ERROR", async () => {
@@ -165,6 +177,10 @@ describe("QuickTransfer API error and success UI", () => {
 		expect((await screen.findByRole("alert")).textContent).toContain(
 			t("dashboard.transferForms.errors.submissionFailed"),
 		);
+		expect(posthogCapture).toHaveBeenCalledWith("transfer_failed", {
+			transfer_type: "own",
+			error_code: "INTERNAL_ERROR",
+		});
 	});
 
 	it("closes the modal and shows success toast after a successful transfer", async () => {
@@ -205,5 +221,28 @@ describe("QuickTransfer API error and success UI", () => {
 			screen.getByText(t("dashboard.transferForms.success")),
 		).toBeTruthy();
 		expect(invalidate).toHaveBeenCalledTimes(1);
+		expect(posthogCapture).toHaveBeenCalledWith("transfer_submitted", {
+			transfer_type: "own",
+		});
+		expect(posthogCapture).toHaveBeenCalledWith("transfer_succeeded", {
+			transfer_type: "own",
+		});
+
+		const sensitiveKeys = [
+			"reference_id",
+			"amount",
+			"amountMinor",
+			"sourceAccountId",
+			"destinationAccountId",
+			"transactionIds",
+		];
+		for (const [, props] of posthogCapture.mock.calls) {
+			if (!props || typeof props !== "object") {
+				continue;
+			}
+			for (const key of sensitiveKeys) {
+				expect(props).not.toHaveProperty(key);
+			}
+		}
 	});
 });
