@@ -107,8 +107,9 @@ export function OwnAccountTransferForm({
 				currency: sourceAccount.currency,
 				title: title.trim(),
 			});
-		} catch {
+		} catch (error) {
 			// Keep loading reset in `finally`; parent may surface API errors.
+			console.error("Unexpected error submitting own-account transfer", error);
 		} finally {
 			setIsSubmitting(false);
 		}
