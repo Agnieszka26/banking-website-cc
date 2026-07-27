@@ -21,14 +21,24 @@ import type {
  */
 export async function listLedgerAccountsForUser(): Promise<AccountDto[]> {
 	const userId = await requireUserId();
-	const rows = await ledgerAccountRepository.listOwned(userId);
 
-	return rows.map((row) => ({
-		id: row.id,
-		name: row.name,
-		currency: row.currency,
-		balanceMinor: row.balanceMinor,
-	}));
+	try {
+		const rows = await ledgerAccountRepository.listOwned(userId);
+		return rows.map((row) => ({
+			id: row.id,
+			name: row.name,
+			currency: row.currency,
+			balanceMinor: row.balanceMinor,
+		}));
+	} catch (error) {
+		if (error instanceof AppError) throw error;
+		log("error", "transfer.list_accounts.failed", {
+			userId,
+			operation: "list",
+			errorCategory: "DATABASE_ERROR",
+		});
+		throw new AppError("INTERNAL_ERROR", "An unexpected error occurred.");
+	}
 }
 
 /**
