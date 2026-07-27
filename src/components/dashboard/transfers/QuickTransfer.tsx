@@ -1,4 +1,5 @@
 import { usePostHog } from "@posthog/react";
+import { useRouter } from "@tanstack/react-router";
 import { Building2, User, Wallet } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { OwnAccountTransferForm } from "#/components/dashboard/transfers/OwnAccountTransferForm";
@@ -12,6 +13,7 @@ import type {
 	TransferType,
 } from "#/components/dashboard/transfers/types";
 import { useTranslation } from "#/lib/i18n";
+import { refreshCachesAfterTransfer } from "#/lib/transfers/refresh-caches-after-transfer";
 import { submitTransfer } from "#/lib/transfers/submit-transfer";
 import { transferErrorMessage } from "#/lib/transfers/transfer-error-message";
 import type { DashboardAccount } from "#/server/plaid";
@@ -41,6 +43,7 @@ type QuickTransferProps = {
 
 export function QuickTransfer({ accounts }: QuickTransferProps) {
 	const t = useTranslation();
+	const router = useRouter();
 	const posthog = usePostHog();
 
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -110,6 +113,11 @@ export function QuickTransfer({ accounts }: QuickTransferProps) {
 			transfer_type: payload.type,
 			reference_id: result.data.id,
 		});
+
+		// Wait for server success, then refresh loaders (no optimistic balances).
+		await refreshCachesAfterTransfer(router);
+		// Drop in-memory ledger options so the next open refetches balances.
+		setLedgerAccounts([]);
 
 		closeModal();
 		setSuccessMessage(t("dashboard.transferForms.success"));
