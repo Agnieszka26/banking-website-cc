@@ -1,21 +1,29 @@
 import type { LucideIcon } from "lucide-react";
-import { Building2, ShoppingCart } from "lucide-react";
-import type { DashboardTransaction } from "#/server/plaid";
-import { formatMoney, formatPlDate } from "#/server/plaid";
+import { ArrowLeftRight, Building2, ShoppingCart } from "lucide-react";
+import { useTranslation } from "#/lib/i18n";
+import type { TransactionListItemViewModel } from "#/lib/transaction-list-model";
 import { getTransactionFlow } from "#/lib/transactions";
+import { formatMoney, formatPlDate } from "#/server/plaid";
 import { cn } from "@/lib/utils";
 
-function getTransactionIcon(isIncome: boolean): LucideIcon {
+function getTransactionIcon(
+	isIncome: boolean,
+	isTransfer: boolean,
+): LucideIcon {
+	if (isTransfer) {
+		return ArrowLeftRight;
+	}
 	return isIncome ? Building2 : ShoppingCart;
 }
 
 type TransactionListItemProps = {
-	transaction: DashboardTransaction;
+	transaction: TransactionListItemViewModel;
 };
 
 export function TransactionListItem({ transaction }: TransactionListItemProps) {
+	const t = useTranslation();
 	const isIncome = getTransactionFlow(transaction.amount) === "income";
-	const Icon = getTransactionIcon(isIncome);
+	const Icon = getTransactionIcon(isIncome, transaction.isTransfer);
 
 	return (
 		<li>
@@ -26,9 +34,14 @@ export function TransactionListItem({ transaction }: TransactionListItemProps) {
 				<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-bank-green-light">
 					<Icon className="size-4 text-bank-green" />
 				</div>
-				<p className="min-w-0 flex-1 truncate text-sm font-medium">
-					{transaction.name}
-				</p>
+				<div className="min-w-0 flex-1">
+					<p className="truncate text-sm font-medium">{transaction.name}</p>
+					{transaction.isTransfer && (
+						<p className="truncate text-xs text-muted-foreground">
+							{t("dashboard.transactions.transferLabel")}
+						</p>
+					)}
+				</div>
 				<span
 					className={cn(
 						"shrink-0 text-sm font-semibold",

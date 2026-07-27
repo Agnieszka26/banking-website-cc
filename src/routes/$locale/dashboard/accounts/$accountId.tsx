@@ -62,7 +62,7 @@ function AccountDetailsPage() {
 			<header className="rounded-xl border border-border bg-card p-6 shadow-sm">
 				<h1 className="text-2xl font-bold">{account.name}</h1>
 				<p className="mt-1 text-sm text-muted-foreground">
-					**** {account.mask}
+					{account.iban ?? `**** ${account.mask}`}
 				</p>
 				<p className="mt-4 text-3xl font-semibold text-bank-green">
 					{formatMoney(account.balance, account.currency)}

@@ -21,9 +21,10 @@ export function TransferSuccessToast({
 
 	return (
 		<div
-			role="status"
+			aria-live="polite"
+			aria-atomic="true"
 			className={cn(
-				"fixed right-4 bottom-4 z-[60] flex max-w-sm items-start gap-3 rounded-xl border border-bank-green/30 bg-card px-4 py-3 shadow-lg",
+				"fixed right-4 bottom-4 z-60 flex max-w-sm items-start gap-3 rounded-xl border border-bank-green/30 bg-card px-4 py-3 shadow-lg",
 				"animate-in fade-in-0 slide-in-from-bottom-2",
 			)}
 		>

@@ -125,10 +125,10 @@
 			"showAll": "Zobacz wszystkie"
 		},
 		"empty": {
-			"noAccounts": "Brak połączonych rachunków.",
+			"noAccounts": "Brak rachunków.",
 			"noTransactions": "Brak transakcji do wyświetlenia.",
 			"noAccountTransactions": "Brak transakcji na tym rachunku.",
-			"connectForSummary": "Połącz konto bankowe, aby zobaczyć podsumowanie.",
+			"connectForSummary": "Podsumowanie rachunku wewnętrznego jest powyżej. Opcjonalnie połącz zewnętrzny bank przez Plaid.",
 			"comingSoon": "Wkrótce dostępne."
 		},
 		"transfer": {
@@ -157,14 +157,21 @@
 			"selectPaymentType": "Wybierz rodzaj płatności",
 			"execute": "Wykonaj przelew",
 			"makeTransfer": "Wykonaj przelew",
+			"submitting": "Wysyłanie przelewu…",
 			"cancel": "Anuluj",
 			"success": "Przelew został złożony pomyślnie.",
+			"loadingAccounts": "Ładowanie rachunków…",
 			"errors": {
 				"required": "To pole jest wymagane.",
 				"amountPositive": "Kwota musi być większa od 0.",
 				"sameAccounts": "Rachunek źródłowy i docelowy nie mogą być takie same.",
 				"invalidAccountNumber": "Podaj prawidłowy 26-cyfrowy numer rachunku.",
-				"needTwoAccounts": "Przelew własny wymaga co najmniej dwóch połączonych rachunków."
+				"needTwoAccounts": "Przelew własny wymaga co najmniej dwóch rachunków księgowych.",
+				"submissionFailed": "Nie udało się wykonać przelewu. Spróbuj ponownie.",
+				"insufficientFunds": "Niewystarczające środki na rachunku źródłowym.",
+				"unauthorized": "Zaloguj się ponownie, aby kontynuować.",
+				"invalidAccount": "Jeden z wybranych rachunków nie został znaleziony.",
+				"validation": "Sprawdź dane przelewu i spróbuj ponownie."
 			}
 		},
 		"messages": {
@@ -214,7 +221,9 @@
 			"pageInfo": "Strona {{page}} z {{totalPages}}",
 			"previous": "Poprzednia",
 			"next": "Następna",
-			"connectToView": "Połącz konto bankowe, aby zobaczyć transakcje."
+			"connectToView": "Połącz konto bankowe, aby zobaczyć transakcje.",
+			"transferLabel": "Przelew",
+			"ledgerLoadError": "Nie udało się wczytać części transakcji aplikacji. Aktywność z połączonego banku może nadal być widoczna."
 		},
 		"securityBanner": {
 			"headline": "Bezpieczeństwo jest dla nas najważniejsze.",
@@ -222,10 +231,10 @@
 			"learnMore": "Dowiedz się więcej"
 		},
 		"connectBank": {
-			"title": "Połącz konto bankowe",
-			"description": "Aby wyświetlić rachunki i transakcje, połącz konto przez bezpieczny moduł Plaid. W środowisku sandbox możesz użyć danych testowych Plaid.",
+			"title": "Połącz zewnętrzny bank (opcjonalnie)",
+			"description": "Twój rachunek wewnętrzny działa bez Plaid. Opcjonalnie połącz zewnętrzny bank przez Plaid, aby importować i wyświetlać zewnętrzne transakcje w sandboxie.",
 			"connecting": "Łączenie…",
-			"connectButton": "Połącz konto przez Plaid",
+			"connectButton": "Połącz zewnętrzne konto przez Plaid",
 			"linkTokenError": "Nie udało się przygotować połączenia z bankiem.",
 			"connectError": "Nie udało się połączyć konta bankowego."
 		}

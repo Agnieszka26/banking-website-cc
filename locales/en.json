@@ -125,10 +125,10 @@
 			"showAll": "Show all"
 		},
 		"empty": {
-			"noAccounts": "No linked accounts.",
+			"noAccounts": "No accounts yet.",
 			"noTransactions": "No transactions to display.",
 			"noAccountTransactions": "No transactions on this account.",
-			"connectForSummary": "Link a bank account to see your summary.",
+			"connectForSummary": "Your internal account summary is shown above. Link an external bank optionally via Plaid.",
 			"comingSoon": "Coming soon."
 		},
 		"transfer": {
@@ -157,14 +157,21 @@
 			"selectPaymentType": "Select payment type",
 			"execute": "Execute transfer",
 			"makeTransfer": "Make a transfer",
+			"submitting": "Submitting transfer…",
 			"cancel": "Cancel",
 			"success": "Transfer submitted successfully.",
+			"loadingAccounts": "Loading accounts…",
 			"errors": {
 				"required": "This field is required.",
 				"amountPositive": "Amount must be greater than 0.",
 				"sameAccounts": "Source and destination accounts must be different.",
 				"invalidAccountNumber": "Enter a valid 26-digit account number.",
-				"needTwoAccounts": "At least two linked accounts are required for an own-account transfer."
+				"needTwoAccounts": "At least two ledger accounts are required for an own-account transfer.",
+				"submissionFailed": "Transfer could not be completed. Please try again.",
+				"insufficientFunds": "Insufficient funds on the source account.",
+				"unauthorized": "Please sign in again to continue.",
+				"invalidAccount": "One of the selected accounts was not found.",
+				"validation": "Please check the transfer details and try again."
 			}
 		},
 		"messages": {
@@ -214,7 +221,9 @@
 			"pageInfo": "Page {{page}} of {{totalPages}}",
 			"previous": "Previous",
 			"next": "Next",
-			"connectToView": "Connect a bank account to view transactions."
+			"connectToView": "Connect a bank account to view transactions.",
+			"transferLabel": "Transfer",
+			"ledgerLoadError": "Some app transactions could not be loaded. Bank-linked activity may still be shown."
 		},
 		"securityBanner": {
 			"headline": "Your security matters most to us.",
@@ -222,10 +231,10 @@
 			"learnMore": "Learn more"
 		},
 		"connectBank": {
-			"title": "Connect bank account",
-			"description": "To view accounts and transactions, connect via the secure Plaid module. In the sandbox environment you can use Plaid test credentials.",
+			"title": "Connect an external bank (optional)",
+			"description": "Your internal account already works without Plaid. Optionally connect an external bank via Plaid to import and display external transactions in the sandbox.",
 			"connecting": "Connecting…",
-			"connectButton": "Connect account via Plaid",
+			"connectButton": "Connect external account via Plaid",
 			"linkTokenError": "Could not prepare bank connection.",
 			"connectError": "Could not connect bank account."
 		}

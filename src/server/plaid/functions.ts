@@ -1,11 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { CountryCode, Products } from "plaid";
+import { ledgerAccountRepository } from "#/data/repositories/ledger-account.repository";
 import { plaidLinkRepository } from "#/data/repositories";
 import { requireSession, requireUserId } from "#/lib/session.server";
+import { mapLedgerAccountToDashboard } from "#/server/accounts/mappers";
 import { getPostHogClient } from "#/utils/posthog-server";
 import { invalidatePlaidCache } from "./cache";
 import { plaidClient } from "./client";
 import { mergeDashboardData, toDashboardUser } from "./dashboard-mappers";
+import { buildAccountSummary } from "./plaid-mappers";
 import { parsePublicTokenInput } from "./schemas";
 import {
 	loadAllTransactions,
@@ -21,11 +24,17 @@ import type {
 
 async function buildFallbackOverview(): Promise<DashboardOverview> {
 	const session = await requireSession("unauthorized");
+	const userId = session.user.id;
+
+	const accounts = (await ledgerAccountRepository.listOwned(userId)).map(
+		mapLedgerAccountToDashboard,
+	);
+
 	return {
 		linked: false,
 		user: toDashboardUser(session),
-		accounts: [],
-		summary: null,
+		accounts,
+		summary: buildAccountSummary(accounts),
 	};
 }
 

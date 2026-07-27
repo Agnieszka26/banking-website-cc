@@ -3,7 +3,7 @@ import { AccountSelectField } from "#/components/dashboard/transfers/AccountSele
 import { TransferAmountField } from "#/components/dashboard/transfers/TransferAmountField";
 import { TransferFormActions } from "#/components/dashboard/transfers/TransferFormActions";
 import { TransferTitleField } from "#/components/dashboard/transfers/TransferTitleField";
-import type { TransferFormProps } from "#/components/dashboard/transfers/types";
+import type { OwnAccountTransferFormProps } from "#/components/dashboard/transfers/types";
 import {
 	isNonEmpty,
 	parsePositiveAmount,
@@ -22,7 +22,7 @@ export function OwnAccountTransferForm({
 	accounts,
 	onCancel,
 	onSuccess,
-}: TransferFormProps) {
+}: OwnAccountTransferFormProps) {
 	const t = useTranslation();
 	const [sourceAccountId, setSourceAccountId] = useState("");
 	const [destinationAccountId, setDestinationAccountId] = useState("");
@@ -71,6 +71,10 @@ export function OwnAccountTransferForm({
 
 	const handleSubmit = async (event: FormEvent) => {
 		event.preventDefault();
+		if (isSubmitting) {
+			return;
+		}
+
 		const nextErrors = validate();
 		setErrors(nextErrors);
 
@@ -83,6 +87,16 @@ export function OwnAccountTransferForm({
 			return;
 		}
 
+		const sourceAccount = accounts.find(
+			(account) => account.id === sourceAccountId,
+		);
+		if (!sourceAccount) {
+			setErrors({
+				sourceAccountId: t("dashboard.transferForms.errors.required"),
+			});
+			return;
+		}
+
 		setIsSubmitting(true);
 		try {
 			await onSuccess({
@@ -90,15 +104,19 @@ export function OwnAccountTransferForm({
 				sourceAccountId,
 				destinationAccountId,
 				amount: parsedAmount,
+				currency: sourceAccount.currency,
 				title: title.trim(),
 			});
+		} catch (error) {
+			// Keep loading reset in `finally`; parent may surface API errors.
+			console.error("Unexpected error submitting own-account transfer", error);
 		} finally {
 			setIsSubmitting(false);
 		}
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
+		<form onSubmit={handleSubmit} className="space-y-4" aria-busy={isSubmitting}>
 			{errors.form && (
 				<p className="text-sm text-destructive" role="alert">
 					{errors.form}
@@ -113,6 +131,7 @@ export function OwnAccountTransferForm({
 				accounts={accounts}
 				onChange={setSourceAccountId}
 				error={errors.sourceAccountId}
+				disabled={isSubmitting}
 			/>
 
 			<AccountSelectField
@@ -123,6 +142,7 @@ export function OwnAccountTransferForm({
 				accounts={accounts}
 				onChange={setDestinationAccountId}
 				error={errors.destinationAccountId}
+				disabled={isSubmitting}
 			/>
 
 			<TransferAmountField
@@ -130,6 +150,7 @@ export function OwnAccountTransferForm({
 				value={amount}
 				onChange={setAmount}
 				error={errors.amount}
+				disabled={isSubmitting}
 			/>
 
 			<TransferTitleField
@@ -137,6 +158,7 @@ export function OwnAccountTransferForm({
 				value={title}
 				onChange={setTitle}
 				error={errors.title}
+				disabled={isSubmitting}
 			/>
 
 			<TransferFormActions

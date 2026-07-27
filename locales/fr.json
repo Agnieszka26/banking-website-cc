@@ -125,10 +125,10 @@
 			"showAll": "Tout afficher"
 		},
 		"empty": {
-			"noAccounts": "Aucun compte connecté.",
+			"noAccounts": "Aucun compte pour le moment.",
 			"noTransactions": "Aucune transaction à afficher.",
 			"noAccountTransactions": "Aucune transaction sur ce compte.",
-			"connectForSummary": "Connectez un compte bancaire pour voir votre résumé.",
+			"connectForSummary": "Le résumé de votre compte interne est ci-dessus. Vous pouvez optionnellement lier une banque externe via Plaid.",
 			"comingSoon": "Bientôt disponible."
 		},
 		"transfer": {
@@ -157,14 +157,21 @@
 			"selectPaymentType": "Sélectionner le type de paiement",
 			"execute": "Effectuer le virement",
 			"makeTransfer": "Effectuer le virement",
+			"submitting": "Envoi du virement…",
 			"cancel": "Annuler",
 			"success": "Virement envoyé avec succès.",
+			"loadingAccounts": "Chargement des comptes…",
 			"errors": {
 				"required": "Ce champ est obligatoire.",
 				"amountPositive": "Le montant doit être supérieur à 0.",
 				"sameAccounts": "Les comptes source et destinataire doivent être différents.",
 				"invalidAccountNumber": "Saisissez un numéro de compte valide à 26 chiffres.",
-				"needTwoAccounts": "Un virement interne nécessite au moins deux comptes connectés."
+				"needTwoAccounts": "Un virement interne nécessite au moins deux comptes du grand livre.",
+				"submissionFailed": "Le virement n'a pas pu être effectué. Veuillez réessayer.",
+				"insufficientFunds": "Fonds insuffisants sur le compte source.",
+				"unauthorized": "Veuillez vous reconnecter pour continuer.",
+				"invalidAccount": "L'un des comptes sélectionnés est introuvable.",
+				"validation": "Vérifiez les détails du virement et réessayez."
 			}
 		},
 		"messages": {
@@ -214,17 +221,20 @@
 			"pageInfo": "Page {{page}} sur {{totalPages}}",
 			"previous": "Précédent",
 			"next": "Suivant",
-			"connectToView": "Connectez un compte bancaire pour voir les transactions."
-		},		"securityBanner": {
+			"connectToView": "Connectez un compte bancaire pour voir les transactions.",
+			"transferLabel": "Virement",
+			"ledgerLoadError": "Certaines transactions de l'application n'ont pas pu être chargées. L'activité liée à la banque peut toujours s'afficher."
+		},
+		"securityBanner": {
 			"headline": "Votre sécurité est notre priorité.",
 			"body": "Ne communiquez jamais vos identifiants par téléphone ou e-mail. Vérifiez toujours l'adresse du site de la banque.",
 			"learnMore": "En savoir plus"
 		},
 		"connectBank": {
-			"title": "Connecter un compte bancaire",
-			"description": "Pour afficher vos comptes et transactions, connectez-vous via le module sécurisé Plaid. En environnement sandbox, vous pouvez utiliser les identifiants de test Plaid.",
+			"title": "Connecter une banque externe (optionnel)",
+			"description": "Votre compte interne fonctionne sans Plaid. Vous pouvez optionnellement connecter une banque externe via Plaid pour importer et afficher des transactions externes en sandbox.",
 			"connecting": "Connexion…",
-			"connectButton": "Connecter via Plaid",
+			"connectButton": "Connecter un compte externe via Plaid",
 			"linkTokenError": "Impossible de préparer la connexion bancaire.",
 			"connectError": "Impossible de connecter le compte bancaire."
 		}

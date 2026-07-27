@@ -170,6 +170,65 @@ model LegacyTransaction {
 }
 
 // ---------------------------------------------------------------------------
+// Application ledger (system of record). Separate from legacy `accounts` /
+// `transactions` and from Plaid cache tables. See docs/API_CONTRACTS.md and
+// docs/transactions-server-boundary.md.
+// ---------------------------------------------------------------------------
+
+model LedgerAccount {
+  id           String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String              @map("user_id")
+  name         String
+  /** Application-domain Polish IBAN (PL + 26 digits). Not supplied by Plaid. */
+  iban         String              @unique
+  currency     String              @db.Char(3)
+  balanceMinor BigInt              @map("balance_minor")
+  createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  transactions LedgerTransaction[]
+
+  @@index([userId])
+  @@map("ledger_accounts")
+}
+
+model LedgerTransfer {
+  id                   String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String              @map("user_id")
+  sourceAccountId      String              @map("source_account_id") @db.Uuid
+  destinationAccountId String              @map("destination_account_id") @db.Uuid
+  amountMinor          BigInt              @map("amount_minor")
+  currency             String              @db.Char(3)
+  title                String
+  createdAt            DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  transactions         LedgerTransaction[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, sourceAccountId, destinationAccountId, amountMinor, currency, title, createdAt])
+  @@map("ledger_transfers")
+}
+
+model LedgerTransaction {
+  id                        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  accountId                 String          @map("account_id") @db.Uuid
+  amountMinor               BigInt          @map("amount_minor")
+  currency                  String          @db.Char(3)
+  direction                 String
+  type                      String
+  title                     String
+  counterpartyName          String?         @map("counterparty_name")
+  counterpartyAccountNumber String?         @map("counterparty_account_number")
+  transferId                String?         @map("transfer_id") @db.Uuid
+  bookingDate               DateTime        @map("booking_date") @db.Date
+  createdAt                 DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  account                   LedgerAccount   @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  transfer                  LedgerTransfer? @relation(fields: [transferId], references: [id], onDelete: Restrict)
+
+  @@index([accountId, bookingDate(sort: Desc), createdAt(sort: Desc)])
+  @@index([transferId])
+  @@map("ledger_transactions")
+}
+
+// ---------------------------------------------------------------------------
 // CMS content (active reads via Supabase client, not Prisma repositories).
 // ---------------------------------------------------------------------------
 

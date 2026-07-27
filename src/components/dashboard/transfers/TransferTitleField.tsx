@@ -8,6 +8,7 @@ type TransferTitleFieldProps = {
 	value: string;
 	onChange: (value: string) => void;
 	error?: string;
+	disabled?: boolean;
 };
 
 /** Transfer title input with validation styling. */
@@ -16,6 +17,7 @@ export function TransferTitleField({
 	value,
 	onChange,
 	error,
+	disabled = false,
 }: TransferTitleFieldProps) {
 	const t = useTranslation();
 
@@ -27,6 +29,7 @@ export function TransferTitleField({
 				type="text"
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
+				disabled={disabled}
 				aria-invalid={Boolean(error)}
 				className={cn("h-10", error && "border-destructive")}
 			/>

@@ -47,6 +47,7 @@ describe("invalidatePlaidCache", () => {
 				balance: 0,
 				currency: "PLN",
 				type: "checking",
+				source: "plaid",
 			},
 		]);
 		plaidTransactionsCache.set("user-1", [

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ConnectBankAccount } from "#/components/dashboard/ConnectBankAccount";
 import { TransactionListItem } from "#/components/dashboard/transactions/TransactionListItem";
 import { useLocalizedPath, useTranslation } from "#/lib/i18n";
+import type { TransactionsPageData } from "#/lib/transaction-list-model";
 import {
 	type AmountSortOrder,
 	type DateSortOrder,
@@ -23,10 +24,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import type { DashboardTransactionsPayload } from "#/server/plaid/types";
 
 type TransactionsPageProps = {
-	data: DashboardTransactionsPayload;
+	data: TransactionsPageData;
 };
 
 export function TransactionsPage({ data }: TransactionsPageProps) {
@@ -103,6 +103,12 @@ export function TransactionsPage({ data }: TransactionsPageProps) {
 			</header>
 
 			{!data.linked && <ConnectBankAccount />}
+
+			{data.ledgerLoadFailed && (
+				<p className="text-sm text-destructive" role="alert">
+					{t("dashboard.transactions.ledgerLoadError")}
+				</p>
+			)}
 
 			<section className="rounded-xl border border-border bg-card shadow-sm">
 				<div className="space-y-4 border-b border-border p-5">
@@ -236,13 +242,11 @@ export function TransactionsPage({ data }: TransactionsPageProps) {
 				</div>
 
 				<div className="p-5">
-					{!data.linked ? (
+					{data.transactions.length === 0 ? (
 						<p className="text-sm text-muted-foreground">
-							{t("dashboard.transactions.connectToView")}
-						</p>
-					) : data.transactions.length === 0 ? (
-						<p className="text-sm text-muted-foreground">
-							{t("dashboard.empty.noTransactions")}
+							{data.linked || !data.ledgerLoadFailed
+								? t("dashboard.empty.noTransactions")
+								: t("dashboard.transactions.connectToView")}
 						</p>
 					) : processed.total === 0 ? (
 						<p className="text-sm text-muted-foreground">

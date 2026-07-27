@@ -31,5 +31,7 @@
 	},
 	"editor.codeActionsOnSave": {
 		"source.organizeImports.biome": "explicit"
-	}
+	},
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "biomejs.biome"
 }
