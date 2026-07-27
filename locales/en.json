@@ -125,10 +125,10 @@
 			"showAll": "Show all"
 		},
 		"empty": {
-			"noAccounts": "No linked accounts.",
+			"noAccounts": "No accounts yet.",
 			"noTransactions": "No transactions to display.",
 			"noAccountTransactions": "No transactions on this account.",
-			"connectForSummary": "Link a bank account to see your summary.",
+			"connectForSummary": "Your internal account summary is shown above. Link an external bank optionally via Plaid.",
 			"comingSoon": "Coming soon."
 		},
 		"transfer": {
@@ -231,10 +231,10 @@
 			"learnMore": "Learn more"
 		},
 		"connectBank": {
-			"title": "Connect bank account",
-			"description": "To view accounts and transactions, connect via the secure Plaid module. In the sandbox environment you can use Plaid test credentials.",
+			"title": "Connect an external bank (optional)",
+			"description": "Your internal account already works without Plaid. Optionally connect an external bank via Plaid to import and display external transactions in the sandbox.",
 			"connecting": "Connecting…",
-			"connectButton": "Connect account via Plaid",
+			"connectButton": "Connect external account via Plaid",
 			"linkTokenError": "Could not prepare bank connection.",
 			"connectError": "Could not connect bank account."
 		}

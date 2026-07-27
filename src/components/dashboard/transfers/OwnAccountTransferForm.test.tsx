@@ -63,12 +63,14 @@ const accounts: TransferAccountOption[] = [
 	{
 		id: "src",
 		name: "Checking",
+		iban: "PL61109010140000071219812874",
 		currency: "PLN",
 		balanceMinor: 50_000,
 	},
 	{
 		id: "dst",
 		name: "Savings",
+		iban: "PL61109010140000071219812875",
 		currency: "PLN",
 		balanceMinor: 10_000,
 	},

@@ -23,7 +23,8 @@ describe("shared transport input vs parsed types", () => {
 
 		expectTypeOf<CreateTransferRequest>().toMatchTypeOf<{
 			sourceAccountId: string;
-			destinationAccountId: string;
+			destinationAccountId?: string;
+			destinationIban?: string;
 			amountMinor: number;
 			title: string;
 			currency?: string;

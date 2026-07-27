@@ -124,6 +124,26 @@ describe("CreateTransferRequestSchema", () => {
 		}
 	});
 
+	it("accepts destinationIban instead of destinationAccountId", () => {
+		const parsed = CreateTransferRequestSchema.safeParse({
+			sourceAccountId: "src-account",
+			destinationIban: "PL61109010140000071219812874",
+			amountMinor: 10_050,
+			title: "Recipient transfer",
+			counterpartyName: "Jan Kowalski",
+		});
+		expect(parsed.success).toBe(true);
+	});
+
+	it("rejects providing both destinationAccountId and destinationIban", () => {
+		expect(
+			CreateTransferRequestSchema.safeParse({
+				...validBody,
+				destinationIban: "PL61109010140000071219812874",
+			}).success,
+		).toBe(false);
+	});
+
 	it("rejects empty or oversized titles and invalid currency codes", () => {
 		expect(
 			CreateTransferRequestSchema.safeParse({

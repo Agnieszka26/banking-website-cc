@@ -3,12 +3,14 @@ import type { TransferPayload } from "#/components/dashboard/transfers/types";
 
 vi.mock("#/server/transfers/functions", () => ({
 	createTransfer: vi.fn(),
+	listLedgerAccounts: vi.fn(),
 }));
 
-import { createTransfer } from "#/server/transfers/functions";
+import { createTransfer, listLedgerAccounts } from "#/server/transfers/functions";
 import { submitTransfer, toAmountMinor } from "./submit-transfer";
 
 const createTransferMock = vi.mocked(createTransfer);
+const listLedgerAccountsMock = vi.mocked(listLedgerAccounts);
 
 const ownPayload: Extract<TransferPayload, { type: "own" }> = {
 	type: "own",
@@ -29,27 +31,77 @@ describe("toAmountMinor", () => {
 });
 
 describe("submitTransfer", () => {
-	it("rejects recipient/tax payloads without calling the server", async () => {
+	it("rejects tax payloads without calling the server", async () => {
 		const result = await submitTransfer({
-			type: "recipient",
-			recipientName: "Jan",
-			recipientAccountNumber: "PL61109010140000071219812874",
+			type: "tax",
+			paymentType: "zus",
+			accountNumber: "PL61109010140000071219812874",
 			amount: 10,
-			title: "Test",
+			paymentId: "123",
 		});
 
 		expect(result).toEqual({
 			ok: false,
 			error: {
 				code: "VALIDATION_ERROR",
-				message:
-					"Only own-account transfers are supported by the ledger transfer API.",
+				message: "Tax transfers are not supported by the ledger transfer API.",
 			},
 		});
 		expect(createTransferMock).not.toHaveBeenCalled();
 	});
 
+	it("submits recipient transfers by IBAN via the ledger API", async () => {
+		listLedgerAccountsMock.mockResolvedValue([
+			{
+				id: "src",
+				name: "Main account",
+				iban: "PL61109010140000071219812874",
+				currency: "PLN",
+				balanceMinor: 100_000,
+			},
+		]);
+		createTransferMock.mockResolvedValue({
+			ok: true,
+			data: {
+				id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+				sourceAccountId: "src",
+				destinationAccountId: "dst",
+				amountMinor: 1000,
+				currency: "PLN",
+				title: "Test",
+				transactionIds: [
+					"11111111-1111-1111-1111-111111111111",
+					"22222222-2222-2222-2222-222222222222",
+				],
+				createdAt: "2026-07-26T12:00:00.000Z",
+			},
+		});
+
+		const result = await submitTransfer({
+			type: "recipient",
+			recipientName: "Jan",
+			recipientAccountNumber: "PL61109010140000071219812875",
+			amount: 10,
+			title: "Test",
+		});
+
+		expect(result.ok).toBe(true);
+		expect(createTransferMock).toHaveBeenCalledWith({
+			data: {
+				sourceAccountId: "src",
+				destinationIban: "PL61109010140000071219812875",
+				amountMinor: 1000,
+				currency: "PLN",
+				title: "Test",
+				counterpartyName: "Jan",
+			},
+		});
+	});
+
 	it("rejects non-positive major amounts before calling the server", async () => {
+		createTransferMock.mockClear();
+		listLedgerAccountsMock.mockClear();
+
 		await expect(
 			submitTransfer({ ...ownPayload, amount: 0 }),
 		).resolves.toMatchObject({

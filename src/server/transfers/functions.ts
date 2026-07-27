@@ -3,7 +3,7 @@ import { isAppError } from "#/lib/errors";
 import { log } from "#/lib/logger";
 import { CreateTransferRequestSchema } from "#/shared/schemas";
 import type { AccountDto, ApiErrorCode, TransferDto } from "#/shared/types";
-import { createOwnAccountTransfer, listLedgerAccountsForUser } from "./service";
+import { createInternalTransfer, listLedgerAccountsForUser } from "./service";
 
 /** Client-facing transfer error codes (aligned with docs/API_CONTRACTS.md). */
 export type TransferErrorCode = Extract<
@@ -47,7 +47,7 @@ export const listLedgerAccounts = createServerFn({ method: "GET" }).handler(
 );
 
 /**
- * Creates an own-account transfer.
+ * Creates an internal transfer (own-account or recipient by IBAN).
  * Returns a typed Result so the client can switch on `error.code`.
  */
 export const createTransfer = createServerFn({ method: "POST" })
@@ -63,7 +63,7 @@ export const createTransfer = createServerFn({ method: "POST" })
 		}
 
 		try {
-			const transfer = await createOwnAccountTransfer(parsed.data);
+			const transfer = await createInternalTransfer(parsed.data);
 			return { ok: true, data: transfer };
 		} catch (error) {
 			if (isAppError(error)) {

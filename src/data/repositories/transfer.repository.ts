@@ -5,8 +5,8 @@ import {
 	InsufficientFundsError,
 } from "#/lib/errors";
 import { fromMinorBigInt, toMinorBigInt } from "#/lib/money";
+import { prisma } from "#/lib/prisma";
 import { withUserRlsContext } from "#/lib/prisma-rls";
-import type { CreateTransferRequestParsed } from "#/shared/types";
 
 export type LedgerTransferRecord = {
 	id: string;
@@ -20,7 +20,21 @@ export type LedgerTransferRecord = {
 	transactionIds: string[];
 };
 
-export type CreateTransferInput = CreateTransferRequestParsed;
+/** Repository-level transfer write — destination already resolved to an account id. */
+export type CreateTransferInput = {
+	sourceAccountId: string;
+	destinationAccountId: string;
+	amountMinor: number;
+	currency: string;
+	title: string;
+	counterpartyName?: string | null;
+	counterpartyAccountNumber?: string | null;
+	/**
+	 * When true, destination may belong to another user.
+	 * Uses owner Prisma after the service validated source ownership.
+	 */
+	allowCrossUser?: boolean;
+};
 
 export type CreateTransferOutcome = {
 	transfer: LedgerTransferRecord;
@@ -31,10 +45,15 @@ export type CreateTransferOutcome = {
 /** Dedup window for safe client retries after unknown outcomes (API_CONTRACTS §6.1). */
 export const TRANSFER_DEDUP_WINDOW_MS = 5 * 60 * 1000;
 
-/** Own-account transfers always post debit + credit legs when complete. */
+/** Own-account / internal transfers always post debit + credit legs when complete. */
 const COMPLETE_TRANSFER_TX_COUNT = 2;
 
-type RlsTx = Parameters<Parameters<typeof withUserRlsContext>[1]>[0];
+type TransferTx = {
+	$queryRaw: typeof prisma.$queryRaw;
+	ledgerTransfer: typeof prisma.ledgerTransfer;
+	ledgerTransaction: typeof prisma.ledgerTransaction;
+	ledgerAccount: typeof prisma.ledgerAccount;
+};
 
 function toTransferRecord(
 	row: {
@@ -57,11 +76,11 @@ function toTransferRecord(
 }
 
 /**
- * Duplicate fingerprint lookup using an existing RLS transaction client.
+ * Duplicate fingerprint lookup using an existing transaction client.
  * Rules match API_CONTRACTS §6.1 (user + accounts + amount + currency + title).
  */
 async function findRecentDuplicateWithTx(
-	tx: RlsTx,
+	tx: TransferTx,
 	params: {
 		userId: string;
 		input: CreateTransferInput;
@@ -101,9 +120,172 @@ async function findRecentDuplicateWithTx(
 	);
 }
 
+async function executeTransferInTx(
+	tx: TransferTx,
+	params: {
+		userId: string;
+		input: CreateTransferInput;
+		/** When false, both accounts must belong to `userId` (RLS own-account path). */
+		requireOwnedDestination: boolean;
+	},
+): Promise<CreateTransferOutcome> {
+	const { userId, input, requireOwnedDestination } = params;
+	const amountMinor = toMinorBigInt(input.amountMinor);
+
+	if (input.sourceAccountId === input.destinationAccountId) {
+		throw new AppError("VALIDATION_ERROR", "Request body failed validation.");
+	}
+
+	// Lock both accounts in deterministic id order to avoid deadlocks
+	// when reciprocal transfers (A→B and B→A) run concurrently.
+	const orderedAccountIds = [
+		input.sourceAccountId,
+		input.destinationAccountId,
+	].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
+
+	type LockedAccountRow = {
+		id: string;
+		user_id: string;
+		balance_minor: bigint;
+		currency: string;
+		iban: string;
+		name: string;
+	};
+
+	const lockedById = new Map<string, LockedAccountRow>();
+	for (const accountId of orderedAccountIds) {
+		const rows = requireOwnedDestination
+			? await tx.$queryRaw<LockedAccountRow[]>`
+					SELECT id, user_id, balance_minor, currency, iban, name
+					FROM public.ledger_accounts
+					WHERE id = ${accountId}::uuid
+						AND user_id = ${userId}
+					FOR UPDATE
+				`
+			: await tx.$queryRaw<LockedAccountRow[]>`
+					SELECT id, user_id, balance_minor, currency, iban, name
+					FROM public.ledger_accounts
+					WHERE id = ${accountId}::uuid
+					FOR UPDATE
+				`;
+		const row = rows[0];
+		if (row) {
+			lockedById.set(row.id, row);
+		}
+	}
+
+	const source = lockedById.get(input.sourceAccountId);
+	const destination = lockedById.get(input.destinationAccountId);
+
+	if (!source || !destination) {
+		throw new AccountNotFoundError(
+			!source ? input.sourceAccountId : input.destinationAccountId,
+		);
+	}
+
+	if (source.user_id !== userId) {
+		throw new AccountNotFoundError(input.sourceAccountId);
+	}
+
+	if (requireOwnedDestination && destination.user_id !== userId) {
+		throw new AccountNotFoundError(input.destinationAccountId);
+	}
+
+	if (
+		source.currency !== input.currency ||
+		destination.currency !== input.currency
+	) {
+		throw new AppError("VALIDATION_ERROR", "Request body failed validation.");
+	}
+
+	// Dedup after locks so concurrent identical requests serialize here.
+	const duplicate = await findRecentDuplicateWithTx(tx, { userId, input });
+	if (
+		duplicate &&
+		duplicate.transactionIds.length >= COMPLETE_TRANSFER_TX_COUNT
+	) {
+		return { transfer: duplicate, deduplicated: true };
+	}
+
+	const bookingDate = new Date(
+		Date.UTC(
+			new Date().getUTCFullYear(),
+			new Date().getUTCMonth(),
+			new Date().getUTCDate(),
+		),
+	);
+
+	const transfer = await tx.ledgerTransfer.create({
+		data: {
+			userId,
+			sourceAccountId: source.id,
+			destinationAccountId: destination.id,
+			amountMinor,
+			currency: input.currency,
+			title: input.title,
+		},
+	});
+
+	const debitCounterpartyName =
+		input.counterpartyName ?? destination.name;
+	const creditCounterpartyName = input.counterpartyName ?? null;
+
+	const debit = await tx.ledgerTransaction.create({
+		data: {
+			accountId: source.id,
+			amountMinor,
+			currency: input.currency,
+			direction: "debit",
+			type: "transfer",
+			title: input.title,
+			counterpartyName: debitCounterpartyName,
+			counterpartyAccountNumber: destination.iban,
+			transferId: transfer.id,
+			bookingDate,
+		},
+	});
+
+	const credit = await tx.ledgerTransaction.create({
+		data: {
+			accountId: destination.id,
+			amountMinor,
+			currency: input.currency,
+			direction: "credit",
+			type: "transfer",
+			title: input.title,
+			counterpartyName: creditCounterpartyName,
+			counterpartyAccountNumber: source.iban,
+			transferId: transfer.id,
+			bookingDate,
+		},
+	});
+
+	const debited = await tx.ledgerAccount.updateMany({
+		where: { id: source.id, balanceMinor: { gte: amountMinor } },
+		data: { balanceMinor: { decrement: amountMinor } },
+	});
+	if (debited.count === 0) {
+		throw new InsufficientFundsError({
+			accountId: source.id,
+			amountMinor: input.amountMinor,
+			balanceMinor: fromMinorBigInt(source.balance_minor),
+		});
+	}
+
+	await tx.ledgerAccount.update({
+		where: { id: destination.id },
+		data: { balanceMinor: { increment: amountMinor } },
+	});
+
+	return {
+		transfer: toTransferRecord(transfer, [debit.id, credit.id]),
+		deduplicated: false,
+	};
+}
+
 /**
- * RLS-scoped access for own-account transfers.
- * All multi-leg writes run in one `withUserRlsContext` DB transaction.
+ * Access for internal transfers (own-account under RLS; cross-user via owner Prisma).
+ * All multi-leg writes run in one DB transaction.
  */
 export const transferRepository = {
 	/**
@@ -115,6 +297,12 @@ export const transferRepository = {
 		input: CreateTransferInput;
 		withinMs?: number;
 	}): Promise<LedgerTransferRecord | null> {
+		if (params.input.allowCrossUser) {
+			return prisma.$transaction(async (tx) =>
+				findRecentDuplicateWithTx(tx, params),
+			);
+		}
+
 		return withUserRlsContext(params.userId, async (tx) =>
 			findRecentDuplicateWithTx(tx, params),
 		);
@@ -130,135 +318,26 @@ export const transferRepository = {
 		input: CreateTransferInput;
 	}): Promise<CreateTransferOutcome> {
 		const { userId, input } = params;
-		const amountMinor = toMinorBigInt(input.amountMinor);
+		const allowCrossUser = input.allowCrossUser === true;
 
-		if (input.sourceAccountId === input.destinationAccountId) {
-			throw new AppError("VALIDATION_ERROR", "Request body failed validation.");
+		if (allowCrossUser) {
+			// Cross-user settlement: owner role after service-layer ownership checks.
+			// RLS cannot credit another user's account from the sender session.
+			return prisma.$transaction(async (tx) =>
+				executeTransferInTx(tx, {
+					userId,
+					input,
+					requireOwnedDestination: false,
+				}),
+			);
 		}
 
-		return withUserRlsContext(userId, async (tx) => {
-			// Lock both accounts in deterministic id order to avoid deadlocks
-			// when reciprocal transfers (A→B and B→A) run concurrently.
-			const orderedAccountIds = [
-				input.sourceAccountId,
-				input.destinationAccountId,
-			].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
-
-			type LockedAccountRow = {
-				id: string;
-				balance_minor: bigint;
-				currency: string;
-			};
-
-			const lockedById = new Map<string, LockedAccountRow>();
-			for (const accountId of orderedAccountIds) {
-				const rows = await tx.$queryRaw<LockedAccountRow[]>`
-					SELECT id, balance_minor, currency
-					FROM public.ledger_accounts
-					WHERE id = ${accountId}::uuid
-						AND user_id = ${userId}
-					FOR UPDATE
-				`;
-				const row = rows[0];
-				if (row) {
-					lockedById.set(row.id, row);
-				}
-			}
-
-			const source = lockedById.get(input.sourceAccountId);
-			const destination = lockedById.get(input.destinationAccountId);
-
-			if (!source || !destination) {
-				throw new AccountNotFoundError(
-					!source ? input.sourceAccountId : input.destinationAccountId,
-				);
-			}
-
-			if (
-				source.currency !== input.currency ||
-				destination.currency !== input.currency
-			) {
-				throw new AppError(
-					"VALIDATION_ERROR",
-					"Request body failed validation.",
-				);
-			}
-
-			// Dedup after locks so concurrent identical requests serialize here.
-			const duplicate = await findRecentDuplicateWithTx(tx, { userId, input });
-			if (
-				duplicate &&
-				duplicate.transactionIds.length >= COMPLETE_TRANSFER_TX_COUNT
-			) {
-				return { transfer: duplicate, deduplicated: true };
-			}
-
-			const bookingDate = new Date(
-				Date.UTC(
-					new Date().getUTCFullYear(),
-					new Date().getUTCMonth(),
-					new Date().getUTCDate(),
-				),
-			);
-
-			const transfer = await tx.ledgerTransfer.create({
-				data: {
-					userId,
-					sourceAccountId: input.sourceAccountId,
-					destinationAccountId: input.destinationAccountId,
-					amountMinor,
-					currency: input.currency,
-					title: input.title,
-				},
-			});
-
-			const debit = await tx.ledgerTransaction.create({
-				data: {
-					accountId: source.id,
-					amountMinor,
-					currency: input.currency,
-					direction: "debit",
-					type: "transfer",
-					title: input.title,
-					transferId: transfer.id,
-					bookingDate,
-				},
-			});
-
-			const credit = await tx.ledgerTransaction.create({
-				data: {
-					accountId: destination.id,
-					amountMinor,
-					currency: input.currency,
-					direction: "credit",
-					type: "transfer",
-					title: input.title,
-					transferId: transfer.id,
-					bookingDate,
-				},
-			});
-
-			const debited = await tx.ledgerAccount.updateMany({
-				where: { id: source.id, balanceMinor: { gte: amountMinor } },
-				data: { balanceMinor: { decrement: amountMinor } },
-			});
-			if (debited.count === 0) {
-				throw new InsufficientFundsError({
-					accountId: source.id,
-					amountMinor: input.amountMinor,
-					balanceMinor: fromMinorBigInt(source.balance_minor),
-				});
-			}
-
-			await tx.ledgerAccount.update({
-				where: { id: destination.id },
-				data: { balanceMinor: { increment: amountMinor } },
-			});
-
-			return {
-				transfer: toTransferRecord(transfer, [debit.id, credit.id]),
-				deduplicated: false,
-			};
-		});
+		return withUserRlsContext(userId, async (tx) =>
+			executeTransferInTx(tx, {
+				userId,
+				input,
+				requireOwnedDestination: true,
+			}),
+		);
 	},
 };

@@ -43,6 +43,7 @@ describe("mergeDashboardData", () => {
 					balance: 100,
 					currency: "PLN",
 					type: "checking",
+					source: "plaid",
 				},
 			],
 			summary: {

@@ -1,4 +1,4 @@
-/** Canonical banking DTOs mapped from live Plaid API responses (not legacy DB tables). */
+/** Canonical banking DTOs for dashboard display (internal ledger + optional Plaid). */
 export type DashboardAccount = {
 	id: string;
 	name: string;
@@ -6,6 +6,9 @@ export type DashboardAccount = {
 	balance: number;
 	currency: string;
 	type: string;
+	/** Present for internal ledger accounts (application-domain IBAN). */
+	iban?: string;
+	source: "internal" | "plaid";
 };
 
 export type DashboardTransaction = {

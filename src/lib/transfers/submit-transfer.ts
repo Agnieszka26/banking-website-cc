@@ -3,7 +3,7 @@ import type {
 	CreateTransferResult,
 	TransferErrorCode,
 } from "#/server/transfers/functions";
-import { createTransfer } from "#/server/transfers/functions";
+import { createTransfer, listLedgerAccounts } from "#/server/transfers/functions";
 import type { TransferDto } from "#/shared/types";
 
 export type { CreateTransferResult, TransferErrorCode };
@@ -19,18 +19,17 @@ export function toAmountMinor(amount: number): number {
 
 /**
  * Submits a transfer through the real server boundary.
- * Only own-account transfers are supported by the ledger transfer API.
+ * Own-account uses destinationAccountId; recipient uses destinationIban.
  */
 export async function submitTransfer(
 	payload: TransferPayload,
 ): Promise<SubmitTransferResult> {
-	if (payload.type !== "own") {
+	if (payload.type === "tax") {
 		return {
 			ok: false,
 			error: {
 				code: "VALIDATION_ERROR",
-				message:
-					"Only own-account transfers are supported by the ledger transfer API.",
+				message: "Tax transfers are not supported by the ledger transfer API.",
 			},
 		};
 	}
@@ -47,16 +46,42 @@ export async function submitTransfer(
 	}
 
 	try {
+		if (payload.type === "own") {
+			const result: CreateTransferResult = await createTransfer({
+				data: {
+					sourceAccountId: payload.sourceAccountId,
+					destinationAccountId: payload.destinationAccountId,
+					amountMinor,
+					currency: payload.currency,
+					title: payload.title,
+				},
+			});
+			return result;
+		}
+
+		// Recipient: resolve the sender's primary ledger account, then transfer by IBAN.
+		const accounts = await listLedgerAccounts();
+		const source = accounts[0];
+		if (!source) {
+			return {
+				ok: false,
+				error: {
+					code: "ACCOUNT_NOT_FOUND",
+					message: "No internal account found for the current user.",
+				},
+			};
+		}
+
 		const result: CreateTransferResult = await createTransfer({
 			data: {
-				sourceAccountId: payload.sourceAccountId,
-				destinationAccountId: payload.destinationAccountId,
+				sourceAccountId: source.id,
+				destinationIban: payload.recipientAccountNumber,
 				amountMinor,
-				currency: payload.currency,
+				currency: source.currency,
 				title: payload.title,
+				counterpartyName: payload.recipientName,
 			},
 		});
-
 		return result;
 	} catch {
 		return {

@@ -1,6 +1,9 @@
 import "@tanstack/react-start/server-only";
+import { ledgerAccountRepository } from "#/data/repositories/ledger-account.repository";
 import { plaidLinkRepository, plaidSyncRepository } from "#/data/repositories";
 import { requireSession } from "#/lib/session.server";
+import { mapLedgerAccountToDashboard } from "#/server/accounts/mappers";
+import { provisionInternalAccountForUser } from "#/server/accounts/provision";
 import { plaidAccountsCache, plaidTransactionsCache } from "./cache";
 import { toDashboardUser } from "./dashboard-mappers";
 import { fetchPlaidAccounts, fetchPlaidTransactions } from "./plaid-api";
@@ -276,19 +279,25 @@ export async function loadDashboardOverview(): Promise<DashboardOverview> {
 	const session = await requireSession("unauthorized");
 	const userId = session.user.id;
 	const user = toDashboardUser(session);
+
+	await provisionInternalAccountForUser(userId);
+	const ledgerRows = await ledgerAccountRepository.listOwned(userId);
+	const internalAccounts = ledgerRows.map(mapLedgerAccountToDashboard);
+
 	const accessToken = await getAccessTokenForUser(userId);
 
 	if (!accessToken) {
 		return {
 			linked: false,
 			user,
-			accounts: [],
-			summary: null,
+			accounts: internalAccounts,
+			summary: buildAccountSummary(internalAccounts),
 		};
 	}
 
 	try {
-		const accounts = await loadAccountsForUser(userId, accessToken);
+		const plaidAccounts = await loadAccountsForUser(userId, accessToken);
+		const accounts = [...internalAccounts, ...plaidAccounts];
 
 		return {
 			linked: true,

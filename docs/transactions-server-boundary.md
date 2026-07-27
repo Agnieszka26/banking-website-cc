@@ -60,6 +60,12 @@ Repositories contain **no** auth, HTTP, or UI logic.
 
 Architecture decision: the application ledger is the source of truth; Plaid is an import adapter. Extending legacy tables would couple business rules to a deprecated shape and block `INSUFFICIENT_FUNDS` enforcement on ledger `balanceMinor`.
 
+## Cross-user internal transfers
+
+Own-account transfers run under `withUserRlsContext` (both accounts owned by the session user).
+
+Recipient transfers resolve `destinationIban` via owner Prisma, then settle with owner Prisma when the destination belongs to another user. The service always verifies source ownership under RLS first. Clients never supply ledger posts or balances.
+
 ## Logging
 
 Structured events via `src/lib/logger.ts` (no full payloads, secrets, or unmasked account numbers):

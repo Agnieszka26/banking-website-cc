@@ -96,6 +96,10 @@ export const TransactionTypeSchema = z.enum([
 export const AccountDtoSchema = z.object({
 	id: z.string().min(1),
 	name: z.string().min(1),
+	/** Application-domain Polish IBAN (`PL` + 26 digits). */
+	iban: z
+		.string()
+		.regex(/^PL\d{26}$/, "Expected Polish IBAN (PL + 26 digits)"),
 	currency: currencyCode,
 	balanceMinor: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
 });
@@ -184,18 +188,47 @@ export const ListTransactionsResponseSchema = apiSuccessSchema(
  * Implementations must create the transfer and every ledger leg in one DB
  * transaction (full rollback on failure) and apply server-side dedup on retry
  * without idempotency keys — see `docs/API_CONTRACTS.md` §6.1.
+ *
+ * Destination is either another owned account id (own-account) or an
+ * application-domain IBAN (internal recipient transfer).
  */
 export const CreateTransferRequestSchema = z
 	.object({
 		sourceAccountId: z.string().min(1),
-		destinationAccountId: z.string().min(1),
+		destinationAccountId: z.string().min(1).optional(),
+		destinationIban: z
+			.string()
+			.min(1)
+			.max(34)
+			.optional(),
 		amountMinor: positiveMinorUnits,
 		currency: currencyCode.default("PLN"),
 		title: z.string().min(1).max(140),
+		counterpartyName: z.string().min(1).max(120).optional(),
 	})
-	.refine((value) => value.sourceAccountId !== value.destinationAccountId, {
-		message: "sourceAccountId and destinationAccountId must differ",
-		path: ["destinationAccountId"],
+	.superRefine((value, ctx) => {
+		const hasDestinationId = value.destinationAccountId !== undefined;
+		const hasDestinationIban = value.destinationIban !== undefined;
+
+		if (hasDestinationId === hasDestinationIban) {
+			ctx.addIssue({
+				code: "custom",
+				message:
+					"Provide exactly one of destinationAccountId or destinationIban",
+				path: ["destinationAccountId"],
+			});
+		}
+
+		if (
+			hasDestinationId &&
+			value.sourceAccountId === value.destinationAccountId
+		) {
+			ctx.addIssue({
+				code: "custom",
+				message: "sourceAccountId and destinationAccountId must differ",
+				path: ["destinationAccountId"],
+			});
+		}
 	});
 
 /**

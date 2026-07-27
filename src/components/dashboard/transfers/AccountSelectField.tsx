@@ -22,7 +22,8 @@ type AccountSelectFieldProps = {
 
 function formatAccountOption(account: TransferAccountOption): string {
 	const major = (account.balanceMinor / 100).toFixed(2);
-	return `${account.name} • ${major} ${account.currency}`;
+	const ibanSuffix = account.iban ? ` • ${account.iban.slice(-4)}` : "";
+	return `${account.name}${ibanSuffix} • ${major} ${account.currency}`;
 }
 
 export function AccountSelectField({

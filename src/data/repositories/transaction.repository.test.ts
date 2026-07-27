@@ -24,6 +24,7 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 			data: {
 				userId: ownerUserId,
 				name: "Owner Checking",
+				iban: (await import("#/lib/iban")).generatePolishIban(),
 				currency: "PLN",
 				balanceMinor: 50_000n,
 			},
@@ -34,6 +35,7 @@ describeIfRlsDb("transactionRepository (ledger RLS)", () => {
 			data: {
 				userId: otherUserId,
 				name: "Other Checking",
+				iban: (await import("#/lib/iban")).generatePolishIban(),
 				currency: "PLN",
 				balanceMinor: 50_000n,
 			},

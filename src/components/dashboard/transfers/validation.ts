@@ -1,12 +1,13 @@
-const POLISH_ACCOUNT_NUMBER_PATTERN = /^(?:PL)?\d{26}$/;
-
 export function normalizeAccountNumber(value: string): string {
-	return value.replace(/\s+/g, "").toUpperCase();
+	const compact = value.replace(/\s+/g, "").toUpperCase();
+	if (/^\d{26}$/.test(compact)) {
+		return `PL${compact}`;
+	}
+	return compact;
 }
 
 export function isValidPolishAccountNumber(value: string): boolean {
-	const normalized = normalizeAccountNumber(value);
-	return POLISH_ACCOUNT_NUMBER_PATTERN.test(normalized);
+	return /^PL\d{26}$/.test(normalizeAccountNumber(value));
 }
 
 export function parsePositiveAmount(value: string): number | null {

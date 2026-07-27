@@ -20,11 +20,13 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 
 	beforeAll(async () => {
 		const { prisma } = await import("#/lib/prisma");
+		const { generatePolishIban } = await import("#/lib/iban");
 
 		const source = await prisma.ledgerAccount.create({
 			data: {
 				userId: ownerUserId,
 				name: "Source",
+				iban: generatePolishIban(),
 				currency: "PLN",
 				balanceMinor: 50_000n,
 			},
@@ -35,6 +37,7 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 			data: {
 				userId: ownerUserId,
 				name: "Destination",
+				iban: generatePolishIban(),
 				currency: "PLN",
 				balanceMinor: 10_000n,
 			},
@@ -45,6 +48,7 @@ describeIfRlsDb("transferRepository (ledger RLS)", () => {
 			data: {
 				userId: otherUserId,
 				name: "Other",
+				iban: generatePolishIban(),
 				currency: "PLN",
 				balanceMinor: 50_000n,
 			},

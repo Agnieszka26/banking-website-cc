@@ -7,9 +7,9 @@ import {
 } from "#/components/dashboard/transfers/validation";
 
 describe("normalizeAccountNumber", () => {
-	it("strips whitespace and uppercases", () => {
+	it("strips whitespace, uppercases, and adds PL prefix when missing", () => {
 		expect(normalizeAccountNumber("26 1234 5678 9012 3456 7890 1234")).toBe(
-			"26123456789012345678901234",
+			"PL26123456789012345678901234",
 		);
 		expect(normalizeAccountNumber("pl61109010140000071219812874")).toBe(
 			"PL61109010140000071219812874",

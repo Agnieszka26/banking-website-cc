@@ -23,6 +23,7 @@ describe("mapCachedAccount", () => {
 			balance: 125.5,
 			currency: "PLN",
 			type: "checking",
+			source: "plaid",
 		});
 	});
 });
@@ -58,6 +59,7 @@ describe("buildAccountSummary", () => {
 					balance: 100,
 					currency: "PLN",
 					type: "checking",
+					source: "plaid",
 				},
 				{
 					id: "2",
@@ -66,6 +68,7 @@ describe("buildAccountSummary", () => {
 					balance: 50,
 					currency: "PLN",
 					type: "savings",
+					source: "plaid",
 				},
 				{
 					id: "3",
@@ -74,6 +77,7 @@ describe("buildAccountSummary", () => {
 					balance: 500,
 					currency: "PLN",
 					type: "credit card",
+					source: "plaid",
 				},
 			]),
 		).toEqual({

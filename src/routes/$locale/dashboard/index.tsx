@@ -90,7 +90,7 @@ function DashboardHome() {
 								const Icon = getAccountIcon(account);
 
 								return (
-									<li key={account.id}>
+									<li key={`${account.source}-${account.id}`}>
 										<Link
 											to={localize(`/dashboard/accounts/${encodeURIComponent(account.id)}`)}
 											className="flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-muted/60"
@@ -103,7 +103,9 @@ function DashboardHome() {
 													{account.name}
 												</p>
 												<p className="truncate text-xs text-muted-foreground">
-													**** {account.mask}
+													{account.iban
+														? account.iban
+														: `**** ${account.mask}`}
 												</p>
 											</div>
 											<div className="flex shrink-0 items-center gap-2">

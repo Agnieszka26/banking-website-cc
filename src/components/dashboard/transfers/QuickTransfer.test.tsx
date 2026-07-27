@@ -92,6 +92,7 @@ const plaidAccounts: DashboardAccount[] = [
 		balance: 100,
 		currency: "PLN",
 		type: "depository",
+		source: "plaid",
 	},
 ];
 
@@ -107,12 +108,14 @@ describe("QuickTransfer API error and success UI", () => {
 			{
 				id: "src",
 				name: "Checking",
+				iban: "PL61109010140000071219812874",
 				currency: "PLN",
 				balanceMinor: 100,
 			},
 			{
 				id: "dst",
 				name: "Savings",
+				iban: "PL61109010140000071219812875",
 				currency: "PLN",
 				balanceMinor: 0,
 			},
@@ -157,8 +160,20 @@ describe("QuickTransfer API error and success UI", () => {
 
 	it("renders generic submission failure for INTERNAL_ERROR", async () => {
 		listLedgerAccountsMock.mockResolvedValue([
-			{ id: "src", name: "A", currency: "PLN", balanceMinor: 100 },
-			{ id: "dst", name: "B", currency: "PLN", balanceMinor: 100 },
+			{
+				id: "src",
+				name: "A",
+				iban: "PL61109010140000071219812874",
+				currency: "PLN",
+				balanceMinor: 100,
+			},
+			{
+				id: "dst",
+				name: "B",
+				iban: "PL61109010140000071219812875",
+				currency: "PLN",
+				balanceMinor: 100,
+			},
 		]);
 		submitTransferMock.mockResolvedValue({
 			ok: false,
@@ -185,8 +200,20 @@ describe("QuickTransfer API error and success UI", () => {
 
 	it("closes the modal and shows success toast after a successful transfer", async () => {
 		listLedgerAccountsMock.mockResolvedValue([
-			{ id: "src", name: "A", currency: "PLN", balanceMinor: 100 },
-			{ id: "dst", name: "B", currency: "PLN", balanceMinor: 100 },
+			{
+				id: "src",
+				name: "A",
+				iban: "PL61109010140000071219812874",
+				currency: "PLN",
+				balanceMinor: 100,
+			},
+			{
+				id: "dst",
+				name: "B",
+				iban: "PL61109010140000071219812875",
+				currency: "PLN",
+				balanceMinor: 100,
+			},
 		]);
 		submitTransferMock.mockResolvedValue({
 			ok: true,

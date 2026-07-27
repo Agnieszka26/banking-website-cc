@@ -125,10 +125,10 @@
 			"showAll": "Zobacz wszystkie"
 		},
 		"empty": {
-			"noAccounts": "Brak połączonych rachunków.",
+			"noAccounts": "Brak rachunków.",
 			"noTransactions": "Brak transakcji do wyświetlenia.",
 			"noAccountTransactions": "Brak transakcji na tym rachunku.",
-			"connectForSummary": "Połącz konto bankowe, aby zobaczyć podsumowanie.",
+			"connectForSummary": "Podsumowanie rachunku wewnętrznego jest powyżej. Opcjonalnie połącz zewnętrzny bank przez Plaid.",
 			"comingSoon": "Wkrótce dostępne."
 		},
 		"transfer": {
@@ -231,10 +231,10 @@
 			"learnMore": "Dowiedz się więcej"
 		},
 		"connectBank": {
-			"title": "Połącz konto bankowe",
-			"description": "Aby wyświetlić rachunki i transakcje, połącz konto przez bezpieczny moduł Plaid. W środowisku sandbox możesz użyć danych testowych Plaid.",
+			"title": "Połącz zewnętrzny bank (opcjonalnie)",
+			"description": "Twój rachunek wewnętrzny działa bez Plaid. Opcjonalnie połącz zewnętrzny bank przez Plaid, aby importować i wyświetlać zewnętrzne transakcje w sandboxie.",
 			"connecting": "Łączenie…",
-			"connectButton": "Połącz konto przez Plaid",
+			"connectButton": "Połącz zewnętrzne konto przez Plaid",
 			"linkTokenError": "Nie udało się przygotować połączenia z bankiem.",
 			"connectError": "Nie udało się połączyć konta bankowego."
 		}

@@ -8,7 +8,7 @@ export type TaxPaymentType = "zus" | "tax_office";
 /** Ledger account option for own-account transfers (internal account ids). */
 export type TransferAccountOption = Pick<
 	AccountDto,
-	"id" | "name" | "currency" | "balanceMinor"
+	"id" | "name" | "currency" | "balanceMinor" | "iban"
 >;
 
 export type OwnAccountTransferPayload = {

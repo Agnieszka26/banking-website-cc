@@ -76,6 +76,7 @@ describe("transaction service auth and ownership", () => {
 			id: "acct-1",
 			userId: "user-a",
 			name: "Checking",
+			iban: "PL61109010140000071219812874",
 			currency: "PLN",
 			balanceMinor: 10_000,
 		});
@@ -181,6 +182,7 @@ describe("transaction service auth and ownership", () => {
 			id: "acct-1",
 			userId: "user-a",
 			name: "Checking",
+			iban: "PL61109010140000071219812874",
 			currency: "PLN",
 			balanceMinor: 50,
 		});
@@ -205,6 +207,7 @@ describe("transaction service auth and ownership", () => {
 			id: "acct-1",
 			userId: "user-a",
 			name: "Checking",
+			iban: "PL61109010140000071219812874",
 			currency: "PLN",
 			balanceMinor: 10_000,
 		});

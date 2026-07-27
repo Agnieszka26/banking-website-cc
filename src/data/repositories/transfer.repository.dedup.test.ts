@@ -6,6 +6,12 @@ vi.mock("#/lib/prisma-rls", () => ({
 	withUserRlsContext: (...args: unknown[]) => withUserRlsContextMock(...args),
 }));
 
+vi.mock("#/lib/prisma", () => ({
+	prisma: {
+		$transaction: vi.fn(),
+	},
+}));
+
 import { transferRepository } from "./transfer.repository";
 
 describe("transferRepository.createTransfer duplicate check timing", () => {
@@ -29,8 +35,11 @@ describe("transferRepository.createTransfer duplicate check timing", () => {
 					return [
 						{
 							id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0001",
+							user_id: "user-a",
 							balance_minor: 50_000n,
 							currency: "PLN",
+							iban: "PL61109010140000071219812874",
+							name: "Source",
 						},
 					];
 				})
@@ -39,8 +48,11 @@ describe("transferRepository.createTransfer duplicate check timing", () => {
 					return [
 						{
 							id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0002",
+							user_id: "user-a",
 							balance_minor: 10_000n,
 							currency: "PLN",
+							iban: "PL61109010140000071219812875",
+							name: "Destination",
 						},
 					];
 				}),

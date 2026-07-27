@@ -8,6 +8,7 @@ vi.mock("#/data/repositories/ledger-account.repository", () => ({
 	ledgerAccountRepository: {
 		findOwnedById: vi.fn(),
 		listOwned: vi.fn(),
+		findByIban: vi.fn(),
 	},
 }));
 
@@ -21,16 +22,27 @@ vi.mock("#/lib/logger", () => ({
 	log: vi.fn(),
 }));
 
+vi.mock("#/server/accounts/provision", () => ({
+	provisionInternalAccountForUser: vi.fn(),
+}));
+
 import { ledgerAccountRepository } from "#/data/repositories/ledger-account.repository";
 import { transferRepository } from "#/data/repositories/transfer.repository";
 import { requireUserId } from "#/lib/session.server";
-import { createOwnAccountTransfer } from "./service";
+import { createInternalTransfer } from "./service";
+import { generatePolishIban } from "#/lib/iban";
 
 const requireUserIdMock = vi.mocked(requireUserId);
 const findOwnedByIdMock = vi.mocked(ledgerAccountRepository.findOwnedById);
+const findByIbanMock = vi.mocked(ledgerAccountRepository.findByIban);
 const createTransferMock = vi.mocked(transferRepository.createTransfer);
 
-describe("createOwnAccountTransfer", () => {
+const SRC_IBAN = generatePolishIban("0000000000000001");
+const DST_IBAN = generatePolishIban("0000000000000002");
+const OTHER_IBAN = generatePolishIban("0000000000000003");
+const UNKNOWN_IBAN = generatePolishIban("0000000000000099");
+
+describe("createInternalTransfer", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		requireUserIdMock.mockResolvedValue("user-a");
@@ -42,6 +54,7 @@ describe("createOwnAccountTransfer", () => {
 				id: "src",
 				userId: "user-a",
 				name: "Checking",
+				iban: SRC_IBAN,
 				currency: "PLN",
 				balanceMinor: 50_000,
 			})
@@ -49,6 +62,7 @@ describe("createOwnAccountTransfer", () => {
 				id: "dst",
 				userId: "user-a",
 				name: "Savings",
+				iban: DST_IBAN,
 				currency: "PLN",
 				balanceMinor: 10_000,
 			});
@@ -71,7 +85,7 @@ describe("createOwnAccountTransfer", () => {
 			deduplicated: false,
 		});
 
-		const result = await createOwnAccountTransfer({
+		const result = await createInternalTransfer({
 			sourceAccountId: "src",
 			destinationAccountId: "dst",
 			amountMinor: 1000,
@@ -84,12 +98,69 @@ describe("createOwnAccountTransfer", () => {
 		expect(createTransferMock).toHaveBeenCalled();
 	});
 
+	it("creates a cross-user transfer by IBAN", async () => {
+		findOwnedByIdMock.mockResolvedValueOnce({
+			id: "src",
+			userId: "user-a",
+			name: "Checking",
+			iban: SRC_IBAN,
+			currency: "PLN",
+			balanceMinor: 50_000,
+		});
+		findByIbanMock.mockResolvedValueOnce({
+			id: "dst-other",
+			userId: "user-b",
+			name: "Main account",
+			iban: OTHER_IBAN,
+			currency: "PLN",
+			balanceMinor: 10_000,
+		});
+
+		createTransferMock.mockResolvedValue({
+			transfer: {
+				id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+				userId: "user-a",
+				sourceAccountId: "src",
+				destinationAccountId: "dst-other",
+				amountMinor: 1000,
+				currency: "PLN",
+				title: "Pay rent",
+				createdAt: new Date("2026-07-26T12:00:00.000Z"),
+				transactionIds: [
+					"11111111-1111-1111-1111-111111111111",
+					"22222222-2222-2222-2222-222222222222",
+				],
+			},
+			deduplicated: false,
+		});
+
+		const result = await createInternalTransfer({
+			sourceAccountId: "src",
+			destinationIban: OTHER_IBAN,
+			amountMinor: 1000,
+			currency: "PLN",
+			title: "Pay rent",
+			counterpartyName: "Anna",
+		});
+
+		expect(result.id).toBe("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+		expect(createTransferMock).toHaveBeenCalledWith({
+			userId: "user-a",
+			input: expect.objectContaining({
+				destinationAccountId: "dst-other",
+				allowCrossUser: true,
+				counterpartyName: "Anna",
+			}),
+		});
+	});
+
 	it("returns a deduplicated transfer from createTransfer without a second write", async () => {
 		findOwnedByIdMock
 			.mockResolvedValueOnce({
 				id: "src",
 				userId: "user-a",
 				name: "Checking",
+				iban: SRC_IBAN,
 				currency: "PLN",
 				balanceMinor: 50_000,
 			})
@@ -97,6 +168,7 @@ describe("createOwnAccountTransfer", () => {
 				id: "dst",
 				userId: "user-a",
 				name: "Savings",
+				iban: DST_IBAN,
 				currency: "PLN",
 				balanceMinor: 10_000,
 			});
@@ -119,7 +191,7 @@ describe("createOwnAccountTransfer", () => {
 			deduplicated: true,
 		});
 
-		const result = await createOwnAccountTransfer({
+		const result = await createInternalTransfer({
 			sourceAccountId: "src",
 			destinationAccountId: "dst",
 			amountMinor: 1000,
@@ -132,16 +204,10 @@ describe("createOwnAccountTransfer", () => {
 	});
 
 	it("rejects transfer from another user's account", async () => {
-		findOwnedByIdMock.mockResolvedValueOnce(null).mockResolvedValueOnce({
-			id: "dst",
-			userId: "user-a",
-			name: "Savings",
-			currency: "PLN",
-			balanceMinor: 10_000,
-		});
+		findOwnedByIdMock.mockResolvedValueOnce(null);
 
 		await expect(
-			createOwnAccountTransfer({
+			createInternalTransfer({
 				sourceAccountId: "foreign",
 				destinationAccountId: "dst",
 				amountMinor: 1000,
@@ -159,6 +225,7 @@ describe("createOwnAccountTransfer", () => {
 				id: "src",
 				userId: "user-a",
 				name: "Checking",
+				iban: SRC_IBAN,
 				currency: "PLN",
 				balanceMinor: 50_000,
 			})
@@ -166,12 +233,13 @@ describe("createOwnAccountTransfer", () => {
 				id: "dst",
 				userId: "user-a",
 				name: "Savings",
+				iban: DST_IBAN,
 				currency: "PLN",
 				balanceMinor: 10_000,
 			});
 
 		await expect(
-			createOwnAccountTransfer({
+			createInternalTransfer({
 				sourceAccountId: "src",
 				destinationAccountId: "dst",
 				amountMinor: 1000,
@@ -189,6 +257,7 @@ describe("createOwnAccountTransfer", () => {
 				id: "src",
 				userId: "user-a",
 				name: "Checking",
+				iban: SRC_IBAN,
 				currency: "PLN",
 				balanceMinor: 500,
 			})
@@ -196,12 +265,13 @@ describe("createOwnAccountTransfer", () => {
 				id: "dst",
 				userId: "user-a",
 				name: "Savings",
+				iban: DST_IBAN,
 				currency: "PLN",
 				balanceMinor: 10_000,
 			});
 
 		await expect(
-			createOwnAccountTransfer({
+			createInternalTransfer({
 				sourceAccountId: "src",
 				destinationAccountId: "dst",
 				amountMinor: 1000,
@@ -209,5 +279,27 @@ describe("createOwnAccountTransfer", () => {
 				title: "Move",
 			}),
 		).rejects.toMatchObject({ code: "INSUFFICIENT_FUNDS" });
+	});
+
+	it("rejects unknown destination IBAN", async () => {
+		findOwnedByIdMock.mockResolvedValueOnce({
+			id: "src",
+			userId: "user-a",
+			name: "Checking",
+			iban: SRC_IBAN,
+			currency: "PLN",
+			balanceMinor: 50_000,
+		});
+		findByIbanMock.mockResolvedValueOnce(null);
+
+		await expect(
+			createInternalTransfer({
+				sourceAccountId: "src",
+				destinationIban: UNKNOWN_IBAN,
+				amountMinor: 1000,
+				currency: "PLN",
+				title: "Pay",
+			}),
+		).rejects.toMatchObject({ code: "ACCOUNT_NOT_FOUND" });
 	});
 });

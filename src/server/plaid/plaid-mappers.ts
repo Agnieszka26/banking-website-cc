@@ -39,6 +39,7 @@ export function mapPlaidAccount(account: AccountBase): DashboardAccount {
 		balance: account.balances.current ?? account.balances.available ?? 0,
 		currency: account.balances.iso_currency_code ?? "PLN",
 		type: account.subtype ?? account.type,
+		source: "plaid",
 	};
 }
 
@@ -87,6 +88,7 @@ export function mapCachedAccount(
 		balance: toNumber(account.balance),
 		currency: account.currency,
 		type: account.type,
+		source: "plaid",
 	};
 }
 

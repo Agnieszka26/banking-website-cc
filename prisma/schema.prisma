@@ -179,6 +179,8 @@ model LedgerAccount {
   id           String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId       String              @map("user_id")
   name         String
+  /** Application-domain Polish IBAN (PL + 26 digits). Not supplied by Plaid. */
+  iban         String              @unique
   currency     String              @db.Char(3)
   balanceMinor BigInt              @map("balance_minor")
   createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
