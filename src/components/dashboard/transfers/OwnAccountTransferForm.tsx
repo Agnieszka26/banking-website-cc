@@ -107,6 +107,8 @@ export function OwnAccountTransferForm({
 				currency: sourceAccount.currency,
 				title: title.trim(),
 			});
+		} catch {
+			// Keep loading reset in `finally`; parent may surface API errors.
 		} finally {
 			setIsSubmitting(false);
 		}

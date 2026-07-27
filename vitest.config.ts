@@ -5,10 +5,11 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			"#": resolve(__dirname, "src"),
+			"@": resolve(__dirname, "src"),
 		},
 	},
 	test: {
-		include: ["src/**/*.test.ts"],
+		include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
 		testTimeout: 30_000,
 	},
 });

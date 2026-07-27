@@ -10,12 +10,25 @@ import { submitTransfer, toAmountMinor } from "./submit-transfer";
 
 const createTransferMock = vi.mocked(createTransfer);
 
-describe("submitTransfer", () => {
-	it("converts major units to minor units", () => {
+const ownPayload: Extract<TransferPayload, { type: "own" }> = {
+	type: "own",
+	sourceAccountId: "src",
+	destinationAccountId: "dst",
+	amount: 10,
+	currency: "PLN",
+	title: "Move",
+};
+
+describe("toAmountMinor", () => {
+	it("converts major units to integer minor units with rounding", () => {
 		expect(toAmountMinor(10.5)).toBe(1050);
 		expect(toAmountMinor(100)).toBe(10_000);
+		expect(toAmountMinor(10.005)).toBe(1001);
+		expect(toAmountMinor(0.01)).toBe(1);
 	});
+});
 
+describe("submitTransfer", () => {
 	it("rejects recipient/tax payloads without calling the server", async () => {
 		const result = await submitTransfer({
 			type: "recipient",
@@ -36,6 +49,22 @@ describe("submitTransfer", () => {
 		expect(createTransferMock).not.toHaveBeenCalled();
 	});
 
+	it("rejects non-positive major amounts before calling the server", async () => {
+		await expect(
+			submitTransfer({ ...ownPayload, amount: 0 }),
+		).resolves.toMatchObject({
+			ok: false,
+			error: { code: "VALIDATION_ERROR" },
+		});
+		await expect(
+			submitTransfer({ ...ownPayload, amount: -5 }),
+		).resolves.toMatchObject({
+			ok: false,
+			error: { code: "VALIDATION_ERROR" },
+		});
+		expect(createTransferMock).not.toHaveBeenCalled();
+	});
+
 	it("returns typed INSUFFICIENT_FUNDS from the server result", async () => {
 		createTransferMock.mockResolvedValue({
 			ok: false,
@@ -45,20 +74,23 @@ describe("submitTransfer", () => {
 			},
 		});
 
-		const payload: TransferPayload = {
-			type: "own",
-			sourceAccountId: "src",
-			destinationAccountId: "dst",
-			amount: 100,
-			currency: "PLN",
-			title: "Move",
-		};
-
-		await expect(submitTransfer(payload)).resolves.toEqual({
+		await expect(submitTransfer(ownPayload)).resolves.toEqual({
 			ok: false,
 			error: {
 				code: "INSUFFICIENT_FUNDS",
 				message: "Account balance is insufficient for this debit.",
+			},
+		});
+	});
+
+	it("maps unexpected thrown errors to INTERNAL_ERROR", async () => {
+		createTransferMock.mockRejectedValue(new Error("network down"));
+
+		await expect(submitTransfer(ownPayload)).resolves.toEqual({
+			ok: false,
+			error: {
+				code: "INTERNAL_ERROR",
+				message: "An unexpected error occurred.",
 			},
 		});
 	});
@@ -82,12 +114,9 @@ describe("submitTransfer", () => {
 		});
 
 		const result = await submitTransfer({
-			type: "own",
-			sourceAccountId: "src",
-			destinationAccountId: "dst",
+			...ownPayload,
 			amount: 10,
 			currency: "EUR",
-			title: "Move",
 		});
 
 		expect(result.ok).toBe(true);
