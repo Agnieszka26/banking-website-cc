@@ -221,8 +221,11 @@
 			"pageInfo": "Page {{page}} sur {{totalPages}}",
 			"previous": "Précédent",
 			"next": "Suivant",
-			"connectToView": "Connectez un compte bancaire pour voir les transactions."
-		},		"securityBanner": {
+			"connectToView": "Connectez un compte bancaire pour voir les transactions.",
+			"transferLabel": "Virement",
+			"ledgerLoadError": "Certaines transactions de l'application n'ont pas pu être chargées. L'activité liée à la banque peut toujours s'afficher."
+		},
+		"securityBanner": {
 			"headline": "Votre sécurité est notre priorité.",
 			"body": "Ne communiquez jamais vos identifiants par téléphone ou e-mail. Vérifiez toujours l'adresse du site de la banque.",
 			"learnMore": "En savoir plus"

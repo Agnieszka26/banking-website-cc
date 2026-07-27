@@ -221,7 +221,9 @@
 			"pageInfo": "Strona {{page}} z {{totalPages}}",
 			"previous": "Poprzednia",
 			"next": "Następna",
-			"connectToView": "Połącz konto bankowe, aby zobaczyć transakcje."
+			"connectToView": "Połącz konto bankowe, aby zobaczyć transakcje.",
+			"transferLabel": "Przelew",
+			"ledgerLoadError": "Nie udało się wczytać części transakcji aplikacji. Aktywność z połączonego banku może nadal być widoczna."
 		},
 		"securityBanner": {
 			"headline": "Bezpieczeństwo jest dla nas najważniejsze.",

@@ -1,6 +1,5 @@
-import type { DashboardTransaction } from "#/server/plaid";
-import {formatPlDate} from "#/server/plaid/format";
-
+import type { TransactionListItemViewModel } from "#/lib/transaction-list-model";
+import { formatPlDate } from "#/server/plaid/format";
 
 export type TransactionFlow = "income" | "outcome";
 
@@ -24,7 +23,7 @@ export type TransactionListQuery = {
 };
 
 export type ProcessedTransactions = {
-	items: DashboardTransaction[];
+	items: TransactionListItemViewModel[];
 	total: number;
 	totalPages: number;
 	page: number;
@@ -34,7 +33,10 @@ export function getTransactionFlow(amount: number): TransactionFlow {
 	return amount < 0 ? "income" : "outcome";
 }
 
-function matchesSearch(transaction: DashboardTransaction, search: string): boolean {
+function matchesSearch(
+	transaction: TransactionListItemViewModel,
+	search: string,
+): boolean {
 	const query = search.trim().toLowerCase();
 	if (!query) {
 		return true;
@@ -46,12 +48,11 @@ function matchesSearch(transaction: DashboardTransaction, search: string): boole
 		formatPlDate(transaction.date).toLowerCase().includes(query) ||
 		transaction.currency.toLowerCase().includes(query)
 	);
-}	
-
+}
 
 function compareByType(
-	a: DashboardTransaction,
-	b: DashboardTransaction,
+	a: TransactionListItemViewModel,
+	b: TransactionListItemViewModel,
 	order: TypeSortOrder,
 ): number {
 	if (order === "none") {
@@ -73,8 +74,8 @@ function compareByType(
 }
 
 function compareByAmount(
-	a: DashboardTransaction,
-	b: DashboardTransaction,
+	a: TransactionListItemViewModel,
+	b: TransactionListItemViewModel,
 	order: AmountSortOrder,
 ): number {
 	if (order === "none") {
@@ -86,8 +87,8 @@ function compareByAmount(
 }
 
 function compareByDate(
-	a: DashboardTransaction,
-	b: DashboardTransaction,
+	a: TransactionListItemViewModel,
+	b: TransactionListItemViewModel,
 	order: DateSortOrder,
 ): number {
 	const diff = a.date.localeCompare(b.date);
@@ -95,7 +96,7 @@ function compareByDate(
 }
 
 export function processTransactions(
-	transactions: DashboardTransaction[],
+	transactions: TransactionListItemViewModel[],
 	query: TransactionListQuery,
 ): ProcessedTransactions {
 	const filtered = transactions.filter((transaction) => {

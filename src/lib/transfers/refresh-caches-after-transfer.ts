@@ -6,10 +6,8 @@
  * targeted invalidations). Does not mutate balances client-side — the
  * server remains the source of truth.
  *
- * TODO(transfers-list): When `/$locale/dashboard/transfers` gains a loader
- * backed by a list-transfers API, default `router.invalidate()` already
- * covers matched routes. If we later switch to filtered invalidation,
- * include the transfers route id here.
+ * Transfer legs appear on the transactions page via GET ledger transactions
+ * (no dedicated GET transfers endpoint in the API contract).
  */
 export async function refreshCachesAfterTransfer(router: {
 	invalidate: () => Promise<void>;

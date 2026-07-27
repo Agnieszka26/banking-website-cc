@@ -221,7 +221,9 @@
 			"pageInfo": "Page {{page}} of {{totalPages}}",
 			"previous": "Previous",
 			"next": "Next",
-			"connectToView": "Connect a bank account to view transactions."
+			"connectToView": "Connect a bank account to view transactions.",
+			"transferLabel": "Transfer",
+			"ledgerLoadError": "Some app transactions could not be loaded. Bank-linked activity may still be shown."
 		},
 		"securityBanner": {
 			"headline": "Your security matters most to us.",

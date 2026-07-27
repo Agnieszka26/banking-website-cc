@@ -1,18 +1,21 @@
 import { describe, expect, it } from "vitest";
+import type { TransactionListItemViewModel } from "#/lib/transaction-list-model";
 import {
 	getTransactionFlow,
 	processTransactions,
 	TRANSACTIONS_PAGE_SIZE,
 	type TransactionListQuery,
 } from "#/lib/transactions";
-console.log("DATABASE_URL:", process.env.DATABASE_URL);
-const transactions = [
+
+const transactions: TransactionListItemViewModel[] = [
 	{
 		id: "1",
 		name: "Salary",
 		date: "2025-01-10",
 		currency: "PLN",
 		amount: -5000,
+		transferId: null,
+		isTransfer: false,
 	},
 	{
 		id: "2",
@@ -20,6 +23,8 @@ const transactions = [
 		date: "2025-01-12",
 		currency: "PLN",
 		amount: 20,
+		transferId: null,
+		isTransfer: false,
 	},
 	{
 		id: "3",
@@ -27,6 +32,8 @@ const transactions = [
 		date: "2025-01-05",
 		currency: "EUR",
 		amount: 1500,
+		transferId: null,
+		isTransfer: false,
 	},
 	{
 		id: "4",
@@ -34,8 +41,10 @@ const transactions = [
 		date: "2025-01-20",
 		currency: "PLN",
 		amount: -1000,
+		transferId: null,
+		isTransfer: false,
 	},
-] as Parameters<typeof processTransactions>[0];
+];
 
 const defaultQuery: TransactionListQuery = {
 	search: "",
